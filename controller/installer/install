@@ -1,0 +1,240 @@
+#!/usr/bin/python
+#Copyright:
+#
+#    Copyright (c) 2012-2014 by Brocade Communications Systems, Inc.
+#    All Rights Reserved.
+#
+#License:
+#
+#This software is licensed, and not freely redistributable. See the
+#license agreement for details.
+
+
+import os, sys, shlex, glob, zipfile, subprocess, time,shutil,datetime,getopt
+import re
+import fnmatch
+
+path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.lib'))
+if not path in sys.path:
+    sys.path.insert(1, path)
+del path
+
+from subprocess import Popen, PIPE
+from controller_prereq import getValidJAVAHOME, checkMemoryCPU ,setupSetenv
+from bvc_install_common import setupLog,logMessage, logAndPrintMessage, unzip, moveFile
+from controller_install import isControllerRunning, installBaseExtensions, installExtensions, getZipList,mergeFeatureCfg, runCustomConfigInstall, stopController, startController, setupKarafLogging
+from install_bvc_ui import checkForNode, installUI, unzipBaseUIFiles, moveBaseUIZipFiles
+# Setup global variables and process commandline arguments
+relDir = sys.argv[0].split('install')[0]
+os.chdir(relDir)
+installDir=os.getcwd()+'/'
+
+noService=False
+ignoreErrors = False
+shortOptsIn = "ih"
+longOptsIn = ["ignore-prereqs","help" ]
+usageStr = 'USAGE: install --ignore-prereqs --help'
+try:
+    opts, args = getopt.getopt(sys.argv[1:],shortOptsIn,longOptsIn)
+except getopt.GetoptError:
+    print usageStr
+    sys.exit(2)
+
+for opt,arg in opts:
+    if opt in ('-i', '--ignore-prereqs'):
+        ignoreErrors = True
+    elif opt in ( '-h', '--help'):
+        print usageStr
+        sys.exit()
+    else:
+        print usageStr
+        sys.exit()
+
+# setup .archives directory & log start message
+archiveDir = installDir+'/.archive'
+if not os.path.exists( archiveDir ):
+    os.makedirs( archiveDir )
+
+logDir = installDir+'/log'
+logFileName = 'install_log'
+if not os.path.exists( logDir ):
+    os.makedirs( logDir )
+
+setupLog( logDir, logFileName )
+logAndPrintMessage( ' Brocade Vyatta Controller Installation\n')
+logAndPrintMessage( ' Starting @ : '+str(datetime.datetime.now()))
+
+
+# check for the base install file and if found run the controller installation
+karafDistName = 'bvc-core-odl-controller'
+baseUXDistName = 'bvc-core-odl-web'
+bvcBaseDistName = 'bvc-core-bvc-controller'
+
+depDir = '.dependencies'
+dependenciesDir = installDir+depDir+'/'
+karafExtensionsDir = '.extensions'
+extensionsDir=installDir+karafExtensionsDir
+versionsDir=installDir+'versions'
+karafInstallDir=installDir+'controller/'
+nodeInstallDir=installDir+'web/'
+
+def getBaseNames( dirName, suffix ):
+    names = []
+    for n in fnmatch.filter(os.listdir(dirName),'*.'+suffix):
+        if os.path.isfile (os.path.join( dirName,n )):
+            name = n.split(re.search('-[0-9]*\.[0-9]*', n).group(0))[0]
+            names.append( name )
+    return names
+
+def convertVersionNames( vlist ):
+    convNames = []
+    for vName in vlist:
+        if '-' in vName:
+            name = vName.split(vName.split('-')[0])[1]
+            name = re.search('(?<=-).*',name).group(0)
+        convNames.append(name)
+    return convNames
+
+extBaseNames = getBaseNames(extensionsDir, 'zip')
+depBaseNames = getBaseNames(dependenciesDir, 'zip')
+versionsBaseNames = convertVersionNames( getBaseNames(versionsDir, 'properties') )
+archivedBaseNames = getBaseNames( archiveDir,'zip')
+
+def exitInstall():
+    logAndPrintMessage( ' Install Exiting @ : '+str(datetime.datetime.now())+'\n')
+    sys.exit(1)
+
+if os.path.exists(installDir+'bvc'):
+    logAndPrintMessage('Found a \"'+installDir+'bvc'+'\" directory, it appears that bvc-dependencies-<version>.zip was improperly unzipped.\nPlease remove this directory and recheck your installation steps.')
+    exitInstall()
+
+if 'bvc-dependencies' not in versionsBaseNames:
+    logAndPrintMessage('Error: Missing bvc-dependencies which indicates you haven\'t properly unzipped\n the bvc-dependencies-<version>.zip file prior to running install.\nPlease recheck your installation steps.')
+    exitInstall()
+
+installingBaseKaraf = karafDistName   in depBaseNames
+installingBaseUX    = baseUXDistName  in depBaseNames
+installingBvcBase   = bvcBaseDistName in depBaseNames
+
+upgradeNames = []
+for bName in extBaseNames:
+    if bName in archivedBaseNames:
+        upgradeNames.append(bName)
+for bName in depBaseNames:
+    if bName in archivedBaseNames:
+        upgradeNames.append(bName)
+
+if installingBaseKaraf  == True or installingBaseUX == True or installingBvcBase == True:
+    if installingBaseKaraf  == True:
+        validJRE, validJAVA_HOME = getValidJAVAHOME(installDir)
+        validMemoryCPU, javaMaxMem, javaMaxPermSize = checkMemoryCPU( ignoreErrors, installDir, validJAVA_HOME)
+    if installingBaseUX == True :
+        validNode = checkForNode()
+    if ( ( installingBaseKaraf == True and validJRE != True )
+         or ( installingBaseKaraf == True and validMemoryCPU != True )
+         or ( installingBaseUX == True and validNode != True)):
+        if ignoreErrors == False:
+            sys.exit(1)
+
+if len(upgradeNames) > 0:
+    logAndPrintMessage(' Re-Installing one or more .zip files:')
+    for name in upgradeNames:
+        logAndPrintMessage('    '+name)
+    stopController(karafInstallDir)
+    if os.path.exists(karafInstallDir+'/data'):
+        try:
+            logAndPrintMessage( ' Removing the karaf data directory   ...')
+            origDir = os.getcwd()
+            os.chdir(karafInstallDir+'/data')
+            for file in glob.glob("*"):
+                if file != 'log':
+                    if os.path.isfile(file):
+                        os.remove( file )
+                    else:
+                        shutil.rmtree(file)
+            os.chdir(origDir)
+            logAndPrintMessage( '                         ............... [ OK ]')
+        except OSError, e:
+            logAndPrintMessage( ' Error removing directory '+karafInstallDir+'/data')
+            logAndPrintMessage( ' Install cannot recover, exiting.')
+            logAndPrintMessage( '                         ............... [ FAILED ]')
+            exitInstall()
+
+def unzipAndMove( dirName, installDir):
+    for zFile in getZipList( dirName, installDir):
+        fullName = installDir+dirName+'/'+zFile
+        unzip( fullName, installDir)
+        moveFile( fullName, archiveDir )
+
+unzipBaseUIFiles( dependenciesDir, installDir )
+moveBaseUIZipFiles( dependenciesDir, archiveDir )
+unzipAndMove( depDir, installDir )
+
+if installingBaseKaraf == True:
+    os.chmod(karafInstallDir+'/bin/start', 0555)
+    os.chmod(karafInstallDir+'/bin/client', 0555)
+    os.chmod(karafInstallDir+'/bin/stop', 0555)
+    os.chmod(karafInstallDir+'/bin/status', 0555)
+    os.chmod(karafInstallDir+'/bin/karaf', 0555)
+
+    # The data directory doesn't exist if the controller hasn't yet been started
+    if not os.path.exists(installDir+'/controller/data/log'):
+        os.makedirs(installDir+'/controller/data/log')
+    if not os.path.exists(installDir+'/controller/data/log/controller_logs'):
+        try:
+            os.symlink( '../controller/data/log',installDir+'log/controller_logs')
+        except OSError, e:
+            fileRemoved =False
+    if not os.path.exists(installDir+'/controller/data/log/karaf.out'):
+        try:
+            os.symlink( '../controller/data/karaf.out',installDir+'log/karaf.out')
+        except OSError, e:
+            fileRemoved =False
+
+    # Setup KarafMBeans
+    os.rename(karafInstallDir+'/bin/karaf',karafInstallDir+'/bin/karaf.old' )
+    karafScript = open(karafInstallDir+'/bin/karaf.old')
+    newKarafFile = open(karafInstallDir+'/bin/karaf',"w")
+    for line in karafScript:
+        if 'KarafMBeanServerBuilder' in line:
+            lineTokens = line.split(" ")
+            for token in lineTokens:
+                if not 'KarafMBeanServerBuilder' in token:
+                    newKarafFile.write( ' '+token)
+        else:
+            newKarafFile.write( line )
+
+    karafScript.close()
+    newKarafFile.close()
+    os.chmod(karafInstallDir+'/bin/karaf', 0555)
+
+    setupSetenv( karafInstallDir, validJAVA_HOME, javaMaxMem, javaMaxPermSize )
+    setupKarafLogging( karafInstallDir, '10', '100' )
+
+else:
+    logMessage( ' No '+karafDistName+'*.zip found. Not installing the base controller.' )
+
+# Extensions Installation Section
+
+controllerRestartRequested = False
+
+if len(extBaseNames) == 0:
+    logMessage( 'No extensions to install')
+else:
+    unzipAndMove( karafExtensionsDir, installDir )
+    controllerRestartRequested = installExtensions( ' Extension Install', installDir, karafInstallDir,
+                       karafExtensionsDir, archiveDir )
+
+if controllerRestartRequested == True:
+    logAndPrintMessage( ' Restarting controller to complete extension install')
+    stopController( installDir )
+
+startController(installDir)
+
+if controllerRestartRequested == True:
+    logAndPrintMessage( ' Restart controller .................... [ OK ]')
+    
+if installingBaseUX == True or len(extBaseNames) > 0:
+    installUI( installDir,nodeInstallDir,extensionsDir,archiveDir,'localhost')
+
+logAndPrintMessage( ' Install completed @ :  '+str(datetime.datetime.now())+'\n')

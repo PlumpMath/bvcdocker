@@ -1,0 +1,70 @@
+controller:
+  restart : always
+  build: ./controller
+  command: /opt/bvc/controller/bin/start
+  ports:
+   - "8181:8181"
+   - "1099:1099"
+  volumes:
+   - /Users/garyberger/Development/Projects/Docker/bvc/:/bvc
+  links:
+    - logstashforwarder
+
+kibana:
+  build: ./kibana
+  command: nohup /opt/kibana/bin/startkibana.sh
+  ports:
+   - "5601:5601"
+  links: 
+    - elasticsearch
+
+elasticsearch:
+  build: ./elasticsearch
+  command: nohup /opt/elasticsearch/bin/elasticsearch -Des.config=/bvc/configs/elasticsearch.yml
+  ports:
+   - "9300:9300"
+   - "9200:9200"
+  volumes:
+    - /Users/garyberger/Development/Projects/Docker/bvc/:/bvc
+
+logstashforwarder:
+  build: ./logstash-forwarder
+  command: nohup /opt/logstash/bin/logstash --verbose -f /bvc/configs/logstash-forwarder.conf -l /bvc/logs/logstash-forwarder.log
+  volumes:
+    - /Users/garyberger/Development/Projects/Docker/bvc/:/bvc
+  links:
+   - redis
+
+logstash:
+  build: ./logstash
+  command: nohup /opt/logstash/bin/logstash --verbose -f /bvc/configs/logstash.conf -l /bvc/logs/logstash.log
+  ports:
+   - "2024"
+  volumes_from:
+   - controller
+  links:
+   - elasticsearch
+   - redis
+
+node:
+  build: ./node
+  command: nohup nohup node /opt/bvc/web/server.js >> /bvc/logs/node.log
+  ports:
+   - "9000:9000"
+  volumes:
+    - /Users/garyberger/Development/Projects/Docker/bvc/:/bvc
+  links:
+    - controller
+
+redis:
+  build: ./redis
+  command: nohup /opt/monitor/redis-3.0.0/src/redis-server /bvc/configs/redis.conf
+  ports:
+   - "6379:6379"
+  volumes:
+    - /Users/garyberger/Development/Projects/Docker/bvc/:/bvc
+  links:
+    - elasticsearch
+
+
+

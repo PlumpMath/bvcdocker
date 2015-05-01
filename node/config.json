@@ -1,0 +1,8 @@
+{
+  "default":   {
+    "baseURL": "http://controller:",
+    "adSalPort": "8080",
+    "mdSalPort" : "8181",
+    "environment": "development"
+  }
+}

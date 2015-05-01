@@ -1,0 +1,16 @@
+{:timestamp=>"2015-05-01T04:03:59.698000+0000", :message=>"Using milestone 2 input plugin 'file'. This plugin should be stable, but if you see strange behavior, please let us know! For more information on plugin milestones, see http://logstash.net/docs/1.4.2/plugin-milestones", :level=>:warn}
+{:timestamp=>"2015-05-01T04:03:59.766000+0000", :message=>"Using milestone 1 input plugin 'log4j'. This plugin should work, but would benefit from use by folks like you. Please let us know if you find bugs or have suggestions on how to improve this plugin.  For more information on plugin milestones, see http://logstash.net/docs/1.4.2/plugin-milestones", :level=>:warn}
+{:timestamp=>"2015-05-01T04:03:59.819000+0000", :message=>"Using milestone 2 output plugin 'redis'. This plugin should be stable, but if you see strange behavior, please let us know! For more information on plugin milestones, see http://logstash.net/docs/1.4.2/plugin-milestones", :level=>:warn}
+{:timestamp=>"2015-05-01T04:04:06.217000+0000", :message=>"Registering file input", :path=>["/bvc/logs/*.log"], :level=>:info}
+{:timestamp=>"2015-05-01T04:04:06.224000+0000", :message=>"No sincedb_path set, generating one based on the file path", :sincedb_path=>"/root/.sincedb_9184fab464195e56c13072c3824671b2", :path=>["/bvc/logs/*.log"], :level=>:info}
+{:timestamp=>"2015-05-01T04:04:06.345000+0000", :message=>"Starting Log4j input listener", :address=>"0.0.0.0:2024", :level=>:info}
+{:timestamp=>"2015-05-01T04:04:06.367000+0000", :message=>"Log4j input", :level=>:info}
+{:timestamp=>"2015-05-01T04:04:06.370000+0000", :message=>"Pipeline started", :level=>:info}
+{:timestamp=>"2015-05-01T12:19:40.742000+0000", :message=>"Using milestone 2 input plugin 'file'. This plugin should be stable, but if you see strange behavior, please let us know! For more information on plugin milestones, see http://logstash.net/docs/1.4.2/plugin-milestones", :level=>:warn}
+{:timestamp=>"2015-05-01T12:19:40.880000+0000", :message=>"Using milestone 1 input plugin 'log4j'. This plugin should work, but would benefit from use by folks like you. Please let us know if you find bugs or have suggestions on how to improve this plugin.  For more information on plugin milestones, see http://logstash.net/docs/1.4.2/plugin-milestones", :level=>:warn}
+{:timestamp=>"2015-05-01T12:19:40.927000+0000", :message=>"Using milestone 2 output plugin 'redis'. This plugin should be stable, but if you see strange behavior, please let us know! For more information on plugin milestones, see http://logstash.net/docs/1.4.2/plugin-milestones", :level=>:warn}
+{:timestamp=>"2015-05-01T12:19:47.057000+0000", :message=>"Registering file input", :path=>["/bvc/logs/*.log"], :level=>:info}
+{:timestamp=>"2015-05-01T12:19:47.062000+0000", :message=>"No sincedb_path set, generating one based on the file path", :sincedb_path=>"/root/.sincedb_9184fab464195e56c13072c3824671b2", :path=>["/bvc/logs/*.log"], :level=>:info}
+{:timestamp=>"2015-05-01T12:19:47.205000+0000", :message=>"Starting Log4j input listener", :address=>"0.0.0.0:2024", :level=>:info}
+{:timestamp=>"2015-05-01T12:19:47.222000+0000", :message=>"Log4j input", :level=>:info}
+{:timestamp=>"2015-05-01T12:19:47.248000+0000", :message=>"Pipeline started", :level=>:info}
