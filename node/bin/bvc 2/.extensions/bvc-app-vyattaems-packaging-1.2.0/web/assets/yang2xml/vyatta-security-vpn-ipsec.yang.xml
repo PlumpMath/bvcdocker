@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-security-vpn-ipsec"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:security-vpn-ipsec="urn:vyatta.com:mgmt:vyatta-security-vpn-ipsec"
+        xmlns:security="urn:vyatta.com:mgmt:vyatta-security"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-security-vpn-ipsec"/>
+  <prefix value="security-vpn-ipsec"/>
+  <import module="vyatta-security">
+    <prefix value="security"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/security:security">
+    <container name="vpn">
+      <presence value="true"/>
+      <configd:priority priority="900"/>
+      <configd:help text="Virtual Private Network (VPN)"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/security/vpn/configd_end.sh"/>
+      <container name="rsa-keys">
+        <presence value="true"/>
+        <configd:help text="RSA keys"/>
+        <list name="rsa-key-name">
+          <configd:help text="Name of remote RSA key"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string"/>
+            <configd:help text="Name of remote RSA key"/>
+          </leaf>
+          <leaf name="rsa-key">
+            <type name="string"/>
+            <configd:help text="Remote RSA key"/>
+          </leaf>
+        </list>
+        <container name="local-key">
+          <presence value="true"/>
+          <configd:help text="Local RSA key"/>
+          <leaf name="file">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/rsa-keys/local-key/file/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Local RSA key file location"/>
+            <default value="/opt/vyatta/etc/config/ipsec.d/rsa-keys/localhost.key"/>
+          </leaf>
+        </container>
+      </container>
+      <container name="ipsec">
+        <presence value="true"/>
+        <configd:help text="VPN IP security (IPsec) parameters"/>
+        <container name="logging">
+          <presence value="true"/>
+          <configd:help text="IPsec logging"/>
+          <leaf-list name="log-modes">
+            <type name="enumeration">
+              <enum name="raw">
+                <configd:help text="Debug log option for pluto"/>
+              </enum>
+              <enum name="crypt">
+                <configd:help text="Debug log option for pluto"/>
+              </enum>
+              <enum name="parsing">
+                <configd:help text="Debug log option for pluto"/>
+              </enum>
+              <enum name="emitting">
+                <configd:help text="Debug log option for pluto"/>
+              </enum>
+              <enum name="control">
+                <configd:help text="Debug log option for pluto"/>
+              </enum>
+              <enum name="all">
+                <configd:help text="Debug log option for pluto"/>
+              </enum>
+              <enum name="private">
+                <configd:help text="Debug log option for pluto"/>
+              </enum>
+            </type>
+            <ordered-by value="user"/>
+            <configd:help text="Log mode"/>
+          </leaf-list>
+        </container>
+        <leaf name="auto-update">
+          <type name="uint32">
+            <range value="30..65535">
+              <error-message>
+                <value>auto-update interval must be between 30 and 65535</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Set auto-update interval for IPsec daemon."/>
+        </leaf>
+        <leaf name="disable-uniqreqids">
+          <type name="empty"/>
+          <configd:help text="Option to disable requirement for unique IDs in the Security Database"/>
+        </leaf>
+        <container name="site-to-site">
+          <presence value="true"/>
+          <configd:help text="Site to site VPN"/>
+          <list name="peer">
+            <configd:help text="VPN peer"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="string"/>
+              <configd:help text="VPN peer"/>
+            </leaf>
+            <container name="authentication">
+              <presence value="true"/>
+              <configd:help text="Peer authentication [REQUIRED]"/>
+              <leaf name="rsa-key-name">
+                <type name="string">
+                  <pattern value="[-_a-zA-Z0-9\.]+">
+                    <configd:error-message message='invalid RSA key name "$VAR(@)"'/>
+                  </pattern>
+                </type>
+                <configd:help text="RSA key name"/>
+              </leaf>
+              <leaf name="pre-shared-secret">
+                <type name="string">
+                  <pattern value="[-\+&amp;!@#$%\^\*\(\),\.:_a-zA-Z0-9]+">
+                    <configd:error-message message="invalid pre-shared secret key &quot;$VAR(@)&quot;&#10;&#10;Only these characters are allowed to be used for setting pre-shared secret key :&#10;alphanumeric characters      a-z A-Z 0-9&#10;special characters           - + &amp; ! @ # $ % ^ * ( ) , . : _&#10;&#10;Use of single quotes to set pre-shared secret key is recommended.&#10;Example usage : 'aA1-&amp;!@,.:_2Bb'&#10;"/>
+                  </pattern>
+                </type>
+                <configd:help text="Pre-shared secret key"/>
+                <configd:comp_help text="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/authentication/pre-shared-secret/configd_comp_help.txt"/>
+              </leaf>
+              <leaf name="remote-id">
+                <type name="string">
+                  <pattern value="[ -~]+">
+                    <configd:error-message message='invalid ID "$VAR(@)"'/>
+                  </pattern>
+                </type>
+                <configd:help text="ID for remote authentication"/>
+              </leaf>
+              <container name="x509">
+                <presence value="true"/>
+                <configd:help text="X.509 certificate"/>
+                <leaf name="ca-cert-file">
+                  <type name="string">
+                    <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/authentication/x509/ca-cert-file/configd_syntax1.cli"/>
+                  </type>
+                  <configd:help text="File containing the X.509 certificate for the Certificate Authority (CA)"/>
+                </leaf>
+                <container name="key">
+                  <presence value="true"/>
+                  <configd:help text="Key file and password to open it"/>
+                  <leaf name="password">
+                    <type name="string"/>
+                    <configd:secret bool="true"/>
+                    <configd:help text="Password that protects the private key"/>
+                  </leaf>
+                  <leaf name="file">
+                    <type name="string">
+                      <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/authentication/x509/key/file/configd_syntax1.cli"/>
+                    </type>
+                    <configd:help text="File containing the private key for the X.509 certificate for this host"/>
+                  </leaf>
+                </container>
+                <leaf name="cert-file">
+                  <type name="string">
+                    <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/authentication/x509/cert-file/configd_syntax1.cli"/>
+                  </type>
+                  <configd:help text="File containing the X.509 certificate for this host"/>
+                </leaf>
+                <leaf name="crl-file">
+                  <type name="string">
+                    <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/authentication/x509/crl-file/configd_syntax1.cli"/>
+                  </type>
+                  <configd:help text="File containing the X.509 Certificate Revocation List (CRL)"/>
+                </leaf>
+              </container>
+              <leaf name="mode">
+                <type name="enumeration">
+                  <enum name="pre-shared-secret">
+                    <configd:help text="Use pre-shared secret key"/>
+                  </enum>
+                  <enum name="x509">
+                    <configd:help text="Use X.509 certificate"/>
+                  </enum>
+                  <enum name="rsa">
+                    <configd:help text="Use RSA key"/>
+                  </enum>
+                </type>
+                <configd:help text="Authentication mode"/>
+                <default value="pre-shared-secret"/>
+              </leaf>
+              <leaf name="id">
+                <type name="string">
+                  <pattern value="[ -~]+">
+                    <configd:error-message message='invalid ID "$VAR(@)"'/>
+                  </pattern>
+                </type>
+                <configd:help text="ID for peer authentication"/>
+              </leaf>
+            </container>
+            <leaf name="description">
+              <type name="string"/>
+              <configd:help text="VPN peer description"/>
+            </leaf>
+            <list name="tunnel">
+              <configd:help text="Peer tunnel [REQUIRED]"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="uint32"/>
+                <configd:help text="Peer tunnel [REQUIRED]"/>
+              </leaf>
+              <container name="local">
+                <presence value="true"/>
+                <configd:help text="Local parameters for interesting traffic"/>
+                <leaf name="prefix">
+                  <type name="union">
+                    <type name="types:ipv4-prefix"/>
+                    <type name="types:ipv6-prefix"/>
+                  </type>
+                  <configd:help text="Local IPv4 or IPv6 prefix"/>
+                </leaf>
+                <leaf name="port">
+                  <type name="string"/>
+                  <configd:help text="Any TCP or UDP port"/>
+                </leaf>
+              </container>
+              <container name="remote">
+                <presence value="true"/>
+                <configd:help text="Remote parameters for interesting traffic"/>
+                <leaf name="prefix">
+                  <type name="union">
+                    <type name="types:ipv4-prefix"/>
+                    <type name="types:ipv6-prefix"/>
+                  </type>
+                  <configd:help text="Remote IPv4 or IPv6 prefix"/>
+                </leaf>
+                <leaf name="port">
+                  <type name="string"/>
+                  <configd:help text="Any TCP or UDP port"/>
+                </leaf>
+              </container>
+              <leaf name="allow-public-networks">
+                <type name="enumeration">
+                  <enum name="enable">
+                    <configd:help text="Enable public networks"/>
+                  </enum>
+                  <enum name="disable">
+                    <configd:help text="Disable public networks (default)"/>
+                  </enum>
+                </type>
+                <configd:help text="Option to allow public networks"/>
+                <default value="disable"/>
+              </leaf>
+              <leaf name="allow-nat-networks">
+                <type name="enumeration">
+                  <enum name="enable">
+                    <configd:help text="Enable NAT networks"/>
+                  </enum>
+                  <enum name="disable">
+                    <configd:help text="Disable NAT networks (default)"/>
+                  </enum>
+                </type>
+                <configd:help text="Option to allow NAT networks"/>
+                <default value="disable"/>
+              </leaf>
+              <leaf name="disable">
+                <type name="empty"/>
+                <configd:help text="Option to disable vpn tunnel"/>
+              </leaf>
+              <leaf name="esp-group">
+                <type name="string"/>
+                <configd:help text="ESP group name"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/tunnel/esp-group/configd_allowed.sh"/>
+              </leaf>
+              <leaf name="protocol">
+                <type name="string">
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/tunnel/protocol/configd_syntax1.cli"/>
+                </type>
+                <configd:help text="Protocol to encrypt"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/tunnel/protocol/configd_allowed.sh"/>
+              </leaf>
+            </list>
+            <leaf name="local-address">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/local-address/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="IPv4 or IPv6 address of a local interface to use for VPN"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/local-address/configd_allowed.sh"/>
+            </leaf>
+            <leaf name="dhcp-interface">
+              <type name="string"/>
+              <configd:help text="DHCP interface to listen on"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/dhcp-interface/configd_allowed.sh"/>
+            </leaf>
+            <leaf name="default-esp-group">
+              <type name="string"/>
+              <configd:help text="Defult ESP group name"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/default-esp-group/configd_allowed.sh"/>
+            </leaf>
+            <container name="vti">
+              <presence value="true"/>
+              <configd:help text="Virtual tunnel interface [REQUIRED]"/>
+              <leaf name="esp-group">
+                <type name="string"/>
+                <configd:help text="ESP group name [REQUIRED]"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/vti/esp-group/configd_allowed.sh"/>
+              </leaf>
+              <leaf name="bind">
+                <type name="string"/>
+                <configd:help text="VTI tunnel interface associated with this configuration [REQUIRED]"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/vti/bind/configd_allowed.sh"/>
+              </leaf>
+            </container>
+            <leaf name="connection-type">
+              <type name="enumeration">
+                <enum name="initiate">
+                  <configd:help text="This endpoint can initiate or respond to a connection"/>
+                </enum>
+                <enum name="respond">
+                  <configd:help text="This endpoint will only respond to a connection"/>
+                </enum>
+              </type>
+              <configd:help text="Connection type"/>
+              <default value="initiate"/>
+            </leaf>
+            <leaf name="ike-group">
+              <type name="string"/>
+              <configd:help text="Internet Key Exchange (IKE) group name [REQUIRED]"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/site-to-site/peer/ike-group/configd_allowed.sh"/>
+            </leaf>
+          </list>
+        </container>
+        <container name="nat-networks">
+          <presence value="true"/>
+          <configd:help text="Network Address Translation (NAT) networks"/>
+          <list name="allowed-network">
+            <configd:help text="NAT networks to allow"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="types:ipv4-prefix"/>
+              <configd:help text="NAT networks to allow"/>
+            </leaf>
+            <leaf-list name="exclude">
+              <type name="types:ipv4-prefix"/>
+              <ordered-by value="user"/>
+              <configd:help text="NAT networks to exclude from allowed-networks"/>
+            </leaf-list>
+          </list>
+        </container>
+        <list name="profile">
+          <configd:help text="VPN IPSec Profile"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string"/>
+            <configd:help text="VPN IPSec Profile"/>
+          </leaf>
+          <container name="authentication">
+            <presence value="true"/>
+            <configd:help text="Authentication [REQUIRED]"/>
+            <leaf name="pre-shared-secret">
+              <type name="string">
+                <pattern value="[-\+&amp;!@#$%\^\*\(\),\.:_a-zA-Z0-9]+">
+                  <configd:error-message message="invalid pre-shared secret key &quot;$VAR(@)&quot;&#10;&#10;Only these characters are allowed to be used for setting pre-shared secret key :&#10;alphanumeric characters      a-z A-Z 0-9&#10;special characters           - + &amp; ! @ # $ % ^ * ( ) , . : _&#10;&#10;Use of single quotes to set pre-shared secret key is recommended.&#10;Example usage : 'aA1-&amp;!@,.:_2Bb'&#10;"/>
+                </pattern>
+              </type>
+              <configd:help text="Pre-shared secret key"/>
+              <configd:comp_help text="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/authentication/pre-shared-secret/configd_comp_help.txt"/>
+            </leaf>
+            <leaf name="mode">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/authentication/mode/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Authentication mode"/>
+              <default value="pre-shared-secret"/>
+            </leaf>
+          </container>
+          <leaf name="esp-group">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/esp-group/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Esp group name [REQUIRED]"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/esp-group/configd_allowed.sh"/>
+          </leaf>
+          <container name="bind">
+            <presence value="true"/>
+            <configd:help text="DMVPN crypto configuration"/>
+            <list name="tunnel">
+              <configd:help text="Tunnel interface associated with this configuration profile"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/bind/tunnel/configd_allowed.sh"/>
+              <configd:end executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/bind/tunnel/configd_end.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/bind/tunnel/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/bind/tunnel/configd_validate2.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/bind/tunnel/configd_validate3.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/bind/tunnel/configd_validate4.cli"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="string"/>
+                <configd:help text="Tunnel interface associated with this configuration profile"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/bind/tunnel/configd_allowed.sh"/>
+              </leaf>
+            </list>
+          </container>
+          <leaf name="ike-group">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/ike-group/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Ike group name [REQUIRED]"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/profile/ike-group/configd_allowed.sh"/>
+          </leaf>
+        </list>
+        <leaf name="nat-traversal">
+          <type name="enumeration">
+            <enum name="enable">
+              <configd:help text="Enable NAT-T"/>
+            </enum>
+            <enum name="disable">
+              <configd:help text="Disable NAT-T"/>
+            </enum>
+          </type>
+          <configd:help text="Network Address Translation (NAT) traversal"/>
+        </leaf>
+        <list name="esp-group">
+          <configd:help text="Name of Encapsulating Security Payload (ESP) group"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string">
+              <pattern value="[-_a-zA-Z0-9\.]+">
+                <configd:error-message message='invalid ESP group name "$VAR(@)"'/>
+              </pattern>
+            </type>
+            <configd:help text="Name of Encapsulating Security Payload (ESP) group"/>
+          </leaf>
+          <list name="proposal">
+            <configd:help text="ESP-group proposal [REQUIRED]"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>must be between 1-65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="ESP-group proposal [REQUIRED]"/>
+            </leaf>
+            <leaf name="hash">
+              <type name="enumeration">
+                <enum name="md5">
+                  <configd:help text="MD5 hash"/>
+                </enum>
+                <enum name="sha1">
+                  <configd:help text="SHA1 hash (default)"/>
+                </enum>
+              </type>
+              <configd:help text="Hash algorithm"/>
+              <default value="sha1"/>
+            </leaf>
+            <leaf name="encryption">
+              <type name="enumeration">
+                <enum name="aes128">
+                  <configd:help text="AES-128 encryption (default)"/>
+                </enum>
+                <enum name="aes256">
+                  <configd:help text="AES-256 encryption"/>
+                </enum>
+                <enum name="3des">
+                  <configd:help text="3DES encryption"/>
+                </enum>
+              </type>
+              <configd:help text="Encryption algorithm"/>
+              <default value="aes128"/>
+            </leaf>
+          </list>
+          <leaf name="compression">
+            <type name="enumeration">
+              <enum name="enable">
+                <configd:help text="Enable ESP compression"/>
+              </enum>
+              <enum name="disable">
+                <configd:help text="Disable ESP compression (default)"/>
+              </enum>
+            </type>
+            <configd:help text="ESP compression"/>
+            <default value="disable"/>
+          </leaf>
+          <leaf name="mode">
+            <type name="enumeration">
+              <enum name="tunnel">
+                <configd:help text="Tunnel mode (default)"/>
+              </enum>
+              <enum name="transport">
+                <configd:help text="Transport mode"/>
+              </enum>
+            </type>
+            <configd:help text="ESP mode"/>
+            <default value="tunnel"/>
+          </leaf>
+          <leaf name="lifetime">
+            <type name="uint32">
+              <range value="30..86400">
+                <error-message>
+                  <value>must be in the range 30 to 86400 seconds</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="ESP lifetime"/>
+            <default value="3600"/>
+          </leaf>
+          <leaf name="pfs">
+            <type name="enumeration">
+              <enum name="enable">
+                <configd:help text="Enable PFS. Use ike-group's dh-group (default)"/>
+              </enum>
+              <enum name="disable">
+                <configd:help text="Disable PFS"/>
+              </enum>
+              <enum name="dh-group2">
+                <configd:help text="Enable PFS. Use Diffie-Hellman group 2"/>
+              </enum>
+              <enum name="dh-group5">
+                <configd:help text="Enable PFS. Use Diffie-Hellman group 5"/>
+              </enum>
+            </type>
+            <configd:help text="ESP Perfect Forward Secrecy"/>
+            <default value="enable"/>
+          </leaf>
+          <leaf name="disable-strict-mode">
+            <type name="empty"/>
+            <configd:help text="Disable strict-mode proposal negotiation for ESP."/>
+          </leaf>
+        </list>
+        <list name="ike-group">
+          <configd:help text="Name of Internet Key Exchange (IKE) group"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string">
+              <pattern value="[-_a-zA-Z0-9\.]+">
+                <configd:error-message message='invalid IKE group name "$VAR(@)"'/>
+              </pattern>
+            </type>
+            <configd:help text="Name of Internet Key Exchange (IKE) group"/>
+          </leaf>
+          <list name="proposal">
+            <configd:help text="IKE-group proposal [REQUIRED]"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>must be between 1-65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="IKE-group proposal [REQUIRED]"/>
+            </leaf>
+            <leaf name="hash">
+              <type name="enumeration">
+                <enum name="md5">
+                  <configd:help text="MD5 hash"/>
+                </enum>
+                <enum name="sha1">
+                  <configd:help text="SHA1 hash (default)"/>
+                </enum>
+              </type>
+              <configd:help text="Hash algorithm"/>
+              <default value="sha1"/>
+            </leaf>
+            <leaf name="encryption">
+              <type name="enumeration">
+                <enum name="aes128">
+                  <configd:help text="AES-128 encryption (default)"/>
+                </enum>
+                <enum name="aes256">
+                  <configd:help text="AES-256 encryption"/>
+                </enum>
+                <enum name="3des">
+                  <configd:help text="3DES encryption"/>
+                </enum>
+              </type>
+              <configd:help text="Encryption algorithm"/>
+              <default value="aes128"/>
+            </leaf>
+            <leaf name="dh-group">
+              <type name="uint32">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/ipsec/ike-group/proposal/dh-group/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Diffie-Hellman (DH) key exchange group"/>
+            </leaf>
+          </list>
+          <container name="dead-peer-detection">
+            <presence value="true"/>
+            <configd:help text="Dead Peer Detection (DPD)"/>
+            <leaf name="action">
+              <type name="enumeration">
+                <enum name="hold">
+                  <configd:help text="Set action to hold (default)"/>
+                </enum>
+                <enum name="clear">
+                  <configd:help text="Set action to clear"/>
+                </enum>
+                <enum name="restart">
+                  <configd:help text="Set action to restart"/>
+                </enum>
+              </type>
+              <configd:help text="Keep-alive failure action"/>
+              <default value="hold"/>
+            </leaf>
+            <leaf name="interval">
+              <type name="uint32">
+                <range value="15..86400">
+                  <error-message>
+                    <value>must be between 15-86400 seconds</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Keep-alive interval"/>
+              <default value="30"/>
+            </leaf>
+            <leaf name="timeout">
+              <type name="uint32">
+                <range value="30..86400">
+                  <error-message>
+                    <value>must be between 30-86400 seconds</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Keep-alive timeout"/>
+              <default value="120"/>
+            </leaf>
+          </container>
+          <leaf name="lifetime">
+            <type name="uint32">
+              <range value="30..86400">
+                <error-message>
+                  <value>must between 30-86400 seconds</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="IKE lifetime"/>
+            <default value="28800"/>
+          </leaf>
+          <leaf name="disable-strict-mode">
+            <type name="empty"/>
+            <configd:help text="Disable strict-mode proposal negotiation for IKE."/>
+          </leaf>
+        </list>
+      </container>
+    </container>
+  </augment>
+</module>

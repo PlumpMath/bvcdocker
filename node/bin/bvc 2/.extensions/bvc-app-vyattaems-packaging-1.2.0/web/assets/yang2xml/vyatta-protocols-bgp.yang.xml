@@ -1,0 +1,1978 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-protocols-bgp"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:protocols-bgp="urn:vyatta.com:mgmt:vyatta-protocols-bgp"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:protocols="urn:vyatta.com:mgmt:vyatta-protocols"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-protocols-bgp"/>
+  <prefix value="protocols-bgp"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-protocols">
+    <prefix value="protocols"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-29">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <grouping name="neighbor-vrrp-failover">
+    <container name="vrrp-failover">
+      <presence value="true"/>
+      <configd:help text="VRRP Failover"/>
+      <list name="vrrp-group">
+        <max-elements value="1"/>
+        <configd:help text="VRRP Group to be associate the neighbor with"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>vrrp-group value must be between 1 and 255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="VRRP Group ID"/>
+        </leaf>
+        <leaf name="prepend-as">
+          <type name="string">
+            <pattern value="[0-9]+( [0-9]+)*">
+              <error-message>
+                <value>as-path should be string of numbers</value>
+              </error-message>
+            </pattern>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/vrrp-failover/prepend-as/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="Prepend AS Path"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/vrrp-failover/prepend-as/configd_validate1.cli"/>
+        </leaf>
+        <leaf name="med">
+          <type name="uint32">
+            <range value="1..max">
+              <error-message>
+                <value>MED value must be between 1 and 4294967295</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Set MED value for outbound routes while VRRP is backup"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/vrrp-failover/med/configd_validate1.cli"/>
+        </leaf>
+      </list>
+    </container>
+  </grouping>
+  <augment target-node="/protocols:protocols">
+    <list name="bgp">
+      <max-elements value="1"/>
+      <configd:priority priority="730"/>
+      <configd:help text="Border Gateway Protocol (BGP) parameters"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/protocols/bgp/configd_end.sh"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="uint32">
+          <range value="1..max">
+            <error-message>
+              <value>AS number must be between 1 and 4294967295</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Border Gateway Protocol (BGP) parameters"/>
+      </leaf>
+      <container name="parameters">
+        <presence value="true"/>
+        <configd:help text="BGP parameters"/>
+        <leaf name="no-rtm">
+          <type name="empty"/>
+          <configd:help text="Prevent the installation of BGP learned routes into rtm"/>
+        </leaf>
+        <leaf name="cluster-id">
+          <type name="types:ipv4-address"/>
+          <configd:help text="Route-reflector cluster-id"/>
+        </leaf>
+        <leaf name="always-compare-med">
+          <type name="empty"/>
+          <configd:help text="Always compare MEDs from different neighbors"/>
+        </leaf>
+        <container name="confederation">
+          <presence value="true"/>
+          <configd:help text="AS confederation parameters"/>
+          <leaf name="identifier">
+            <type name="uint32">
+              <range value="1..max">
+                <error-message>
+                  <value>confederation AS id must be between 1 and 4294967295</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Confederation AS identifier [REQUIRED]"/>
+          </leaf>
+          <leaf-list name="peers">
+            <type name="uint32">
+              <range value="1..max">
+                <error-message>
+                  <value>confederation AS id must be between 1 and 4294967295</value>
+                </error-message>
+              </range>
+            </type>
+            <ordered-by value="user"/>
+            <configd:help text="Peer ASs in the BGP confederation"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/parameters/confederation/peers/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/parameters/confederation/peers/configd_validate2.cli"/>
+          </leaf-list>
+        </container>
+        <container name="default">
+          <presence value="true"/>
+          <configd:help text="BGP defaults"/>
+          <leaf name="local-pref">
+            <type name="uint32"/>
+            <configd:help text="Default local preference (higher=more preferred)"/>
+          </leaf>
+        </container>
+        <leaf name="extended-asn-capability">
+          <type name="empty"/>
+          <configd:help text="Enable Extended ASN Capability (4 octet ASN)"/>
+        </leaf>
+        <container name="graceful-restart">
+          <presence value="true"/>
+          <configd:help text="Graceful restart capability parameters"/>
+          <leaf name="graceful-reset">
+            <type name="empty"/>
+            <configd:help text="Enable graceful reset capability"/>
+          </leaf>
+          <leaf name="restart-time">
+            <type name="uint32">
+              <range value="1..3600">
+                <error-message>
+                  <value>restart-time must be between 1 and 3600</value>
+                </error-message>
+              </range>
+            </type>
+            <default value="90"/>
+            <configd:help text="Max time needed for Neighbor(s) to restart"/>
+          </leaf>
+          <leaf name="stalepath-time">
+            <type name="uint32">
+              <range value="1..3600">
+                <error-message>
+                  <value>stalepath-time must be between 1 and 3600</value>
+                </error-message>
+              </range>
+            </type>
+            <default value="360"/>
+            <configd:help text="Maximum time to hold onto restarting peer's stale paths"/>
+          </leaf>
+        </container>
+        <container name="bestpath">
+          <presence value="true"/>
+          <configd:help text="Default bestpath selection mechanism"/>
+          <container name="med">
+            <presence value="true"/>
+            <configd:help text="MED attribute comparison parameters"/>
+            <leaf name="confed">
+              <type name="empty"/>
+              <configd:help text="Compare MEDs among confederation paths"/>
+            </leaf>
+            <leaf name="missing-as-worst">
+              <type name="empty"/>
+              <configd:help text="Treat missing route as a MED as the least preferred one"/>
+            </leaf>
+          </container>
+          <container name="as-path">
+            <presence value="true"/>
+            <configd:help text="AS-path attribute comparison parameters"/>
+            <leaf name="ignore">
+              <type name="empty"/>
+              <configd:help text="Ignore AS-path length in selecting a route"/>
+            </leaf>
+            <leaf name="confed">
+              <type name="empty"/>
+              <configd:help text="Compare AS-path lengths including confederation sets &amp; sequences"/>
+            </leaf>
+          </container>
+          <leaf name="compare-routerid">
+            <type name="empty"/>
+            <configd:help text="Compare the router-id for identical eBGP paths"/>
+          </leaf>
+        </container>
+        <leaf name="log-neighbor-changes">
+          <type name="empty"/>
+          <configd:help text="Log neighbor up/down changes and reset reason"/>
+        </leaf>
+        <leaf name="no-fast-external-failover">
+          <type name="empty"/>
+          <configd:help text="Disable immediate sesison reset if peer's connected link goes down"/>
+        </leaf>
+        <leaf name="enforce-first-as">
+          <type name="empty"/>
+          <configd:help text="Require first AS in the path to match peer's AS"/>
+        </leaf>
+        <leaf name="scan-time">
+          <type name="uint32">
+            <range value="5..60">
+              <error-message>
+                <value>scan-time must be between 5 and 60 seconds</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="BGP route scanner interval"/>
+        </leaf>
+        <leaf name="no-client-to-client-reflection">
+          <type name="empty"/>
+          <configd:help text="Disable client to client route reflection"/>
+        </leaf>
+        <leaf name="deterministic-med">
+          <type name="empty"/>
+          <configd:help text="Compare MEDs between different peers in the same AS"/>
+        </leaf>
+        <container name="maximum-paths">
+          <presence value="true"/>
+          <configd:help text="BGP multipaths"/>
+          <leaf name="ibgp">
+            <type name="uint32">
+              <range value="2..64">
+                <error-message>
+                  <value>Must be between (2-64)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Maximum iBGP multipaths"/>
+          </leaf>
+          <leaf name="ebgp">
+            <type name="uint32">
+              <range value="2..64">
+                <error-message>
+                  <value>Must be between (2-64)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Maximum eBGP multipaths"/>
+          </leaf>
+        </container>
+        <leaf name="router-id">
+          <type name="types:ipv4-address"/>
+          <configd:help text="BGP router id"/>
+        </leaf>
+      </container>
+      <container name="timers">
+        <presence value="true"/>
+        <configd:help text="BGP protocol timers"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/timers/configd_validate1.cli"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/timers/configd_validate2.cli"/>
+        <leaf name="holdtime">
+          <type name="uint32">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/timers/holdtime/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="BGP holdtime interval"/>
+          <default value="90"/>
+        </leaf>
+        <leaf name="keepalive">
+          <type name="uint32">
+            <range value="1..65535">
+              <error-message>
+                <value>Keepalive interval must be between 1 and 65535</value>
+              </error-message>
+            </range>
+          </type>
+          <default value="30"/>
+          <configd:help text="Keepalive interval"/>
+        </leaf>
+      </container>
+      <list name="peer-group">
+        <configd:help text="BGP peer-group"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="BGP peer-group"/>
+        </leaf>
+        <list name="local-as">
+          <configd:help text="Local AS to allow customization of AS number"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/local-as/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..max">
+                <error-message>
+                  <value>local-as must be between 1 and 4294967295</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Local AS to allow customization of AS number"/>
+          </leaf>
+        </list>
+        <container name="ttl-security">
+          <presence value="true"/>
+          <configd:help text="Ttl security mechanism"/>
+          <leaf name="hops">
+            <type name="uint32">
+              <range value="1..254">
+                <error-message>
+                  <value>ttl-security hops must be between 1 and 254</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Number of the maximum number of hops to the BGP peer"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/ttl-security/hops/configd_validate1.cli"/>
+          </leaf>
+        </container>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this peer-group"/>
+        </leaf>
+        <leaf name="update-source">
+          <type name="string"/>
+          <configd:help text="Source IP of routing updates"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/update-source/configd_create.sh"/>
+        </leaf>
+        <leaf name="override-capability">
+          <type name="empty"/>
+          <configd:help text="Ignore capability negotiation with specified peer-group"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/override-capability/configd_validate1.cli"/>
+        </leaf>
+        <uses name="neighbor-vrrp-failover"/>
+        <leaf name="strict-capability-match">
+          <type name="empty"/>
+          <configd:help text="Enable strict capability negotiation"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/strict-capability-match/configd_validate1.cli"/>
+        </leaf>
+        <leaf name="advertisement-interval">
+          <type name="uint32">
+            <range value="0..600">
+              <error-message>
+                <value>must be between 0 and 600</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Minimum interval between routing updates"/>
+        </leaf>
+        <leaf name="as-origination-interval">
+          <type name="uint32">
+            <range value="1..65535">
+              <error-message>
+                <value>must be between 1 and 65535</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Minimum interval between AS origination routing updates"/>
+        </leaf>
+        <leaf name="password">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/password/configd_syntax1.cli"/>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="BGP MD5 password"/>
+        </leaf>
+        <leaf name="passive">
+          <type name="empty"/>
+          <configd:help text="Do not intiate a session with this peer-group"/>
+        </leaf>
+        <leaf name="disable-capability-negotiation">
+          <type name="empty"/>
+          <configd:help text="Disable capability negotiation with this peer-group"/>
+        </leaf>
+        <leaf name="shutdown">
+          <type name="empty"/>
+          <configd:help text="Administratively shut down peer-group"/>
+        </leaf>
+        <leaf name="ebgp-multihop">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>ebgp-multihop must be between 1 and 255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Allow this eBGP peer-group to not be on a directly connected network"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/ebgp-multihop/configd_validate1.cli"/>
+        </leaf>
+        <container name="address-family">
+          <presence value="true"/>
+          <configd:help text="BGP peer-group address-family parameters"/>
+          <container name="ipv4-unicast">
+            <presence value="true"/>
+            <configd:help text="BGP peer-group IPv4 parameters"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/configd_delete1.cli"/>
+            <container name="default-originate">
+              <presence value="true"/>
+              <configd:help text="Send default route to this peer-group"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route-map to specify criteria of the default"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/default-originate/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/default-originate/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="filter-list">
+              <presence value="true"/>
+              <configd:help text="As-path-list to filter route updates to/from this peer-group"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="As-path-list to filter outgoing route updates to this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/filter-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/filter-list/export/configd_validate1.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="As-path-list to filter incoming route updates from this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/filter-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/filter-list/import/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <leaf name="remove-private-as">
+              <type name="empty"/>
+              <configd:help text="Remove private AS numbers from AS path in outbound route updates"/>
+            </leaf>
+            <leaf name="unsuppress-map">
+              <type name="string"/>
+              <configd:help text="Route-map to selectively unsuppress suppressed routes"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/unsuppress-map/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/unsuppress-map/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="nexthop-self">
+              <type name="empty"/>
+              <configd:help text="Nexthop for routes sent to this peer-group to be the local router"/>
+            </leaf>
+            <container name="distribute-list">
+              <presence value="true"/>
+              <configd:help text="Access-list to filter route updates to/from this peer-group"/>
+              <leaf name="export">
+                <type name="uint32">
+                  <range value="1..65535">
+                    <error-message>
+                      <value>Access list must be between 1 and 65535</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Access-list to filter outgoing route updates to this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/distribute-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/distribute-list/export/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/distribute-list/export/configd_validate2.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="uint32">
+                  <range value="1..65535">
+                    <error-message>
+                      <value>Access list must be between 1 and 65535</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Access-list to filter incoming route updates from this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/distribute-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/distribute-list/import/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/distribute-list/import/configd_validate2.cli"/>
+              </leaf>
+            </container>
+            <leaf name="route-reflector-client">
+              <type name="empty"/>
+              <configd:help text="Peer-group as a route reflector client"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/route-reflector-client/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="maximum-prefix">
+              <type name="uint32">
+                <range value="1..max">
+                  <error-message>
+                    <value>maximum-prefix must be between 1 and 4294967295</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Maximum number of prefixes to accept from this peer-group"/>
+            </leaf>
+            <leaf name="route-server-client">
+              <type name="empty"/>
+              <configd:help text="Peer-group as route server client"/>
+            </leaf>
+            <container name="attribute-unchanged">
+              <presence value="true"/>
+              <configd:help text="BGP attributes are sent unchanged"/>
+              <leaf name="next-hop">
+                <type name="empty"/>
+                <configd:help text="Send nexthop unchanged"/>
+              </leaf>
+              <leaf name="med">
+                <type name="empty"/>
+                <configd:help text="Send multi-exit discriminator unchanged"/>
+              </leaf>
+              <leaf name="as-path">
+                <type name="empty"/>
+                <configd:help text="Send AS path unchanged"/>
+              </leaf>
+            </container>
+            <container name="route-map">
+              <presence value="true"/>
+              <configd:help text="Route-map to filter route updates to/from this peer-group"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Route-map to filter outgoing route updates to this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/route-map/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/route-map/export/configd_validate1.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Route-map to filter incoming route updates from this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/route-map/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/route-map/import/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="allowas-in">
+              <presence value="true"/>
+              <configd:help text="Accept a route that contains the local-AS in the as-path"/>
+              <leaf name="number">
+                <type name="uint32">
+                  <range value="1..10">
+                    <error-message>
+                      <value>allowas-in number must be between 1 and 10</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Number of occurrences of AS number"/>
+              </leaf>
+            </container>
+            <container name="soft-reconfiguration">
+              <presence value="true"/>
+              <configd:help text="Soft reconfiguration for peer-group"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/soft-reconfiguration/configd_validate1.cli"/>
+              <leaf name="inbound">
+                <type name="empty"/>
+                <configd:help text="Inbound soft reconfiguration for this peer-group [REQUIRED]"/>
+              </leaf>
+            </container>
+            <container name="capability">
+              <presence value="true"/>
+              <configd:help text="Advertise capabilities to this peer-group"/>
+              <container name="graceful-restart">
+                <presence value="true"/>
+                <configd:help text="Advertise the graceful-restart capability to this peer-group"/>
+                <leaf name="disable">
+                  <type name="empty"/>
+                  <configd:help text="Disable the advertisement of the graceful-restart capability to this peer-group"/>
+                </leaf>
+              </container>
+              <container name="orf">
+                <presence value="true"/>
+                <configd:help text="Advertise ORF capability to this peer-group"/>
+                <container name="prefix-list">
+                  <presence value="true"/>
+                  <configd:help text="Advertise prefix-list ORF capability to this peer-group"/>
+                  <leaf name="receive">
+                    <type name="empty"/>
+                    <configd:help text="Capability to receive the ORF"/>
+                  </leaf>
+                  <leaf name="send">
+                    <type name="empty"/>
+                    <configd:help text="Capability to send the ORF"/>
+                  </leaf>
+                </container>
+              </container>
+            </container>
+            <container name="disable-send-community">
+              <presence value="true"/>
+              <configd:help text="Disable sending community attributes to this peer-group"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/disable-send-community/configd_validate1.cli"/>
+              <leaf name="extended">
+                <type name="empty"/>
+                <configd:help text="Disable sending extended community attributes to this peer-group"/>
+              </leaf>
+              <leaf name="standard">
+                <type name="empty"/>
+                <configd:help text="Disable sending standard community attributes to this peer-group"/>
+              </leaf>
+            </container>
+            <leaf name="weight">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>weight must be between 1 and 65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Default weight for routes from this peer-group"/>
+            </leaf>
+            <container name="prefix-list">
+              <presence value="true"/>
+              <configd:help text="Prefix-list to filter route updates to/from this peer-group"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Prefix-list to filter outgoing route updates to this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/prefix-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/prefix-list/export/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/prefix-list/export/configd_validate2.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Prefix-list to filter incoming route updates from this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/prefix-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/prefix-list/import/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv4-unicast/prefix-list/import/configd_validate2.cli"/>
+              </leaf>
+            </container>
+          </container>
+          <container name="ipv6-unicast">
+            <presence value="true"/>
+            <configd:help text="BGP peer-group IPv6 parameters"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/configd_delete1.cli"/>
+            <container name="default-originate">
+              <presence value="true"/>
+              <configd:help text="Send default route to this peer-group"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route-map to specify criteria of the default"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/default-originate/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/default-originate/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="filter-list">
+              <presence value="true"/>
+              <configd:help text="As-path-list to filter route updates to/from this peer-group"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="As-path-list to filter outgoing route updates to this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/filter-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/filter-list/export/configd_validate1.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="As-path-list to filter incoming route updates from this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/filter-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/filter-list/import/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <leaf name="remove-private-as">
+              <type name="empty"/>
+              <configd:help text="Remove private AS numbers from AS path in outbound route updates"/>
+            </leaf>
+            <leaf name="unsuppress-map">
+              <type name="string"/>
+              <configd:help text="Route-map to selectively unsuppress suppressed routes"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/unsuppress-map/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/unsuppress-map/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="nexthop-self">
+              <type name="empty"/>
+              <configd:help text="Nexthop for routes sent to this peer-group to be the local router"/>
+            </leaf>
+            <container name="distribute-list">
+              <presence value="true"/>
+              <configd:help text="Access-list to filter route updates to/from this peer-group"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Access-list to filter outgoing route updates to this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/distribute-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/distribute-list/export/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/distribute-list/export/configd_validate2.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Access-list to filter incoming route updates from this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/distribute-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/distribute-list/import/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/distribute-list/import/configd_validate2.cli"/>
+              </leaf>
+            </container>
+            <leaf name="route-reflector-client">
+              <type name="empty"/>
+              <configd:help text="Peer-group as a route reflector client"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/route-reflector-client/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="maximum-prefix">
+              <type name="uint32">
+                <range value="1..max">
+                  <error-message>
+                    <value>maximum-prefix must be between 1 and 4294967295</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Maximum number of prefixes to accept from this peer-group"/>
+            </leaf>
+            <leaf name="route-server-client">
+              <type name="empty"/>
+              <configd:help text="Peer-group as route server client"/>
+            </leaf>
+            <container name="attribute-unchanged">
+              <presence value="true"/>
+              <configd:help text="Send BGP attributes unchanged"/>
+              <leaf name="next-hop">
+                <type name="empty"/>
+                <configd:help text="Send nexthop unchanged"/>
+              </leaf>
+              <leaf name="med">
+                <type name="empty"/>
+                <configd:help text="Send multi-exit discriminator unchanged"/>
+              </leaf>
+              <leaf name="as-path">
+                <type name="empty"/>
+                <configd:help text="Send AS path unchanged"/>
+              </leaf>
+            </container>
+            <container name="route-map">
+              <presence value="true"/>
+              <configd:help text="Route-map to filter route updates to/from this peer-group"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Route-map to filter outgoing route updates to this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/route-map/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/route-map/export/configd_validate1.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Route-map to filter incoming route updates from this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/route-map/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/route-map/import/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="allowas-in">
+              <presence value="true"/>
+              <configd:help text="Accept a route that contains the local-AS in the as-path"/>
+              <leaf name="number">
+                <type name="uint32">
+                  <range value="1..10">
+                    <error-message>
+                      <value>allowas-in number must be between 1 and 10</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Number of occurrences of AS number"/>
+              </leaf>
+            </container>
+            <container name="soft-reconfiguration">
+              <presence value="true"/>
+              <configd:help text="Soft reconfiguration for peer-group"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/soft-reconfiguration/configd_validate1.cli"/>
+              <leaf name="inbound">
+                <type name="empty"/>
+                <configd:help text="Inbound soft reconfiguration for this peer-group [REQUIRED]"/>
+              </leaf>
+            </container>
+            <container name="capability">
+              <presence value="true"/>
+              <configd:help text="Advertise capabilities to this peer-group"/>
+              <container name="graceful-restart">
+                <presence value="true"/>
+                <configd:help text="Advertise the graceful-restart capability to this peer-group"/>
+                <leaf name="disable">
+                  <type name="empty"/>
+                  <configd:help text="Disable the advertisement of the graceful-restart capability to this peer-group"/>
+                </leaf>
+              </container>
+              <container name="orf">
+                <presence value="true"/>
+                <configd:help text="Advertise ORF capability to this peer-group"/>
+                <container name="prefix-list">
+                  <presence value="true"/>
+                  <configd:help text="Advertise prefix-list ORF capability to this peer-group"/>
+                  <leaf name="receive">
+                    <type name="empty"/>
+                    <configd:help text="Capability to receive the ORF"/>
+                  </leaf>
+                  <leaf name="send">
+                    <type name="empty"/>
+                    <configd:help text="Capability to send the ORF"/>
+                  </leaf>
+                </container>
+              </container>
+            </container>
+            <container name="disable-send-community">
+              <presence value="true"/>
+              <configd:help text="Disable sending community attributes to this peer-group"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/disable-send-community/configd_validate1.cli"/>
+              <leaf name="extended">
+                <type name="empty"/>
+                <configd:help text="Disable sending extended community attributes to this peer-group"/>
+              </leaf>
+              <leaf name="standard">
+                <type name="empty"/>
+                <configd:help text="Disable sending standard community attributes to this peer-group"/>
+              </leaf>
+            </container>
+            <leaf name="weight">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>weight must be between 1 and 65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Default weight for routes from this peer-group"/>
+            </leaf>
+            <container name="prefix-list">
+              <presence value="true"/>
+              <configd:help text="Prefix-list to filter route updates to/from this peer-group"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Prefix-list to filter outgoing route updates to this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/prefix-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/prefix-list/export/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/prefix-list/export/configd_validate2.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Prefix-list to filter incoming route updates from this peer-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/prefix-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/prefix-list/import/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/peer-group/address-family/ipv6-unicast/prefix-list/import/configd_validate2.cli"/>
+              </leaf>
+            </container>
+          </container>
+        </container>
+        <container name="capability">
+          <presence value="true"/>
+          <configd:help text="Advertise capabilities to this peer-group"/>
+          <leaf name="dynamic">
+            <type name="empty"/>
+            <configd:help text="Advertise dynamic capability to this peer-group"/>
+          </leaf>
+          <leaf name="route-refresh">
+            <type name="empty"/>
+            <configd:help text="Advertise route-refresh capability to this peer-group"/>
+          </leaf>
+        </container>
+        <leaf name="remote-as">
+          <type name="uint32">
+            <range value="1..max">
+              <error-message>
+                <value>remote-as must be between 1 and 4294967295</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Peer-group BGP AS number [REQUIRED]"/>
+        </leaf>
+      </list>
+      <list name="neighbor">
+        <configd:help text="BGP neighbor"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="union">
+            <type name="types:ipv4-address">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/configd_syntax1.cli"/>
+            </type>
+            <type name="types:ipv6-address">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/configd_syntax1.cli"/>
+            </type>
+          </type>
+          <configd:help text="BGP neighbor"/>
+        </leaf>
+        <list name="local-as">
+          <max-elements value="1"/>
+          <configd:help text="Local AS to allow customization of AS number"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/local-as/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/local-as/configd_validate2.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..max">
+                <error-message>
+                  <value>local-as must be between 1 and 4294967295</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Local AS to allow customization of AS number"/>
+          </leaf>
+        </list>
+        <container name="ttl-security">
+          <presence value="true"/>
+          <configd:help text="Ttl security mechanism for this BGP peer"/>
+          <leaf name="hops">
+            <type name="uint32">
+              <range value="1..254">
+                <error-message>
+                  <value>ttl-security hops must be between 1 and 254</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Number of the maximum number of hops to the BGP peer"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/ttl-security/hops/configd_validate1.cli"/>
+          </leaf>
+        </container>
+        <leaf name="enforce-multihop">
+          <type name="empty"/>
+          <configd:help text="Enforce multihop for eBGP neighbors"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/description/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="Description for this neighbor"/>
+        </leaf>
+        <leaf name="update-source">
+          <type name="string"/>
+          <configd:help text="Source IP of routing updates"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/update-source/configd_create.sh"/>
+        </leaf>
+        <leaf name="override-capability">
+          <type name="empty"/>
+          <configd:help text="Ignore capability negotiation with specified neighbor"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/override-capability/configd_validate1.cli"/>
+        </leaf>
+        <uses name="neighbor-vrrp-failover"/>
+        <leaf name="strict-capability-match">
+          <type name="empty"/>
+          <configd:help text="Enable strict capability negotiation"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/strict-capability-match/configd_validate1.cli"/>
+        </leaf>
+        <container name="timers">
+          <presence value="true"/>
+          <configd:help text="Neighbor timers"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/timers/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/timers/configd_validate2.cli"/>
+          <leaf name="connect">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>BGP connect timer must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="BGP connect timer for this neighbor"/>
+          </leaf>
+          <leaf name="holdtime">
+            <type name="uint32">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/timers/holdtime/configd_syntax1.cli"/>
+            </type>
+            <default value="90"/>
+            <configd:help text="BGP hold timer for this neighbor"/>
+          </leaf>
+          <leaf name="keepalive">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>Keepalive interval must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <default value="30"/>
+            <configd:help text="BGP keepalive interval for this neighbor"/>
+          </leaf>
+        </container>
+        <leaf name="advertisement-interval">
+          <type name="uint32">
+            <range value="0..600">
+              <error-message>
+                <value>must be between 0 and 600</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Minimum interval between routing updates"/>
+        </leaf>
+        <leaf name="as-origination-interval">
+          <type name="uint32">
+            <range value="1..65535">
+              <error-message>
+                <value>as-origination-interval must be between 1 and 65535 seconds</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Minimum interval between AS origination routing updates"/>
+        </leaf>
+        <leaf name="password">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/password/configd_syntax1.cli"/>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="BGP MD5 password"/>
+        </leaf>
+        <leaf name="passive">
+          <type name="empty"/>
+          <configd:help text="Do not initiate a session with this neighbor"/>
+        </leaf>
+        <leaf name="disable-capability-negotiation">
+          <type name="empty"/>
+          <configd:help text="Disable capability negotiation with this neighbor"/>
+        </leaf>
+        <leaf name="shutdown">
+          <type name="empty"/>
+          <configd:help text="Administratively shut down neighbor"/>
+        </leaf>
+        <leaf name="ebgp-multihop">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>ebgp-multihop must be between 1 and 255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Allow this eBGP neighbor to not be on a directly connected network"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/ebgp-multihop/configd_validate1.cli"/>
+        </leaf>
+        <leaf name="port">
+          <type name="uint32">
+            <range value="1..65535">
+              <error-message>
+                <value>port must be between 1 and 65535</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Neighbor's BGP port"/>
+        </leaf>
+        <container name="address-family">
+          <presence value="true"/>
+          <configd:help text="Parameters relating to IPv4 or IPv6 routes"/>
+          <container name="ipv4-unicast">
+            <presence value="true"/>
+            <configd:help text="BGP neighbor IPv4 parameters"/>
+            <container name="default-originate">
+              <presence value="true"/>
+              <configd:help text="Send default route to this neighbor"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route-map to specify criteria of the default"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/default-originate/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/default-originate/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="filter-list">
+              <presence value="true"/>
+              <configd:help text="As-path-list to filter route updates to/from this neighbor"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="As-path-list to filter outgoing route updates to this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/filter-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/filter-list/export/configd_validate1.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="As-path-list to filter incoming route updates from this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/filter-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/filter-list/import/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <leaf name="remove-private-as">
+              <type name="empty"/>
+              <configd:help text="Remove private AS numbers from AS path in outbound route updates"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/remove-private-as/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="unsuppress-map">
+              <type name="string"/>
+              <configd:help text="Route-map to selectively unsuppress suppressed routes"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/unsuppress-map/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/unsuppress-map/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="nexthop-self">
+              <type name="empty"/>
+              <configd:help text="Nexthop for routes sent to this neighbor to be the local router"/>
+            </leaf>
+            <leaf name="peer-group">
+              <type name="string"/>
+              <configd:help text="IPv4 peer group for this peer"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/peer-group/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/peer-group/configd_validate1.cli"/>
+            </leaf>
+            <container name="distribute-list">
+              <presence value="true"/>
+              <configd:help text="Access-list to filter route updates to/from this neighbor"/>
+              <leaf name="export">
+                <type name="uint32">
+                  <range value="1..65535">
+                    <error-message>
+                      <value>Access list must be between 1 and 65535</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Access-list to filter outgoing route updates to this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/distribute-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/distribute-list/export/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/distribute-list/export/configd_validate2.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="uint32">
+                  <range value="1..65535">
+                    <error-message>
+                      <value>Access list must be between 1 and 65535</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Access-list to filter incoming route updates from this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/distribute-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/distribute-list/import/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/distribute-list/import/configd_validate2.cli"/>
+              </leaf>
+            </container>
+            <leaf name="route-reflector-client">
+              <type name="empty"/>
+              <configd:help text="Neighbor as a route reflector client"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/route-reflector-client/configd_validate1.cli"/>
+            </leaf>
+            <list name="maximum-prefix">
+              <max-elements value="1"/>
+              <configd:help text="Maximum number of prefixes to accept from this neighbor"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="uint32">
+                  <range value="1..max">
+                    <error-message>
+                      <value>maximum-prefix must be between 1 and 4294967295</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Maximum number of prefixes to accept from this neighbor"/>
+              </leaf>
+              <leaf name="warning-only">
+                <type name="empty"/>
+                <configd:help text="Only give warning message when limit is exceeded"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/maximum-prefix/warning-only/configd_validate1.cli"/>
+              </leaf>
+              <list name="threshold">
+                <max-elements value="1"/>
+                <configd:help text="Threshold value (percentage) at which to generate a warning msg"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/maximum-prefix/threshold/configd_validate1.cli"/>
+                <key value="tagnode"/>
+                <leaf name="tagnode">
+                  <type name="uint32">
+                    <range value="1..100">
+                      <error-message>
+                        <value>threshold must be between 1 and 100 (%)</value>
+                      </error-message>
+                    </range>
+                  </type>
+                  <configd:help text="Threshold value (percentage) at which to generate a warning msg"/>
+                </leaf>
+                <leaf name="warning-only">
+                  <type name="empty"/>
+                  <configd:help text="Only give warning message when limit is exceeded"/>
+                </leaf>
+              </list>
+            </list>
+            <leaf name="route-server-client">
+              <type name="empty"/>
+              <configd:help text="Neighbor is route server client"/>
+            </leaf>
+            <container name="attribute-unchanged">
+              <presence value="true"/>
+              <configd:help text="BGP attributes are sent unchanged"/>
+              <leaf name="next-hop">
+                <type name="empty"/>
+                <configd:help text="Send nexthop unchanged"/>
+              </leaf>
+              <leaf name="med">
+                <type name="empty"/>
+                <configd:help text="Send multi-exit discriminator unchanged"/>
+              </leaf>
+              <leaf name="as-path">
+                <type name="empty"/>
+                <configd:help text="Send AS path unchanged"/>
+              </leaf>
+            </container>
+            <container name="route-map">
+              <presence value="true"/>
+              <configd:help text="Route-map to filter route updates to/from this neighbor"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Route-map to filter outgoing route updates to this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/route-map/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/route-map/export/configd_validate1.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Route-map to filter incoming route updates from this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/route-map/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/route-map/import/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="allowas-in">
+              <presence value="true"/>
+              <configd:help text="Accept a route that contains the local-AS in the as-path"/>
+              <leaf name="number">
+                <type name="uint32">
+                  <range value="1..10">
+                    <error-message>
+                      <value>allowas-in number must be between 1 and 10</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Number of occurrences of AS number"/>
+              </leaf>
+            </container>
+            <container name="soft-reconfiguration">
+              <presence value="true"/>
+              <configd:help text="Soft reconfiguration for neighbor"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/soft-reconfiguration/configd_validate1.cli"/>
+              <leaf name="inbound">
+                <type name="empty"/>
+                <configd:help text="Inbound soft reconfiguration for this neighbor [REQUIRED]"/>
+              </leaf>
+            </container>
+            <container name="capability">
+              <presence value="true"/>
+              <configd:help text="Advertise capabilities to this neighbor"/>
+              <container name="graceful-restart">
+                <presence value="true"/>
+                <configd:help text="Advertise the graceful-restart capability to this neighbor"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/capability/graceful-restart/configd_validate1.cli"/>
+                <leaf name="disable">
+                  <type name="empty"/>
+                  <configd:help text="Disable the advertisement of the graceful-restart capability to this neighbor"/>
+                </leaf>
+              </container>
+              <container name="orf">
+                <presence value="true"/>
+                <configd:help text="Advertise ORF capability to this neighbor"/>
+                <container name="prefix-list">
+                  <presence value="true"/>
+                  <configd:help text="Advertise prefix-list ORF capability to this neighbor"/>
+                  <leaf name="receive">
+                    <type name="empty"/>
+                    <configd:help text="Capability to receive the ORF"/>
+                  </leaf>
+                  <leaf name="send">
+                    <type name="empty"/>
+                    <configd:help text="Capability to send the ORF"/>
+                  </leaf>
+                </container>
+              </container>
+            </container>
+            <container name="disable-send-community">
+              <presence value="true"/>
+              <configd:help text="Disable sending community attributes to this neighbor"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/disable-send-community/configd_validate1.cli"/>
+              <leaf name="extended">
+                <type name="empty"/>
+                <configd:help text="Disable sending extended community attributes to this neighbor"/>
+              </leaf>
+              <leaf name="standard">
+                <type name="empty"/>
+                <configd:help text="Disable sending standard community attributes to this neighbor"/>
+              </leaf>
+            </container>
+            <leaf name="weight">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>weight must be between 1 and 65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Default weight for routes from this neighbor"/>
+            </leaf>
+            <container name="prefix-list">
+              <presence value="true"/>
+              <configd:help text="Prefix-list to filter route updates to/from this neighbor"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Prefix-list to filter outgoing route updates to this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/prefix-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/prefix-list/export/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/prefix-list/export/configd_validate2.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Prefix-list to filter incoming route updates from this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/prefix-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/prefix-list/import/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv4-unicast/prefix-list/import/configd_validate2.cli"/>
+              </leaf>
+            </container>
+          </container>
+          <container name="ipv6-unicast">
+            <presence value="true"/>
+            <configd:help text="BGP neighbor IPv6 parameters"/>
+            <container name="default-originate">
+              <presence value="true"/>
+              <configd:help text="Send default route to this neighbor"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route-map to specify criteria of the default"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/default-originate/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/default-originate/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="filter-list">
+              <presence value="true"/>
+              <configd:help text="As-path-list to filter route updates to/from this neighbor"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="As-path-list to filter outgoing route updates to this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/filter-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/filter-list/export/configd_validate1.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="As-path-list to filter incoming route updates from this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/filter-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/filter-list/import/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <leaf name="remove-private-as">
+              <type name="empty"/>
+              <configd:help text="Remove private AS numbers from AS path in outbound route updates"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/remove-private-as/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="unsuppress-map">
+              <type name="string"/>
+              <configd:help text="Route-map to selectively unsuppress suppressed routes"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/unsuppress-map/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/unsuppress-map/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="nexthop-self">
+              <type name="empty"/>
+              <configd:help text="Nexthop for routes sent to this neighbor to be the local router"/>
+            </leaf>
+            <leaf name="peer-group">
+              <type name="string"/>
+              <configd:help text="IPv6 peer group for this peer"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/peer-group/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/peer-group/configd_validate1.cli"/>
+            </leaf>
+            <container name="distribute-list">
+              <presence value="true"/>
+              <configd:help text="Access-list to filter route updates to/from this neighbor"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Access-list to filter outgoing route updates to this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/distribute-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/distribute-list/export/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/distribute-list/export/configd_validate2.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Access-list to filter incoming route updates from this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/distribute-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/distribute-list/import/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/distribute-list/import/configd_validate2.cli"/>
+              </leaf>
+            </container>
+            <leaf name="route-reflector-client">
+              <type name="empty"/>
+              <configd:help text="Neighbor as a route reflector client"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/route-reflector-client/configd_validate1.cli"/>
+            </leaf>
+            <list name="maximum-prefix">
+              <max-elements value="1"/>
+              <configd:help text="Maximum number of prefixes to accept from this neighbor"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="uint32">
+                  <range value="1..max">
+                    <error-message>
+                      <value>maximum-prefix must be between 1 and 4294967295</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Maximum number of prefixes to accept from this neighbor"/>
+              </leaf>
+              <leaf name="warning-only">
+                <type name="empty"/>
+                <configd:help text="Only give warning message when limit is exceeded"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/maximum-prefix/warning-only/configd_validate1.cli"/>
+              </leaf>
+              <list name="threshold">
+                <max-elements value="1"/>
+                <configd:help text="Threshold value (percentage) at which to generate a warning msg"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/maximum-prefix/threshold/configd_validate1.cli"/>
+                <key value="tagnode"/>
+                <leaf name="tagnode">
+                  <type name="uint32">
+                    <range value="1..100">
+                      <error-message>
+                        <value>threshold must be between 1 and 100 (%)</value>
+                      </error-message>
+                    </range>
+                  </type>
+                  <configd:help text="Threshold value (percentage) at which to generate a warning msg"/>
+                </leaf>
+                <leaf name="warning-only">
+                  <type name="empty"/>
+                  <configd:help text="Only give warning message when limit is exceeded"/>
+                </leaf>
+              </list>
+            </list>
+            <leaf name="route-server-client">
+              <type name="empty"/>
+              <configd:help text="Neighbor as route server client"/>
+            </leaf>
+            <container name="attribute-unchanged">
+              <presence value="true"/>
+              <configd:help text="Send BGP attributes unchanged"/>
+              <leaf name="next-hop">
+                <type name="empty"/>
+                <configd:help text="Send nexthop unchanged"/>
+              </leaf>
+              <leaf name="med">
+                <type name="empty"/>
+                <configd:help text="Send multi-exit discriminator unchanged"/>
+              </leaf>
+              <leaf name="as-path">
+                <type name="empty"/>
+                <configd:help text="Send AS path unchanged"/>
+              </leaf>
+            </container>
+            <container name="route-map">
+              <presence value="true"/>
+              <configd:help text="Route-map to filter route updates to/from this neighbor"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Route-map to filter outgoing route updates to this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/route-map/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/route-map/export/configd_validate1.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Route-map to filter incoming route updates from this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/route-map/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/route-map/import/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="allowas-in">
+              <presence value="true"/>
+              <configd:help text="Accept a route that contains the local-AS in the as-path"/>
+              <leaf name="number">
+                <type name="uint32">
+                  <range value="1..10">
+                    <error-message>
+                      <value>allowas-in number must be between 1 and 10</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Number of occurrences of AS number"/>
+              </leaf>
+            </container>
+            <container name="soft-reconfiguration">
+              <presence value="true"/>
+              <configd:help text="Soft reconfiguration for neighbor"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/soft-reconfiguration/configd_validate1.cli"/>
+              <leaf name="inbound">
+                <type name="empty"/>
+                <configd:help text="Inbound soft reconfiguration for this neighbor [REQUIRED]"/>
+              </leaf>
+            </container>
+            <container name="capability">
+              <presence value="true"/>
+              <configd:help text="Advertise capabilities to this neighbor"/>
+              <container name="graceful-restart">
+                <presence value="true"/>
+                <configd:help text="Advertise the graceful-restart capability to this neighbor"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/capability/graceful-restart/configd_validate1.cli"/>
+                <leaf name="disable">
+                  <type name="empty"/>
+                  <configd:help text="Disable the advertisement of the graceful-restart capability to this neighbor"/>
+                </leaf>
+              </container>
+              <container name="orf">
+                <presence value="true"/>
+                <configd:help text="Advertise ORF capability to this neighbor"/>
+                <container name="prefix-list">
+                  <presence value="true"/>
+                  <configd:help text="Advertise prefix-list ORF capability to this neighbor"/>
+                  <leaf name="receive">
+                    <type name="empty"/>
+                    <configd:help text="Capability to receive the ORF"/>
+                  </leaf>
+                  <leaf name="send">
+                    <type name="empty"/>
+                    <configd:help text="Capability to send the ORF"/>
+                  </leaf>
+                </container>
+              </container>
+            </container>
+            <container name="disable-send-community">
+              <presence value="true"/>
+              <configd:help text="Disable sending community attributes to this neighbor"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/disable-send-community/configd_validate1.cli"/>
+              <leaf name="extended">
+                <type name="empty"/>
+                <configd:help text="Disable sending extended community attributes to this neighbor"/>
+              </leaf>
+              <leaf name="standard">
+                <type name="empty"/>
+                <configd:help text="Disable sending standard community attributes to this neighbor"/>
+              </leaf>
+            </container>
+            <leaf name="weight">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>weight must be between 1 and 65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Default weight for IPV6 routes from this neighbor"/>
+            </leaf>
+            <container name="prefix-list">
+              <presence value="true"/>
+              <configd:help text="Prefix-list to filter route updates to/from this neighbor"/>
+              <leaf name="export">
+                <type name="string"/>
+                <configd:help text="Prefix-list to filter outgoing route updates to this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/prefix-list/export/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/prefix-list/export/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/prefix-list/export/configd_validate2.cli"/>
+              </leaf>
+              <leaf name="import">
+                <type name="string"/>
+                <configd:help text="Prefix-list to filter incoming route updates from this neighbor"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/prefix-list/import/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/prefix-list/import/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/neighbor/address-family/ipv6-unicast/prefix-list/import/configd_validate2.cli"/>
+              </leaf>
+            </container>
+          </container>
+        </container>
+        <container name="capability">
+          <presence value="true"/>
+          <configd:help text="Advertise capabilities to this neighbor"/>
+          <leaf name="dynamic">
+            <type name="empty"/>
+            <configd:help text="Advertise dynamic capability to this neighbor"/>
+          </leaf>
+          <leaf name="route-refresh">
+            <type name="empty"/>
+            <configd:help text="Advertise route-refresh capability to this neighbor"/>
+          </leaf>
+        </container>
+        <leaf name="remote-as">
+          <type name="uint32">
+            <range value="1..max">
+              <error-message>
+                <value>remote-as must be between 1 and 4294967295</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Neighbor BGP AS number [REQUIRED]"/>
+        </leaf>
+      </list>
+      <container name="address-family">
+        <presence value="true"/>
+        <configd:help text="BGP address-family parameters"/>
+        <container name="ipv4-unicast">
+          <presence value="true"/>
+          <configd:help text="BGP IPv4 settings"/>
+          <container name="parameters">
+            <presence value="true"/>
+            <configd:help text="BGP parameters for the ipv4-unicast address family"/>
+            <leaf name="synchronization">
+              <type name="empty"/>
+              <configd:help text="Enable BGP synchronization for the ipv4-unicast address family"/>
+            </leaf>
+            <leaf name="network-synchronization">
+              <type name="empty"/>
+              <configd:help text="Enable BGP network synchronization for the ipv4-unicast address family"/>
+            </leaf>
+            <container name="distance">
+              <presence value="true"/>
+              <configd:help text="Administratives distances for BGP routes"/>
+              <container name="global">
+                <presence value="true"/>
+                <configd:help text="Global administratives distances for BGP routes"/>
+                <leaf name="local">
+                  <type name="uint32">
+                    <range value="1..255">
+                      <error-message>
+                        <value>Must be between 1-255</value>
+                      </error-message>
+                    </range>
+                  </type>
+                  <configd:help text="Administrative distance for local BGP routes"/>
+                  <default value="200"/>
+                </leaf>
+                <leaf name="internal">
+                  <type name="uint32">
+                    <range value="1..255">
+                      <error-message>
+                        <value>Must be between 1-255</value>
+                      </error-message>
+                    </range>
+                  </type>
+                  <configd:help text="Administrative distance for internal BGP routes"/>
+                  <default value="200"/>
+                </leaf>
+                <leaf name="external">
+                  <type name="uint32">
+                    <range value="1..255">
+                      <error-message>
+                        <value>Must be between 1-255</value>
+                      </error-message>
+                    </range>
+                  </type>
+                  <configd:help text="Administrative distance for external BGP routes"/>
+                  <default value="20"/>
+                </leaf>
+              </container>
+            </container>
+            <container name="dampening">
+              <presence value="true"/>
+              <configd:help text="Enable route-flap dampening"/>
+              <leaf name="re-use">
+                <type name="uint32">
+                  <range value="1..20000">
+                    <error-message>
+                      <value>Re-use value must be between 1 and 20000</value>
+                    </error-message>
+                  </range>
+                </type>
+                <default value="750"/>
+                <configd:help text="Penalty value to start reusing a route [REQUIRED]"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/re-use/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/re-use/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/re-use/configd_validate3.cli"/>
+              </leaf>
+              <leaf name="half-life">
+                <type name="uint32">
+                  <range value="1..45">
+                    <error-message>
+                      <value>Half-life penalty must be between 1 and 45</value>
+                    </error-message>
+                  </range>
+                </type>
+                <default value="15"/>
+                <configd:help text="Half-life time for dampening [REQUIRED]"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/half-life/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/half-life/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/half-life/configd_validate3.cli"/>
+              </leaf>
+              <leaf name="start-suppress">
+                <type name="uint32">
+                  <range value="1..20000">
+                    <error-message>
+                      <value>Start-suppress value must be between 1 and 20000</value>
+                    </error-message>
+                  </range>
+                </type>
+                <default value="2000"/>
+                <configd:help text="Penalty value to start suppressing a route [REQUIRED]"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/start-suppress/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/start-suppress/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/start-suppress/configd_validate3.cli"/>
+              </leaf>
+              <leaf name="max-suppress-time">
+                <type name="uint32">
+                  <range value="1..255">
+                    <error-message>
+                      <value>Max-suppress-time must be between 1 and 255</value>
+                    </error-message>
+                  </range>
+                </type>
+                <default value="60"/>
+                <configd:help text="Maximum duration to suppress a stable route [REQUIRED]"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/max-suppress-time/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/max-suppress-time/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/parameters/dampening/max-suppress-time/configd_validate3.cli"/>
+              </leaf>
+            </container>
+          </container>
+          <list name="aggregate-address">
+            <configd:help text="BGP aggregate network"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="types:ipv4-prefix">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/aggregate-address/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="BGP aggregate network"/>
+            </leaf>
+            <leaf name="as-set">
+              <type name="empty"/>
+              <configd:help text="Generate AS-set path information for this aggregate address"/>
+            </leaf>
+            <leaf name="summary-only">
+              <type name="empty"/>
+              <configd:help text="Announce the aggregate summary network only"/>
+            </leaf>
+          </list>
+          <container name="redistribute">
+            <presence value="true"/>
+            <configd:help text="Redistribute routes from other protocols into BGP"/>
+            <container name="kernel">
+              <presence value="true"/>
+              <configd:help text="Redistribute kernel routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/kernel/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/kernel/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="rip">
+              <presence value="true"/>
+              <configd:help text="Redistribute RIP routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/rip/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/rip/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="connected">
+              <presence value="true"/>
+              <configd:help text="Redistribute connected routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/connected/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/connected/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="static">
+              <presence value="true"/>
+              <configd:help text="Redistribute static routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/static/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/static/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="ospf">
+              <presence value="true"/>
+              <configd:help text="Redistribute OSPF routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/ospf/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/redistribute/ospf/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+          </container>
+          <list name="network">
+            <configd:help text="BGP network"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/network/configd_validate1.cli"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="types:ipv4-prefix">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/network/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="BGP network"/>
+            </leaf>
+            <leaf name="backdoor">
+              <type name="empty"/>
+              <configd:help text="Network as a backdoor route"/>
+            </leaf>
+            <leaf name="route-map">
+              <type name="string"/>
+              <configd:help text="Route-map to modify route attributes"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/network/route-map/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv4-unicast/network/route-map/configd_validate1.cli"/>
+            </leaf>
+          </list>
+          <leaf name="auto-summary">
+            <type name="empty"/>
+            <configd:help text="Enable automatic network number summarization"/>
+          </leaf>
+        </container>
+        <container name="ipv6-unicast">
+          <presence value="true"/>
+          <configd:help text="BGP IPv6 settings"/>
+          <container name="parameters">
+            <presence value="true"/>
+            <configd:help text="BGP parameters for the ipv6-unicast address family"/>
+            <leaf name="synchronization">
+              <type name="empty"/>
+              <configd:help text="Enable BGP synchronization for the ipv6-unicast address family"/>
+            </leaf>
+            <leaf name="network-synchronization">
+              <type name="empty"/>
+              <configd:help text="Enable BGP network synchronization for the ipv6-unicast address family"/>
+            </leaf>
+            <container name="distance">
+              <presence value="true"/>
+              <configd:help text="Administratives distances for BGP routes"/>
+              <container name="global">
+                <presence value="true"/>
+                <configd:help text="Global administratives distances for BGP routes"/>
+                <leaf name="local">
+                  <type name="uint32">
+                    <range value="1..255">
+                      <error-message>
+                        <value>Must be between 1-255</value>
+                      </error-message>
+                    </range>
+                  </type>
+                  <configd:help text="Administrative distance for local BGP routes"/>
+                  <default value="200"/>
+                </leaf>
+                <leaf name="internal">
+                  <type name="uint32">
+                    <range value="1..255">
+                      <error-message>
+                        <value>Must be between 1-255</value>
+                      </error-message>
+                    </range>
+                  </type>
+                  <configd:help text="Administrative distance for internal BGP routes"/>
+                  <default value="200"/>
+                </leaf>
+                <leaf name="external">
+                  <type name="uint32">
+                    <range value="1..255">
+                      <error-message>
+                        <value>Must be between 1-255</value>
+                      </error-message>
+                    </range>
+                  </type>
+                  <configd:help text="Administrative distance for external BGP routes"/>
+                  <default value="20"/>
+                </leaf>
+              </container>
+            </container>
+            <container name="dampening">
+              <presence value="true"/>
+              <configd:help text="Enable route-flap dampening"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/configd_validate1.cli"/>
+              <leaf name="re-use">
+                <type name="uint32">
+                  <range value="1..20000">
+                    <error-message>
+                      <value>Re-use value must be between 1 and 20000</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Penalty value to start reusing a route [REQUIRED]"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/re-use/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/re-use/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/re-use/configd_validate3.cli"/>
+              </leaf>
+              <leaf name="half-life">
+                <type name="uint32">
+                  <range value="1..45">
+                    <error-message>
+                      <value>Half-life penalty must be between 1 and 45</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Half-life time for dampening [REQUIRED]"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/half-life/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/half-life/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/half-life/configd_validate3.cli"/>
+              </leaf>
+              <leaf name="start-suppress">
+                <type name="uint32">
+                  <range value="1..20000">
+                    <error-message>
+                      <value>Start-suppress value must be between 1 and 20000</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Penalty value to start suppressing a route [REQUIRED]"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/start-suppress/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/start-suppress/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/start-suppress/configd_validate3.cli"/>
+              </leaf>
+              <leaf name="max-suppress-time">
+                <type name="uint32">
+                  <range value="1..255">
+                    <error-message>
+                      <value>Max-suppress-time must be between 1 and 255</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Maximum duration to suppress a stable route [REQUIRED]"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/max-suppress-time/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/max-suppress-time/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/parameters/dampening/max-suppress-time/configd_validate3.cli"/>
+              </leaf>
+            </container>
+          </container>
+          <list name="aggregate-address">
+            <configd:help text="BGP IPv6 aggregate network"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="types:ipv6-prefix">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/aggregate-address/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="BGP IPv6 aggregate network"/>
+            </leaf>
+            <leaf name="summary-only">
+              <type name="empty"/>
+              <configd:help text="Announce the aggregate summary network only"/>
+            </leaf>
+          </list>
+          <container name="redistribute">
+            <presence value="true"/>
+            <configd:help text="Redistribute routes from other protocols into BGP"/>
+            <container name="kernel">
+              <presence value="true"/>
+              <configd:help text="Redistribute kernel routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/kernel/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/kernel/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="connected">
+              <presence value="true"/>
+              <configd:help text="Redistribute connected routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/connected/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/connected/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="static">
+              <presence value="true"/>
+              <configd:help text="Redistribute static routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/static/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/static/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="ospfv3">
+              <presence value="true"/>
+              <configd:help text="Redistribute OSPFv3 routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/ospfv3/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/ospfv3/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="ripng">
+              <presence value="true"/>
+              <configd:help text="Redistribute RIPng routes into BGP"/>
+              <leaf name="route-map">
+                <type name="string"/>
+                <configd:help text="Route map to filter redistributed routes"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/ripng/route-map/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/redistribute/ripng/route-map/configd_validate1.cli"/>
+              </leaf>
+            </container>
+          </container>
+          <list name="network">
+            <configd:help text="BGP IPv6 network"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/network/configd_validate1.cli"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="types:ipv6-prefix">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/network/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="BGP IPv6 network"/>
+            </leaf>
+            <leaf name="backdoor">
+              <type name="empty"/>
+              <configd:help text="Network as a backdoor route"/>
+            </leaf>
+            <leaf name="route-map">
+              <type name="string"/>
+              <configd:help text="Route-map to modify route attributes"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/network/route-map/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/bgp/address-family/ipv6-unicast/network/route-map/configd_validate1.cli"/>
+            </leaf>
+          </list>
+          <leaf name="auto-summary">
+            <type name="empty"/>
+            <configd:help text="Enable automatic network number summarization"/>
+          </leaf>
+        </container>
+      </container>
+    </list>
+  </augment>
+</module>

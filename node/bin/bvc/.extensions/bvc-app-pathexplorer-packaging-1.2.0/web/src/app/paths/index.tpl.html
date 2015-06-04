@@ -1,0 +1,114 @@
+<h2>Path Explorer</h2>
+<div>
+  <form role="form" name="findPathsForm">
+    <div class="row">
+      <div class="col-md-2 form-group">
+        <label for="sourceAddress" tooltip="Enter a Source IP Address/Host name">Source Address</label><br>
+        <input id="sourceAddress" class="form-control" ng-model="sourceAddress" placeholder="Enter source IP Address"  ng-pattern="/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?=.*?[a-z])(?!\.)[a-z\d.-]*[a-z\d]$/" required/>
+      </div>
+      <div class="col-md-2 form-group">
+        <label for="destinationAddress" tooltip="Enter a Destination IP Address/Host name">Dest. Address</label><br>
+        <input id="destinationAddress" class="form-control" ng-model="destinationAddress" placeholder="Enter destination IP Address"  ng-pattern="/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?=.*?[a-z])(?!\.)[a-z\d.-]*[a-z\d]$/" required/>
+      </div>
+      <div class="col-md-4 form-group">
+        <label for="waypoints">Waypoints</label><br>
+        <input id="waypoints" class="form-control" ng-model="waypoints" ng-list placeholder="Enter waypoints separated by commas"/>
+      </div>
+      <div class="col-md-2 form-group">
+        <label for="waypoints" tooltip="Enter one or more waypoints separated by commas">&nbsp;</label><br>
+        <button-submit name="addPath" class="btn-primary" form="findPathsForm" function="submit" label="Add Path" glyph="plus"></button-submit>
+      </div>
+    </div>
+  </form>
+  <hr/>
+
+  <div>
+    <h4>Installed Paths</h4>
+
+    <div id="notes">
+      <div>
+        <small>To highlight a path in the graph, click on the <i class="icon icon-fixedwidth icon-lightbulb"></i> light-bulb icon next to the path.</small>
+      </div>
+      <div>
+        <small>To unhighlight a path in the graph, click on the <i class="icon icon-fixedwidth icon-power-off"></i> power-off icon.</small>
+      </div>
+      <div>
+        <small>To delete a path from the system, click on the <i class="icon icon-fixedwidth icon-remove-sign"></i> delete icon.</small>
+      </div>
+      <div>
+        <small>To set a new waypoint for system calculated path, click on the set waypoint link and enter a new waypoint.</small>
+      </div>
+      <div>
+        <small>To change the waypoint, click on the waypoint and enter a new waypoint.</small>
+      </div>
+    </div>
+    <table class="footable table" data-page-size="25">
+      <thead>
+      <tr>
+        <th>Source -> Dest&nbsp;
+          <i class="icon-refresh hand-pointer" ng-click="refresh()"></i>&nbsp;
+        </th>
+        <th>WayPoints</th>
+        <th>Hops</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-hide="pathData.length">
+        <td colspan="3" class="centerAlign">No Paths Found</td>
+      </tr>
+      <tr ng-repeat="item in pathData" ng-class="{ 'background-color': selectedRowHiliteColor() }">
+        <td id="td-{{item['source-addr']}}-{{item['destination-addr']}}" ng-click="selectPath(item['source-addr'] + '-' + item['destination-addr'])">
+          <div>
+            <div id="path-{{item['source-addr']}}-{{item['destination-addr']}}" class="pull-left space-right-1em"><strong>{{item['source-addr']}}&nbsp;&rarr;&nbsp;{{item['destination-addr']}}</strong></div>
+            <div class="pull-left">
+              <i id="hp-{{item['source-addr']}}-{{item['destination-addr']}}" class="icon icon-fixedwidth icon-lightbulb hand-pointer smallButton" ng-click="hilitePath(item)" tooltip="Highlight Path in graph"></i>&nbsp;
+              <i id="uhp-{{item['source-addr']}}-{{item['destination-addr']}}" class="icon icon-fixedwidth icon-power-off hand-pointer smallButton" ng-click="unhilitePath(item)" tooltip="Unhighlight Path in graph"></i>&nbsp;
+              <i id="del-{{item['source-addr']}}-{{item['destination-addr']}}" class="icon icon-fixedwidth icon-remove-sign hand-pointer smallButton" ng-click="deletePath(item)" tooltip="Delete Path"></i>&nbsp;
+            </div>
+          </div>
+        </td>
+        <td>
+          <a id="wp-{{item['source-addr']}}-{{item['destination-addr']}}" href="#" editable-text="item.waypoints"  onbeforesave="updatePath(item, $data)">
+            <div ng-repeat="waypoint in item['waypoints']">{{waypoint}}</div>
+            <div ng-hide="item['waypoints'].length">set waypoint</div>
+          </a>
+        </td>
+        <td>
+          <div id="hop-{{item['source-addr']}}-{{item['destination-addr']}}">
+            <div id="hop-{{item['source-addr']}}-{{item['destination-addr']}}-{{$index}}" ng-repeat="hop in item['hopsGrouped']">{{hop[0]}}&nbsp;&rarr;&nbsp;{{hop[1]}}</div>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+      <tfoot class="hide-if-no-paging">
+      <tr>
+        <td colspan="3">
+          <div class="pagination pagination-centered"></div>
+        </td>
+      </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div id="graphOptions">
+
+    <div class="btn-group">
+      <label class="btn btn-default" ng-model="topologyOptions.smoothCurves" btn-checkbox btn-checkbox-true="false" btn-checkbox-false="true" tooltip="Toggle Links"><i class="icon-resize-full">&nbsp;&nbsp;Bi-directional Links</i></label>
+    </div>
+
+    <div class="btn-group">
+      <label class="btn btn-default" ng-model="topologyOptions.physics.barnesHut.springLength" btn-radio="150" tooltip="Show nodes closer">Closer</label>
+      <label class="btn btn-default" ng-model="topologyOptions.physics.barnesHut.springLength" btn-radio="250" tooltip="Show nodes in normal mode">Default</label>
+      <label class="btn btn-default" ng-model="topologyOptions.physics.barnesHut.springLength" btn-radio="330" tooltip="Show nodes farther apart">Relaxed</label>
+    </div>
+
+    <!--<div class="btn-group">-->
+      <!--<label class="btn btn-default" ng-model="topologyOptions.dataManipulation" btn-checkbox>Allow Edits</label>-->
+    <!--</div>-->
+  </div>
+  <p></p>
+
+  <div class="pathsGraph col-md-12">
+    <paths-simple topology-data="topologyData" topology-options="topologyOptions" selected-node="selectedNode" selected-edge="selectedEdge"></paths-simple>
+  </div>
+</div>

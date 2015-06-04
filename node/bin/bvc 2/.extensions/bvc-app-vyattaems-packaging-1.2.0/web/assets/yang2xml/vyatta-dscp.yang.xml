@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-dscp"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:dscp="urn:vyatta.com:mgmt:vyatta-dscp"
+        xmlns:inet="urn:ietf:params:xml:ns:yang:ietf-inet-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-dscp"/>
+  <prefix value="dscp"/>
+  <import module="ietf-inet-types">
+    <prefix value="inet"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2015-01-09">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+  </revision>
+  <typedef name="dscp-name">
+    <reference>
+      <text>http://www.iana.org/assignments/dscp-registry/dscp-registry.xhtml#dscp-registry-1</text>
+    </reference>
+    <type name="enumeration">
+      <enum name="default">
+        <reference>
+          <text>RFC 2474</text>
+        </reference>
+        <value value="0"/>
+      </enum>
+      <enum name="cs1">
+        <reference>
+          <text>RFC 2474</text>
+        </reference>
+        <value value="8"/>
+      </enum>
+      <enum name="cs2">
+        <reference>
+          <text>RFC 2474</text>
+        </reference>
+        <value value="16"/>
+      </enum>
+      <enum name="cs3">
+        <reference>
+          <text>RFC 2474</text>
+        </reference>
+        <value value="24"/>
+      </enum>
+      <enum name="cs4">
+        <reference>
+          <text>RFC 2474</text>
+        </reference>
+        <value value="32"/>
+      </enum>
+      <enum name="cs5">
+        <reference>
+          <text>RFC 2474</text>
+        </reference>
+        <value value="40"/>
+      </enum>
+      <enum name="cs6">
+        <reference>
+          <text>RFC 2474</text>
+        </reference>
+        <value value="48"/>
+      </enum>
+      <enum name="cs7">
+        <reference>
+          <text>RFC 2474</text>
+        </reference>
+        <value value="56"/>
+      </enum>
+      <enum name="af11">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="10"/>
+      </enum>
+      <enum name="af12">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="12"/>
+      </enum>
+      <enum name="af13">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="14"/>
+      </enum>
+      <enum name="af21">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="18"/>
+      </enum>
+      <enum name="af22">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="20"/>
+      </enum>
+      <enum name="af23">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="22"/>
+      </enum>
+      <enum name="af31">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="26"/>
+      </enum>
+      <enum name="af32">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="28"/>
+      </enum>
+      <enum name="af33">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="30"/>
+      </enum>
+      <enum name="af41">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="34"/>
+      </enum>
+      <enum name="af42">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="36"/>
+      </enum>
+      <enum name="af43">
+        <reference>
+          <text>RFC 2597</text>
+        </reference>
+        <value value="38"/>
+      </enum>
+      <enum name="ef">
+        <reference>
+          <text>RFC 3246</text>
+        </reference>
+        <value value="46"/>
+      </enum>
+      <enum name="va">
+        <reference>
+          <text>RFC 5865</text>
+        </reference>
+        <value value="44"/>
+      </enum>
+    </type>
+  </typedef>
+  <typedef name="dscp-name-or-value">
+    <type name="union">
+      <type name="inet:dscp"/>
+      <type name="dscp-name"/>
+    </type>
+  </typedef>
+</module>

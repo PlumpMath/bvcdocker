@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-services"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:service="urn:vyatta.com:mgmt:vyatta-service"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-service"/>
+  <prefix value="service"/>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+	 San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-05-30">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+  </revision>
+  <container name="service">
+    <presence value="true"/>
+    <configd:help text="Services"/>
+  </container>
+</module>

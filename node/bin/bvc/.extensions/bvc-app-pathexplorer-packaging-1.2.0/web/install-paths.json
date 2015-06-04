@@ -1,0 +1,21 @@
+{
+  "install": [
+    {
+      "src": "src/app/app.module.js",
+      "cue": "//@install:modules",
+      "data": [ "  ,'app/paths/paths.module'" ]
+    },
+    {
+      "src": "src/app/app.module.js",
+      "cue": "//@install:packages",
+      "data": [ "  ,'bvc.paths'" ]
+    },
+    {
+      "src": "index.html",
+      "cue": "<!-- @install:css -->",
+      "data": [
+        "  <link rel=\"stylesheet\" type=\"text/css\" href=\"assets/bvc-app-paths.css\" />"
+      ]
+    }
+  ]
+}

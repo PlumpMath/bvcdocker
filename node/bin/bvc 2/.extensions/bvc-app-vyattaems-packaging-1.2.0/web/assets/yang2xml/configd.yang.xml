@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="configd"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:configd"/>
+  <prefix value="configd"/>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+	 San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-12-17">
+    <description>
+      <text>Add rpc-script extension</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-05-30">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+  </revision>
+  <extension name="help">
+    <argument name="text"/>
+  </extension>
+  <extension name="comp_help">
+    <argument name="text"/>
+  </extension>
+  <extension name="pattern-help">
+    <argument name="text"/>
+  </extension>
+  <extension name="priority">
+    <argument name="priority"/>
+  </extension>
+  <extension name="allowed">
+    <argument name="executable"/>
+  </extension>
+  <extension name="begin">
+    <argument name="executable"/>
+  </extension>
+  <extension name="end">
+    <argument name="executable"/>
+  </extension>
+  <extension name="create">
+    <argument name="executable"/>
+  </extension>
+  <extension name="delete">
+    <argument name="executable"/>
+  </extension>
+  <extension name="update">
+    <argument name="executable"/>
+  </extension>
+  <extension name="subst">
+    <argument name="executable"/>
+  </extension>
+  <extension name="secret">
+    <argument name="bool"/>
+  </extension>
+  <extension name="validate">
+    <argument name="executable"/>
+  </extension>
+  <extension name="syntax">
+    <argument name="executable"/>
+  </extension>
+  <extension name="error-message">
+    <argument name="message"/>
+  </extension>
+  <extension name="migration">
+    <argument name="level"/>
+  </extension>
+  <extension name="rpc-script">
+    <argument name="executable"/>
+  </extension>
+</module>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-system-time"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:system-time="urn:vyatta.com:mgmt:vyatta-system-time"
+        xmlns:system="urn:vyatta.com:mgmt:vyatta-system"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-system-time"/>
+  <prefix value="system-time"/>
+  <import module="vyatta-system">
+    <prefix value="system"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2015-01-08">
+    <description>
+      <text>NTP stats collection</text>
+    </description>
+  </revision>
+  <revision date="2014-12-10">
+    <description>
+      <text>IPv6 for NTP</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/system:system">
+    <container name="ntp">
+      <presence value="true"/>
+      <configd:priority priority="300"/>
+      <configd:help text="Network Time Protocol (NTP) configuration"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/system/ntp/configd_end.sh"/>
+      <leaf name="statistics">
+        <type name="empty"/>
+        <configd:help text="Enable statistics collection"/>
+      </leaf>
+      <list name="server">
+        <configd:help text="Network Time Protocol (NTP) server"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string"/>
+          <configd:help text="Network Time Protocol (NTP) server"/>
+        </leaf>
+        <leaf name="preempt">
+          <type name="empty"/>
+          <configd:help text="Specifies the association as preemptable rather than the default persistent"/>
+        </leaf>
+        <leaf name="dynamic">
+          <type name="empty"/>
+          <configd:help text="Allow server to be configured eve if not reachable"/>
+        </leaf>
+        <leaf name="noselect">
+          <type name="empty"/>
+          <configd:help text="Marks the server as unused"/>
+        </leaf>
+        <leaf name="prefer">
+          <type name="empty"/>
+          <configd:help text="Marks the server as preferred"/>
+        </leaf>
+        <leaf name="address-family">
+          <type name="enumeration">
+            <enum name="ipv4">
+              <configd:help text="only IPv4 addresses"/>
+            </enum>
+            <enum name="ipv6">
+              <configd:help text="only IPv6 addresses"/>
+            </enum>
+          </type>
+          <configd:help text="Address family for hostname resolution"/>
+        </leaf>
+      </list>
+    </container>
+    <leaf name="time-zone">
+      <type name="string"/>
+      <configd:priority priority="100"/>
+      <configd:help text="Local time zone"/>
+      <default value="GMT"/>
+      <configd:update executable="/opt/vyatta/share/tmplscripts/system/time-zone/configd_update.sh"/>
+      <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/time-zone/configd_allowed.sh"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/system/time-zone/configd_end.sh"/>
+      <configd:comp_help text="/opt/vyatta/share/tmplscripts/system/time-zone/configd_comp_help.txt"/>
+      <configd:delete executable="/opt/vyatta/share/tmplscripts/system/time-zone/configd_delete1.cli"/>
+    </leaf>
+  </augment>
+</module>

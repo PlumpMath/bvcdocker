@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-system-acm-configd"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:system-acm-configd="urn:vyatta.com:mgmt:vyatta-system-acm-configd"
+        xmlns:system="urn:vyatta.com:mgmt:vyatta-system"
+        xmlns:system-acm="urn:vyatta.com:mgmt:vyatta-system-acm"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-system-acm-configd"/>
+  <prefix value="system-acm-configd"/>
+  <import module="vyatta-system">
+    <prefix value="system"/>
+  </import>
+  <import module="vyatta-system-acm">
+    <prefix value="system-acm"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-08-26">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <typedef name="action">
+    <type name="enumeration">
+      <enum name="allow">
+        <configd:help text="Allow the action"/>
+      </enum>
+      <enum name="deny">
+        <configd:help text="Deny the action"/>
+      </enum>
+    </type>
+  </typedef>
+  <augment target-node="/system:system/system-acm:acm">
+    <leaf name="log-requests">
+      <configd:help text="Log all requests to the audit log"/>
+      <type name="empty"/>
+    </leaf>
+    <leaf name="read-default">
+      <type name="action"/>
+      <default value="allow"/>
+      <configd:help text="Read operation default action"/>
+    </leaf>
+    <leaf name="delete-default">
+      <type name="action"/>
+      <default value="deny"/>
+      <configd:help text="Delete operation default action"/>
+    </leaf>
+    <leaf name="update-default">
+      <type name="action"/>
+      <default value="deny"/>
+      <configd:help text="Update operation default action"/>
+    </leaf>
+    <container name="ruleset">
+      <presence value="true"/>
+      <configd:help text="Configuration path ruleset"/>
+      <list name="rule">
+        <configd:help text="Rule number (1-9999)"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/acm/ruleset/rule/configd_validate1.cli"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/acm/ruleset/rule/configd_validate2.cli"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/acm/ruleset/rule/configd_validate3.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="uint32">
+            <range value="1..9999"/>
+          </type>
+          <configd:help text="Rule number"/>
+        </leaf>
+        <leaf name="path">
+          <type name="string"/>
+          <configd:help text="Path to match"/>
+        </leaf>
+        <leaf name="action">
+          <type name="action"/>
+          <default value="deny"/>
+          <configd:help text="Action"/>
+        </leaf>
+        <leaf-list name="group">
+          <type name="string"/>
+          <ordered-by value="user"/>
+          <configd:help text="Group to match"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/acm/ruleset/rule/group/configd_allowed.sh"/>
+        </leaf-list>
+        <leaf name="log">
+          <type name="empty"/>
+          <configd:help text="Enable logging for rule"/>
+        </leaf>
+        <leaf name="operation">
+          <type name="enumeration">
+            <enum name="create"/>
+            <enum name="read"/>
+            <enum name="update"/>
+            <enum name="delete"/>
+            <enum name="*"/>
+          </type>
+          <configd:help text="Path operation to match"/>
+        </leaf>
+      </list>
+    </container>
+    <leaf name="enable">
+      <type name="empty"/>
+      <configd:help text="Enable rulesets"/>
+    </leaf>
+    <leaf name="create-default">
+      <type name="action"/>
+      <default value="deny"/>
+      <configd:help text="Create operation default action"/>
+    </leaf>
+  </augment>
+</module>

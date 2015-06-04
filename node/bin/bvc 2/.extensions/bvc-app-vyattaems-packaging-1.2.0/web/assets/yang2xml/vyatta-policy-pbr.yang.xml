@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-policy-pbr"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:policy-pbr="urn:vyatta.com:mgmt:vyatta-policy-pbr"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:interfaces-dataplane="urn:vyatta.com:mgmt:vyatta-interfaces-dataplane"
+        xmlns:interfaces-l2tpeth="urn:vyatta.com:mgmt:vyatta-interfaces-l2tpeth"
+        xmlns:policy="urn:vyatta.com:mgmt:vyatta-policy"
+        xmlns:policy-route="urn:vyatta.com:mgmt:vyatta-policy-route"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-policy-pbr"/>
+  <prefix value="policy-pbr"/>
+  <import module="vyatta-interfaces">
+    <prefix value="if"/>
+  </import>
+  <import module="vyatta-interfaces-dataplane">
+    <prefix value="interfaces-dataplane"/>
+  </import>
+  <import module="vyatta-interfaces-l2tpeth">
+    <prefix value="interfaces-l2tpeth"/>
+  </import>
+  <import module="vyatta-policy">
+    <prefix value="policy"/>
+  </import>
+  <import module="vyatta-policy-route">
+    <prefix value="policy-route"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/policy:policy/policy-route:route">
+    <list name="pbr">
+      <configd:priority priority="310"/>
+      <configd:help text="PBR group"/>
+      <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/configd_delete.sh"/>
+      <configd:begin executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/configd_begin.sh"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/configd_end.sh"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="string">
+          <pattern value="[0-9A-Za-z][-_0-9A-Za-z]*">
+            <error-message>
+              <value>only alpha-numeric policy name allowed</value>
+            </error-message>
+          </pattern>
+        </type>
+        <configd:help text="PBR group"/>
+      </leaf>
+      <leaf name="description">
+        <type name="string"/>
+        <configd:help text="Rule-set description"/>
+      </leaf>
+      <list name="rule">
+        <configd:help text="Rule number (1-9999)"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/configd_end.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="uint32">
+            <range value="1..9999"/>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/configd_syntax1.cli"/>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/configd_syntax2.cli"/>
+          </type>
+          <configd:help text="Rule number (1-9999)"/>
+        </leaf>
+        <container name="tcp">
+          <presence value="true"/>
+          <configd:help text="TCP flags to match"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/tcp/configd_validate1.cli"/>
+          <leaf name="flags">
+            <type name="string">
+              <pattern value="(((!?(SYN|ACK|FIN|RST|PSH|URG),)*(!?(SYN|ACK|FIN|RST|PSH|URG))))">
+                <error-message>
+                  <value>Invalid value for TCP flags. Allowed values : SYN ACK FIN RST URG PSH
+When specifying more than one flag, flags should be comma-separated.
+For example : value of 'SYN,!ACK,!FIN,!RST' will only match packets with
+the SYN flag set, and the ACK, FIN and RST flags unset</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="TCP flags to match"/>
+            <configd:comp_help text="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/tcp/flags/configd_comp_help.txt"/>
+          </leaf>
+        </container>
+        <container name="icmp">
+          <presence value="true"/>
+          <configd:help text="ICMP for IPV4"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmp/configd_validate1.cli"/>
+          <leaf name="type-name">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmp/type-name/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="ICMP type-name"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmp/type-name/configd_allowed.sh"/>
+          </leaf>
+          <leaf name="code">
+            <type name="uint32">
+              <range value="0..255"/>
+            </type>
+            <configd:help text="ICMP code must be between 0 and 255"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmp/code/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmp/code/configd_validate2.cli"/>
+          </leaf>
+          <leaf name="type">
+            <type name="uint32">
+              <range value="0..255"/>
+            </type>
+            <configd:help text="ICMP type must be between 0 and 255"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmp/type/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmp/type/configd_validate2.cli"/>
+          </leaf>
+        </container>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Rule description"/>
+        </leaf>
+        <leaf name="action">
+          <type name="enumeration">
+            <enum name="accept"/>
+            <enum name="drop"/>
+          </type>
+          <configd:help text="Rule action"/>
+        </leaf>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable PBR rule"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/disable/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/disable/configd_delete.sh"/>
+        </leaf>
+        <container name="icmpv6">
+          <presence value="true"/>
+          <configd:help text="ICMP for IPV6"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmpv6/configd_validate1.cli"/>
+          <leaf name="type-name">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmpv6/type-name/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="ICMPv6 type/code names"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmpv6/type-name/configd_allowed.sh"/>
+          </leaf>
+          <leaf name="code">
+            <type name="uint32">
+              <range value="0..255"/>
+            </type>
+            <configd:help text="ICMP code must be between 0 and 255"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmpv6/code/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmpv6/code/configd_validate2.cli"/>
+          </leaf>
+          <leaf name="type">
+            <type name="uint32">
+              <range value="0..255"/>
+            </type>
+            <configd:help text="ICMP type must be between 0 and 255"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmpv6/type/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/icmpv6/type/configd_validate2.cli"/>
+          </leaf>
+        </container>
+        <container name="source">
+          <presence value="true"/>
+          <configd:help text="Source parameters"/>
+          <leaf name="address">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/address/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/address/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Source IP address, subnet, or address-group"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/address/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/address/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/address/configd_validate2.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/address/configd_validate3.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/address/configd_validate4.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/address/configd_validate5.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/address/configd_validate6.cli"/>
+          </leaf>
+          <leaf name="port">
+            <type name="string"/>
+            <configd:help text="Source port or port-group"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/port/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/port/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/source/port/configd_validate2.cli"/>
+          </leaf>
+        </container>
+        <leaf name="log">
+          <type name="empty"/>
+          <configd:help text="Enable logging for PBR rule"/>
+        </leaf>
+        <leaf name="table">
+          <type name="uint32">
+            <range value="1..128"/>
+          </type>
+          <configd:help text="Policy Based Routing Table id"/>
+        </leaf>
+        <leaf name="address-family">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/address-family/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="Address Family ipv4 or ipv6 for this ruleset"/>
+        </leaf>
+        <container name="destination">
+          <presence value="true"/>
+          <configd:help text="Destination parameters"/>
+          <leaf name="address">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/address/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/address/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Destination IP address, subnet, or address-group"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/address/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/address/configd_validate2.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/address/configd_validate3.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/address/configd_validate4.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/address/configd_validate5.cli"/>
+          </leaf>
+          <leaf name="port">
+            <type name="string"/>
+            <configd:help text="Destination port or port-group"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/port/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/port/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/destination/port/configd_validate2.cli"/>
+          </leaf>
+        </container>
+        <leaf name="dscp">
+          <type name="uint32">
+            <range value="0..63"/>
+          </type>
+          <configd:help text="DSCP value to match in an incoming IP header"/>
+        </leaf>
+        <leaf name="protocol">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/protocol/configd_syntax1.cli"/>
+          </type>
+          <configd:help text='Protocol to match (name,  number or "all")'/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/pbr/rule/protocol/configd_allowed.sh"/>
+        </leaf>
+      </list>
+      <leaf name="config-trap">
+        <type name="enumeration">
+          <enum name="enable">
+            <configd:help text="Enable sending SNMP trap on firewall configuration change"/>
+          </enum>
+          <enum name="disable">
+            <configd:help text="Disable sending SNMP trap on firewall configuration change"/>
+          </enum>
+        </type>
+        <configd:help text="SNMP trap generation on firewall configuration changes"/>
+        <default value="disable"/>
+      </leaf>
+    </list>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane">
+    <container name="policy">
+      <presence value="true"/>
+      <configd:help text="PBR Options"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/policy/configd_end.sh"/>
+      <leaf-list name="route">
+        <type name="string">
+          <pattern value="[!-~]{1,28}">
+            <error-message>
+              <value>PBR name must be 28 characters or less</value>
+            </error-message>
+          </pattern>
+          <pattern value="[^\|;&amp;$&lt;&gt;]*">
+            <error-message>
+              <value>PBR rule set name cannot contain shell punctuation</value>
+            </error-message>
+          </pattern>
+        </type>
+        <ordered-by value="user"/>
+        <configd:help text="Ruleset for PBR routed packets on inbound interface"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/policy/route/configd_allowed.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/policy/route/configd_validate1.cli"/>
+      </leaf-list>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane/interfaces-dataplane:vif">
+    <container name="policy">
+      <presence value="true"/>
+      <leaf-list name="route">
+        <type name="string">
+          <pattern value="[!-~]{1,28}">
+            <error-message>
+              <value>PBR name must be 28 characters or less</value>
+            </error-message>
+          </pattern>
+          <pattern value="[^-]">
+            <error-message>
+              <value>PBR rule set name cannot start with "-"</value>
+            </error-message>
+          </pattern>
+          <pattern value="[^\|;&amp;$&lt;&gt;]*">
+            <error-message>
+              <value>PBR rule set name cannot contain shell punctuation</value>
+            </error-message>
+          </pattern>
+        </type>
+        <ordered-by value="user"/>
+        <configd:help text="Ruleset for PBR routed packets on inbound interface"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/policy/route/configd_allowed.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/policy/route/configd_validate1.cli"/>
+      </leaf-list>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-l2tpeth:l2tpeth">
+    <container name="policy">
+      <presence value="true"/>
+      <leaf-list name="route">
+        <type name="string">
+          <pattern value="[!-~]{1,28}">
+            <error-message>
+              <value>PBR name must be 28 characters or less</value>
+            </error-message>
+          </pattern>
+          <pattern value="[^-]">
+            <error-message>
+              <value>PBR rule set name cannot start with "-"</value>
+            </error-message>
+          </pattern>
+          <pattern value="[^\|;&amp;$&lt;&gt;]*">
+            <error-message>
+              <value>PBR rule set name cannot contain shell punctuation</value>
+            </error-message>
+          </pattern>
+        </type>
+        <ordered-by value="user"/>
+        <configd:help text="Ruleset for PBR routed packets on inbound interface"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/policy/route/configd_allowed.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/policy/route/configd_validate1.cli"/>
+      </leaf-list>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-l2tpeth:l2tpeth/interfaces-l2tpeth:vif">
+    <container name="policy">
+      <presence value="true"/>
+      <leaf-list name="route">
+        <type name="string">
+          <pattern value="[!-~]{1,28}">
+            <error-message>
+              <value>PBR name must be 28 characters or less</value>
+            </error-message>
+          </pattern>
+          <pattern value="[^-]">
+            <error-message>
+              <value>PBR rule set name cannot start with "-"</value>
+            </error-message>
+          </pattern>
+          <pattern value="[^\|;&amp;$&lt;&gt;]*">
+            <error-message>
+              <value>PBR rule set name cannot contain shell punctuation</value>
+            </error-message>
+          </pattern>
+        </type>
+        <ordered-by value="user"/>
+        <configd:help text="Ruleset for PBR routed packets on inbound interface"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/policy/route/configd_allowed.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/policy/route/configd_validate1.cli"/>
+      </leaf-list>
+    </container>
+  </augment>
+</module>

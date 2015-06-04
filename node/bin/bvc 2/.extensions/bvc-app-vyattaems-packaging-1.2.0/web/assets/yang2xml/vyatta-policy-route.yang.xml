@@ -1,0 +1,1059 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-policy-route"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:policy-route="urn:vyatta.com:mgmt:vyatta-policy-route"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:policy="urn:vyatta.com:mgmt:vyatta-policy"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-policy-route"/>
+  <prefix value="policy-route"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-policy">
+    <prefix value="policy"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <typedef name="community-list">
+    <type name="uint32">
+      <range value="1..199">
+        <error-message>
+          <value>
+  community-list must be 
+    &lt;1-99&gt;	BGP community list (standard) 
+    &lt;100-199&gt;	BGP community list (expanded) </value>
+        </error-message>
+      </range>
+      <configd:help text="&#10;   &lt;1-99&gt;&#9;BGP community list (standard) &#10;   &lt;100-199&gt;&#9;BGP community list (expanded) "/>
+    </type>
+  </typedef>
+  <typedef name="extcommunity-list">
+    <type name="uint32">
+      <range value="1..199">
+        <error-message>
+          <value>
+  extcommunity-list must be 
+    &lt;1-99&gt;	BGP extended community list (standard) 
+    &lt;100-199&gt;	BGP extended community list (expanded) </value>
+        </error-message>
+      </range>
+      <configd:help text="&#10;   &lt;1-99&gt;&#9;BGP extended community list (standard) &#10;   &lt;100-199&gt;&#9;BGP extended community list (expanded) "/>
+    </type>
+  </typedef>
+  <augment target-node="/policy:policy">
+    <container name="route">
+      <configd:help text="Routing policy"/>
+      <presence value="true"/>
+      <list name="access-list6">
+        <configd:priority priority="470"/>
+        <configd:help text="IPv6 access-list filter"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/access-list6/configd_end.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[!-~]{1,64}">
+              <error-message>
+                <value>access-list name must be 64 characters or less</value>
+              </error-message>
+            </pattern>
+            <pattern value="[^-].*">
+              <error-message>
+                <value>access-list name cannot start with "-"</value>
+              </error-message>
+            </pattern>
+            <pattern value="[^\|;&amp;$&lt;&gt;]*">
+              <error-message>
+                <value>access-list name cannot contain shell punctuation</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:help text="IPv6 access-list filter"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this IPv6 access-list"/>
+        </leaf>
+        <list name="rule">
+          <configd:help text="Rule for this access-list6"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>rule number must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Rule for this access-list6"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this IPv6 access-list rule"/>
+          </leaf>
+          <leaf name="action">
+            <type name="enumeration">
+              <enum name="permit">
+                <configd:help text="Permit matching networks"/>
+              </enum>
+              <enum name="deny">
+                <configd:help text="Deny matching networks"/>
+              </enum>
+            </type>
+            <configd:help text="Action to take on networks matching this rule [REQUIRED]"/>
+          </leaf>
+          <container name="source">
+            <presence value="true"/>
+            <configd:help text="Source IPv6 network to match"/>
+            <leaf name="exact-match">
+              <type name="empty"/>
+              <configd:help text="Exact match of the network prefixes"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list6/rule/source/exact-match/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="any">
+              <type name="empty"/>
+              <configd:help text="Any IPv6 address to match"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list6/rule/source/any/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list6/rule/source/any/configd_validate2.cli"/>
+            </leaf>
+            <leaf name="network">
+              <type name="types:ipv6-prefix"/>
+              <configd:help text="Network/netmask to match (requires inverse-mask be defined)"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list6/rule/source/network/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list6/rule/source/network/configd_validate2.cli"/>
+            </leaf>
+          </container>
+        </list>
+      </list>
+      <list name="access-list">
+        <configd:priority priority="470"/>
+        <configd:help text="IP access-list filter"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/configd_end.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="uint32">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="IP access-list filter"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this access-list"/>
+        </leaf>
+        <list name="rule">
+          <configd:help text="Rule for this access-list"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>rule number must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Rule for this access-list"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this rule"/>
+          </leaf>
+          <leaf name="action">
+            <type name="enumeration">
+              <enum name="permit">
+                <configd:help text="Permit matching networks"/>
+              </enum>
+              <enum name="deny">
+                <configd:help text="Deny matching networks"/>
+              </enum>
+            </type>
+            <configd:help text="Action to take on networks matching this rule [REQUIRED]"/>
+          </leaf>
+          <container name="source">
+            <presence value="true"/>
+            <configd:help text="Source network or address to match"/>
+            <leaf name="host">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Single host IP address to match"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/host/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/host/configd_validate2.cli"/>
+            </leaf>
+            <leaf name="inverse-mask">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Network/netmask to match (requires network be defined)"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/inverse-mask/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/inverse-mask/configd_validate2.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/inverse-mask/configd_validate3.cli"/>
+            </leaf>
+            <leaf name="any">
+              <type name="empty"/>
+              <configd:help text="Any IP address to match"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/any/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/any/configd_validate2.cli"/>
+            </leaf>
+            <leaf name="network">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Network/netmask to match (requires inverse-mask be defined)"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/network/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/network/configd_validate2.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/source/network/configd_validate3.cli"/>
+            </leaf>
+          </container>
+          <container name="destination">
+            <presence value="true"/>
+            <configd:help text="Destination network or address"/>
+            <leaf name="host">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Single host IP address to match"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/host/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/host/configd_validate2.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/host/configd_validate3.cli"/>
+            </leaf>
+            <leaf name="inverse-mask">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Network/netmask to match (requires network be defined)"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/inverse-mask/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/inverse-mask/configd_validate2.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/inverse-mask/configd_validate3.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/inverse-mask/configd_validate4.cli"/>
+            </leaf>
+            <leaf name="any">
+              <type name="empty"/>
+              <configd:help text="Any IP address to match"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/any/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/any/configd_validate2.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/any/configd_validate3.cli"/>
+            </leaf>
+            <leaf name="network">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Network/netmask to match (requires inverse-mask be defined)"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/network/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/network/configd_validate2.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/network/configd_validate3.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/access-list/rule/destination/network/configd_validate4.cli"/>
+            </leaf>
+          </container>
+        </list>
+      </list>
+      <list name="community-list">
+        <configd:priority priority="470"/>
+        <configd:help text="Border Gateway Protocol (BGP) community-list filter"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/community-list/configd_end.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="community-list"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this community list"/>
+        </leaf>
+        <list name="rule">
+          <configd:help text="create a rule for this BGP community list"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>rule number must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="create a rule for this BGP community list"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this rule"/>
+          </leaf>
+          <leaf name="action">
+            <type name="enumeration">
+              <enum name="permit">
+                <configd:help text="Permit matching communities"/>
+              </enum>
+              <enum name="deny">
+                <configd:help text="Deny matching communities"/>
+              </enum>
+            </type>
+            <configd:help text="Action to take on communities matching this rule [REQUIRED]"/>
+          </leaf>
+          <leaf name="community">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/community-list/rule/community/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Border Gateway Protocl (BGP) community attribute"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/community-list/rule/community/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/community-list/rule/community/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="regex">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/community-list/rule/regex/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Regular expression to match against a community list"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/community-list/rule/regex/configd_validate1.cli"/>
+          </leaf>
+        </list>
+      </list>
+      <list name="extcommunity-list">
+        <configd:priority priority="470"/>
+        <configd:help text="Border Gateway Protocol (BGP) extended community-list filter"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/extcommunity-list/configd_end.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="extcommunity-list"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this extended community list"/>
+        </leaf>
+        <list name="rule">
+          <configd:help text="create a rule for this BGP extended community list"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>rule number must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="create a rule for this BGP extended community list"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this rule"/>
+          </leaf>
+          <leaf name="action">
+            <type name="enumeration">
+              <enum name="permit">
+                <configd:help text="Permit matching communities"/>
+              </enum>
+              <enum name="deny">
+                <configd:help text="Deny matching communities"/>
+              </enum>
+            </type>
+            <configd:help text="Action to take on communities matching this rule [REQUIRED]"/>
+          </leaf>
+          <leaf name="rt">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/extcommunity-list/rule/rt/rt_check.cli"/>
+            </type>
+            <configd:help text="Route Target extended community in AA:NN or IPAddr:NN format"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/extcommunity-list/rule/rt/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="soo">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/extcommunity-list/rule/soo/soo_check.cli"/>
+            </type>
+            <configd:help text="Site-of-Origin extended community in AA:NN or IPAddr:NN format"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/extcommunity-list/rule/soo/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="regex">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/extcommunity-list/rule/regex/listnum_check.cli"/>
+            </type>
+            <configd:help text="Regular expression to match against a extcommunity list"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/extcommunity-list/rule/regex/configd_validate1.cli"/>
+          </leaf>
+        </list>
+      </list>
+      <list name="as-path-list">
+        <configd:priority priority="470"/>
+        <configd:help text="Border Gateway Protocol (BGP) autonomous system path filter"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/as-path-list/configd_end.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[-a-zA-Z0-9.]+">
+              <error-message>
+                <value>as-path-list name must be alpha-numeric</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:help text="Border Gateway Protocol (BGP) autonomous system path filter"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this as-path-list"/>
+        </leaf>
+        <list name="rule">
+          <configd:help text="Rule for this as-path-list"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>rule number must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Rule for this as-path-list"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this rule"/>
+          </leaf>
+          <leaf name="action">
+            <type name="enumeration">
+              <enum name="permit">
+                <configd:help text="Permit matching as-paths"/>
+              </enum>
+              <enum name="deny">
+                <configd:help text="Deny matching as-paths"/>
+              </enum>
+            </type>
+            <configd:help text="Action to take on AS paths matching this rule [REQUIRED]"/>
+          </leaf>
+          <leaf name="regex">
+            <type name="string"/>
+            <configd:help text="Regular expression to match against an AS path"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/as-path-list/rule/regex/configd_validate1.cli"/>
+          </leaf>
+        </list>
+      </list>
+      <list name="route-map">
+        <configd:priority priority="470"/>
+        <configd:help text="IP route-map"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[-a-zA-Z0-9.]+">
+              <configd:error-message message="route-map $VAR(@): name must be alpha-numeric"/>
+            </pattern>
+          </type>
+          <configd:help text="IP route-map"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this route-map"/>
+        </leaf>
+        <list name="rule">
+          <configd:help text="Rule for this route-map"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/configd_delete.sh"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>rule number must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Rule for this route-map"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this rule"/>
+          </leaf>
+          <leaf name="action">
+            <type name="enumeration">
+              <enum name="permit">
+                <configd:help text="Permit matching prefixes"/>
+              </enum>
+              <enum name="deny">
+                <configd:help text="Deny matching prefixes"/>
+              </enum>
+            </type>
+            <configd:help text="Action to take on prefixes matching this rule [REQUIRED]"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/action/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/action/configd_delete.sh"/>
+          </leaf>
+          <container name="set">
+            <presence value="true"/>
+            <configd:help text="Route parameters"/>
+            <leaf name="tag">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>tag must be between 1 and 65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Tag value for routing protocol"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/tag/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/tag/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/tag/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="originator-id">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Border Gateway Protocol (BGP) originator ID attribute"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/originator-id/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/originator-id/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/originator-id/configd_validate1.cli"/>
+            </leaf>
+            <container name="aggregator">
+              <presence value="true"/>
+              <configd:help text="Border Gateway Protocol (BGP) aggregator attribute"/>
+              <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/aggregator/configd_end.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/aggregator/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/aggregator/configd_validate2.cli"/>
+              <leaf name="ip">
+                <type name="types:ipv4-address"/>
+                <configd:help text="IP address of an aggregation"/>
+              </leaf>
+              <leaf name="as">
+                <type name="uint32">
+                  <range value="1..max">
+                    <error-message>
+                      <value>BGP AS number must be between 1 and 4294967295</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="AS number of an aggregation"/>
+              </leaf>
+            </container>
+            <leaf name="local-preference">
+              <type name="uint32"/>
+              <configd:help text="Border Gateway Protocol (BGP) local preference attribute"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/local-preference/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/local-preference/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/local-preference/configd_validate1.cli"/>
+            </leaf>
+            <container name="ipv6-next-hop">
+              <presence value="true"/>
+              <configd:help text="Nexthop IPv6 address"/>
+              <leaf name="global">
+                <type name="types:ipv6-address"/>
+                <configd:help text="Nexthop IPv6 global address"/>
+                <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/ipv6-next-hop/global/configd_update.sh"/>
+                <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/ipv6-next-hop/global/configd_delete.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/ipv6-next-hop/global/configd_validate1.cli"/>
+              </leaf>
+              <leaf name="local">
+                <type name="types:ipv6-address"/>
+                <configd:help text="Nexthop IPv6 local address"/>
+                <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/ipv6-next-hop/local/configd_update.sh"/>
+                <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/ipv6-next-hop/local/configd_delete.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/ipv6-next-hop/local/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <leaf name="origin">
+              <type name="enumeration">
+                <enum name="igp">
+                  <configd:help text="Interior gateway protocol origin"/>
+                </enum>
+                <enum name="egp">
+                  <configd:help text="Exterior gateway protocol origin"/>
+                </enum>
+                <enum name="incomplete">
+                  <configd:help text="Incomplete origin"/>
+                </enum>
+              </type>
+              <configd:help text="Border Gateway Protocl (BGP) origin code"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/origin/configd_allowed.sh"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/origin/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/origin/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/origin/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="metric-type">
+              <type name="enumeration">
+                <enum name="type-1">
+                  <configd:help text="OSPF external type 1 metric"/>
+                </enum>
+                <enum name="type-2">
+                  <configd:help text="OSPF external type 2 metric"/>
+                </enum>
+              </type>
+              <configd:help text="Open Shortest Path First (OSPF) external metric-type"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/metric-type/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/metric-type/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/metric-type/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="as-path-prepend">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/as-path-prepend/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Prepend string for a Border Gateway Protocol (BGP) AS-path attribute"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/as-path-prepend/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/as-path-prepend/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/as-path-prepend/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="community">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/community/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Border Gateway Protocl (BGP) community attribute"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/community/configd_allowed.sh"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/community/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/community/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/community/configd_validate1.cli"/>
+            </leaf>
+            <container name="extcommunity">
+              <presence value="true"/>
+              <configd:help text="Border Gateway Protocl (BGP) extcommunity attribute"/>
+              <leaf name="rt">
+                <type name="string"/>
+                <configd:help text="Route Target extended community in AA:NN or IPAddr:NN format"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/extcommunity/rt/configd_validate1.cli"/>
+                <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/extcommunity/rt/configd_update.sh"/>
+              </leaf>
+              <leaf name="soo">
+                <type name="string"/>
+                <configd:help text="Site-of-Origin extended community in AA:NN or IPAddr:NN format"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/extcommunity/soo/configd_validate1.cli"/>
+                <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/extcommunity/soo/configd_update.sh"/>
+              </leaf>
+            </container>
+            <leaf name="delete-community">
+              <type name="uint32"/>
+              <configd:help text="Border Gateway Protocol (BGP) communities to delete"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/delete-community/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/delete-community/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/delete-community/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="atomic-aggregate">
+              <type name="empty"/>
+              <configd:help text="Border Gateway Protocol (BGP) atomic aggregate attribute"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/atomic-aggregate/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/atomic-aggregate/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/atomic-aggregate/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="weight">
+              <type name="uint32"/>
+              <configd:help text="Border Gateway Protocol (BGP) weight attribute"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/weight/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/weight/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/weight/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="metric">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/metric/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Destination routing protocol metric"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/metric/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/metric/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/metric/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="ip-next-hop">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Nexthop IP address"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/ip-next-hop/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/ip-next-hop/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/set/ip-next-hop/configd_validate1.cli"/>
+            </leaf>
+          </container>
+          <leaf name="continue">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>continue must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Jump to a different rule in this route-map on a match"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/continue/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/continue/configd_delete.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/continue/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/continue/configd_validate2.cli"/>
+          </leaf>
+          <container name="match">
+            <presence value="true"/>
+            <configd:help text="Route parameters to match"/>
+            <leaf name="tag">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>tag must be between 1 and 65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Route tag to match"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/tag/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/tag/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/tag/configd_validate1.cli"/>
+            </leaf>
+            <container name="ip">
+              <presence value="true"/>
+              <configd:help text="IP prefix parameters to match"/>
+              <container name="peer">
+                <presence value="true"/>
+                <configd:help text="IP peer to match"/>
+                <leaf name="access-list">
+                  <type name="uint32"/>
+                  <configd:help text="IP access-list to match"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/access-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/access-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/access-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/access-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/access-list/configd_validate3.cli"/>
+                </leaf>
+                <leaf name="prefix-list">
+                  <type name="string"/>
+                  <configd:help text="IP prefix-list to match"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/prefix-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/prefix-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/prefix-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/prefix-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/peer/prefix-list/configd_validate3.cli"/>
+                </leaf>
+              </container>
+              <container name="nexthop">
+                <presence value="true"/>
+                <configd:help text="IP next-hop of route to match"/>
+                <leaf name="access-list">
+                  <type name="uint32"/>
+                  <configd:help text="IP access-list to match"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/access-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/access-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/access-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/access-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/access-list/configd_validate3.cli"/>
+                </leaf>
+                <leaf name="prefix-list">
+                  <type name="string"/>
+                  <configd:help text="IP prefix-list to match"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/prefix-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/prefix-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/prefix-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/prefix-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/nexthop/prefix-list/configd_validate3.cli"/>
+                </leaf>
+              </container>
+              <container name="address">
+                <presence value="true"/>
+                <configd:help text="IP address of route to match"/>
+                <leaf name="access-list">
+                  <type name="uint32"/>
+                  <configd:help text="IP access-list to match"/>
+                  <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/access-list/configd_allowed.sh"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/access-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/access-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/access-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/access-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/access-list/configd_validate3.cli"/>
+                </leaf>
+                <leaf name="prefix-list">
+                  <type name="string"/>
+                  <configd:help text="IP prefix-list to match"/>
+                  <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/prefix-list/configd_allowed.sh"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/prefix-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/prefix-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/prefix-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/prefix-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ip/address/prefix-list/configd_validate3.cli"/>
+                </leaf>
+              </container>
+            </container>
+            <leaf name="origin">
+              <type name="enumeration">
+                <enum name="egp">
+                  <configd:help text="Exterior gateway protocol origin "/>
+                </enum>
+                <enum name="igp">
+                  <configd:help text="Interior gateway protocol origin"/>
+                </enum>
+                <enum name="incomplete">
+                  <configd:help text="Incomplete origin "/>
+                </enum>
+              </type>
+              <configd:help text="Border Gateway Protocol (BGP) origin code to match"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/origin/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/origin/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/origin/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="interface">
+              <type name="string"/>
+              <configd:help text="First hop interface of a route to match"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/interface/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/interface/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/interface/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/interface/configd_validate2.cli"/>
+            </leaf>
+            <container name="community">
+              <presence value="true"/>
+              <configd:help text="BGP community-list to match"/>
+              <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/community/configd_end.sh"/>
+              <leaf name="exact-match">
+                <type name="empty"/>
+                <configd:help text="Community-list to exactly match"/>
+              </leaf>
+              <leaf name="community-list">
+                <type name="community-list"/>
+                <configd:help text="BGP community-list to match"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/community/community-list/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="extcommunity">
+              <presence value="true"/>
+              <configd:help text="BGP extcommunity-list to match"/>
+              <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/extcommunity/configd_end.sh"/>
+              <leaf name="exact-match">
+                <type name="empty"/>
+                <configd:help text="Extcommunity-list to exactly match"/>
+              </leaf>
+              <leaf name="extcommunity-list">
+                <type name="extcommunity-list"/>
+                <configd:help text="BGP extcommunity-list to match"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/extcommunity/extcommunity-list/configd_validate1.cli"/>
+              </leaf>
+            </container>
+            <container name="ipv6">
+              <presence value="true"/>
+              <configd:help text="IPv6 prefix parameters to match"/>
+              <container name="peer">
+                <presence value="true"/>
+                <configd:help text="IP peer to match"/>
+                <leaf name="access-list">
+                  <type name="string"/>
+                  <configd:help text="IPv6 access-list6 to match"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/access-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/access-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/access-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/access-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/access-list/configd_validate3.cli"/>
+                </leaf>
+                <leaf name="prefix-list">
+                  <type name="string"/>
+                  <configd:help text="IPv6 prefix-list to match"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/prefix-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/prefix-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/prefix-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/prefix-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/peer/prefix-list/configd_validate3.cli"/>
+                </leaf>
+              </container>
+              <container name="nexthop">
+                <presence value="true"/>
+                <configd:help text="IP next-hop of route to match"/>
+                <leaf name="access-list">
+                  <type name="string"/>
+                  <configd:help text="IPv6 access-list6 to match"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/access-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/access-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/access-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/access-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/access-list/configd_validate3.cli"/>
+                </leaf>
+                <leaf name="prefix-list">
+                  <type name="string"/>
+                  <configd:help text="IPv6 prefix-list to match"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/prefix-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/prefix-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/prefix-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/prefix-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/nexthop/prefix-list/configd_validate3.cli"/>
+                </leaf>
+              </container>
+              <container name="address">
+                <presence value="true"/>
+                <configd:help text="IPv6 address of route to match"/>
+                <leaf name="access-list">
+                  <type name="string"/>
+                  <configd:help text="IPv6 access-list6 to match"/>
+                  <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/access-list/configd_allowed.sh"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/access-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/access-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/access-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/access-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/access-list/configd_validate3.cli"/>
+                </leaf>
+                <leaf name="prefix-list">
+                  <type name="string"/>
+                  <configd:help text="IPv6 prefix-list to match"/>
+                  <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/prefix-list/configd_allowed.sh"/>
+                  <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/prefix-list/configd_update.sh"/>
+                  <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/prefix-list/configd_delete.sh"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/prefix-list/configd_validate1.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/prefix-list/configd_validate2.cli"/>
+                  <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/ipv6/address/prefix-list/configd_validate3.cli"/>
+                </leaf>
+              </container>
+            </container>
+            <leaf name="as-path">
+              <type name="string"/>
+              <configd:help text="BGP as-path-list to match"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/as-path/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/as-path/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/as-path/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/as-path/configd_validate2.cli"/>
+            </leaf>
+            <leaf name="metric">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>metric must be between 1 and 65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Metric of route to match"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/metric/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/metric/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/route-map/rule/match/metric/configd_validate1.cli"/>
+            </leaf>
+          </container>
+        </list>
+      </list>
+      <list name="prefix-list6">
+        <configd:priority priority="470"/>
+        <configd:help text="IPv6 prefix-list filter"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[-a-zA-Z0-9.]+">
+              <error-message>
+                <value>prefix-list6 name must be alpha-numeric</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:help text="IPv6 prefix-list filter"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this prefix-list6"/>
+        </leaf>
+        <list name="rule">
+          <configd:help text="Rule for this prefix-list6"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/prefix-list6/rule/configd_delete.sh"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/prefix-list6/rule/configd_end.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/prefix-list6/rule/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/prefix-list6/rule/configd_validate2.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>rule number must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Rule for this prefix-list6"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this rule"/>
+          </leaf>
+          <leaf name="action">
+            <type name="enumeration">
+              <enum name="permit">
+                <configd:help text="Permit matching prefixes"/>
+              </enum>
+              <enum name="deny">
+                <configd:help text="Deny matching prefixes"/>
+              </enum>
+            </type>
+            <configd:help text="Action to take on prefixes matching this rule"/>
+          </leaf>
+          <leaf name="ge">
+            <type name="uint32">
+              <range value="0..128">
+                <error-message>
+                  <value>ge must be between 0 and 128</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Prefix length to match a netmask greater than or equal to it"/>
+          </leaf>
+          <leaf name="prefix">
+            <type name="types:ipv6-prefix"/>
+            <configd:help text="Prefix to match"/>
+          </leaf>
+          <leaf name="le">
+            <type name="uint32">
+              <range value="0..128">
+                <error-message>
+                  <value>le must be between 0 and 128</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Prefix length to match a netmask less than or equal to it"/>
+          </leaf>
+        </list>
+      </list>
+      <list name="prefix-list">
+        <configd:priority priority="470"/>
+        <configd:help text="IP prefix-list filter"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[-a-zA-Z0-9.]+">
+              <error-message>
+                <value>prefix-list name must be alpha-numeric</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:help text="IP prefix-list filter"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this prefix-list"/>
+        </leaf>
+        <list name="rule">
+          <configd:help text="Rule for this prefix-list"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/policy/route/prefix-list/rule/configd_delete.sh"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/policy/route/prefix-list/rule/configd_end.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/prefix-list/rule/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/route/prefix-list/rule/configd_validate2.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>rule number must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Rule for this prefix-list"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this rule"/>
+          </leaf>
+          <leaf name="action">
+            <type name="enumeration">
+              <enum name="permit">
+                <configd:help text="Permit matching prefixes"/>
+              </enum>
+              <enum name="deny">
+                <configd:help text="Deny matching prefixes"/>
+              </enum>
+            </type>
+            <configd:help text="Action to take on prefixes matching this rule [REQUIRED]"/>
+          </leaf>
+          <leaf name="ge">
+            <type name="uint32">
+              <range value="0..32">
+                <error-message>
+                  <value>ge must be between 0 and 32</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Prefix length to match a netmask greater than or equal to it"/>
+          </leaf>
+          <leaf name="prefix">
+            <type name="types:ipv4-prefix"/>
+            <configd:help text="Prefix to match"/>
+          </leaf>
+          <leaf name="le">
+            <type name="uint32">
+              <range value="0..32">
+                <error-message>
+                  <value>le must be between 0 and 32</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Prefix length to match a netmask less than or equal to it"/>
+          </leaf>
+        </list>
+      </list>
+    </container>
+  </augment>
+</module>

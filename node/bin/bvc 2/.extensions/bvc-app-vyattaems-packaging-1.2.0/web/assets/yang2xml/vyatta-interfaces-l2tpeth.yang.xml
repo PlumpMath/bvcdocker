@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-interfaces-l2tpeth"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:interfaces-l2tpeth="urn:vyatta.com:mgmt:vyatta-interfaces-l2tpeth"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:interfaces-dataplane="urn:vyatta.com:mgmt:vyatta-interfaces-dataplane"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-interfaces-l2tpeth"/>
+  <prefix value="interfaces-l2tpeth"/>
+  <import module="vyatta-interfaces">
+    <prefix value="if"/>
+  </import>
+  <import module="vyatta-interfaces-dataplane">
+    <prefix value="interfaces-dataplane"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2015-02-10">
+    <description>
+      <text>Perform address validation at the interface level
+      rather than at the address level</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/if:interfaces">
+    <list name="l2tpeth">
+      <configd:priority priority="500"/>
+      <configd:help text="L2TPv3 static tunnel interface"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="string">
+          <pattern value="lttp[0-9]+"/>
+          <configd:pattern-help text="&lt;lttpN&gt;"/>
+        </type>
+        <configd:help text="L2TPv3 static tunnel interface"/>
+      </leaf>
+      <leaf name="description">
+        <type name="string">
+          <pattern value=".{1,256}">
+            <error-message>
+              <value>interface description is too long (limit 256 characters)</value>
+            </error-message>
+          </pattern>
+        </type>
+        <configd:help text="Description"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/description/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/description/configd_delete.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/description/configd_validate1.cli"/>
+      </leaf>
+      <container name="ip">
+        <leaf name="enable-proxy-arp">
+          <type name="empty"/>
+          <configd:help text="Enable proxy-arp on this interface"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/enable-proxy-arp/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/enable-proxy-arp/configd_delete.sh"/>
+        </leaf>
+        <leaf name="disable-forwarding">
+          <type name="empty"/>
+          <configd:help text="Disable IPv4 forwarding on this interface"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/disable-forwarding/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/disable-forwarding/configd_delete.sh"/>
+        </leaf>
+      </container>
+      <container name="ipv6">
+        <configd:help text="IPv6 parameters"/>
+      </container>
+      <leaf name="mtu">
+        <type name="uint32">
+          <range value="64..9000"/>
+        </type>
+        <configd:priority priority="510"/>
+        <configd:help text="Maximum Transmission Unit (MTU)"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/mtu/configd_create.sh"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/mtu/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/mtu/configd_delete.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/mtu/configd_validate1.cli"/>
+      </leaf>
+      <leaf name="disable">
+        <type name="empty"/>
+        <configd:priority priority="510"/>
+        <configd:help text="Disable interface"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/disable/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/disable/configd_delete.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/disable/configd_validate1.cli"/>
+      </leaf>
+      <list name="vif">
+        <configd:priority priority="510"/>
+        <configd:help text="Virtual Interface (VIF) ID"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/configd_delete.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/configd_validate1.cli"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/configd_validate2.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="uint32">
+            <range value="1..4094"/>
+          </type>
+          <configd:help text="Virtual Interface (VIF) ID"/>
+        </leaf>
+        <leaf name="vlan">
+          <type name="uint32">
+            <range value="1..4094"/>
+          </type>
+          <configd:help text="Virtual Local Area Network (VLAN) ID"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/description/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/description/configd_delete.sh"/>
+        </leaf>
+        <container name="ip">
+          <leaf name="enable-proxy-arp">
+            <type name="empty"/>
+            <configd:help text="Enable proxy-arp on this interface"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/enable-proxy-arp/configd_create.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/enable-proxy-arp/configd_delete.sh"/>
+          </leaf>
+        </container>
+        <container name="ipv6">
+          <configd:help text="IPv6 parameters"/>
+        </container>
+        <leaf name="mtu">
+          <type name="uint32">
+            <range value="68..9000"/>
+          </type>
+          <configd:help text="Maximum Transmission Unit (MTU)"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/mtu/configd_create.sh"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/mtu/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/mtu/configd_delete.sh"/>
+        </leaf>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable interface"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/disable/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/disable/configd_delete.sh"/>
+        </leaf>
+        <leaf-list name="address">
+          <type name="if:address"/>
+          <ordered-by value="user"/>
+          <configd:help text="IP address"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/address/configd_create.sh"/>
+        </leaf-list>
+        <container name="bridge-group">
+          <configd:help text="Add this interface to a bridge group"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/bridge-group/configd_end.sh"/>
+          <leaf name="bridge">
+            <type name="string">
+              <pattern value="br[0-9]+">
+                <configd:error-message message="$VAR(@): not a valid name for a bridge"/>
+              </pattern>
+            </type>
+            <configd:help text="Bridge group name"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/bridge-group/bridge/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/bridge-group/bridge/configd_validate1.cli"/>
+          </leaf>
+        </container>
+      </list>
+      <leaf-list name="address">
+        <type name="if:address"/>
+        <ordered-by value="user"/>
+        <configd:priority priority="510"/>
+        <configd:help text="IP address"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/address/configd_create.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/address/configd_validate1.cli"/>
+      </leaf-list>
+      <container name="l2tp-session">
+        <configd:priority priority="501"/>
+        <configd:help text="L2TPv3 static tunnel interface"/>
+        <configd:begin executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/l2tp-session/configd_begin.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/l2tp-session/configd_validate.cli"/>
+        <leaf name="local-ip">
+          <type name="union">
+            <type name="types:ipv4-address"/>
+            <type name="types:ipv6-address"/>
+          </type>
+          <configd:help text="Local IP address for this tunnel [REQUIRED]"/>
+        </leaf>
+        <leaf name="remote-cookie">
+          <type name="string">
+            <pattern value="([0-9A-Fa-f]{8}|[0-9A-Fa-f]{16})">
+              <error-message>
+                <value>Cookie must be 8 or 16 hex characters</value>
+              </error-message>
+            </pattern>
+            <configd:pattern-help text="&lt;8 or 16 byte hex string (e.g. abcdef01)&gt;"/>
+          </type>
+          <configd:help text="Optional remote cookie for this session"/>
+        </leaf>
+        <leaf name="remote-udp-port">
+          <type name="uint32">
+            <range value="1..65535"/>
+          </type>
+          <configd:help text="Remote UDP port for this tunnel"/>
+        </leaf>
+        <leaf name="local-cookie">
+          <type name="string">
+            <pattern value="([0-9A-Fa-f]{8}|[0-9A-Fa-f]{16})">
+              <error-message>
+                <value>Cookie must be 8 or 16 hex characters</value>
+              </error-message>
+            </pattern>
+            <configd:pattern-help text="&lt;8 or 16 byte hex string (e.g. abcdef01)&gt;"/>
+          </type>
+          <configd:help text="Optional local cookie for this session"/>
+        </leaf>
+        <leaf name="local-udp-port">
+          <type name="uint32">
+            <range value="1..65535"/>
+          </type>
+          <configd:help text="Local UDP port for this tunnel"/>
+        </leaf>
+        <leaf name="remote-ip">
+          <type name="union">
+            <type name="types:ipv4-address"/>
+            <type name="types:ipv6-address"/>
+          </type>
+          <configd:help text="Remote IP address for this tunnel [REQUIRED]"/>
+        </leaf>
+        <leaf name="local-session-id">
+          <type name="uint32"/>
+          <configd:help text="Local session ID for this tunnel [REQUIRED]"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/l2tp-session/local-session-id/configd_validate1.cli"/>
+        </leaf>
+        <leaf name="encapsulation">
+          <type name="string"/>
+          <configd:help text="Encapsulation of this tunnel interface [REQUIRED]"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/l2tp-session/encapsulation/configd_allowed.sh"/>
+        </leaf>
+        <leaf name="remote-session-id">
+          <type name="uint32"/>
+          <configd:help text="Remote session ID for this tunnel [REQUIRED]"/>
+        </leaf>
+      </container>
+      <container name="bridge-group">
+        <configd:priority priority="510"/>
+        <configd:help text="Add this interface to a bridge group"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/bridge-group/configd_end.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/bridge-group/configd_validate1.cli"/>
+        <leaf name="priority">
+          <type name="uint32">
+            <range value="0..63"/>
+          </type>
+          <configd:help text="Bridge port priority"/>
+        </leaf>
+        <leaf name="bridge">
+          <type name="string">
+            <pattern value="br[0-9]+">
+              <configd:error-message message="$VAR(@): not a valid name for a bridge"/>
+            </pattern>
+          </type>
+          <configd:help text="Bridge group name"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/bridge-group/bridge/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/bridge-group/bridge/configd_validate1.cli"/>
+        </leaf>
+        <leaf name="cost">
+          <type name="uint32">
+            <range value="1..65535"/>
+          </type>
+          <configd:help text="Bridge port cost"/>
+        </leaf>
+      </container>
+    </list>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane">
+    <container name="xconnect">
+      <configd:priority priority="525"/>
+      <configd:help text="Specify the parameters for cross-connect"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/xconnect/configd_end.sh"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/xconnect/configd_validate.cli"/>
+      <leaf name="ttl">
+        <type name="uint8">
+          <range value="1..127"/>
+        </type>
+        <configd:help text="TTL value"/>
+      </leaf>
+      <leaf name="l2tpeth">
+        <type name="string">
+          <pattern value="lttp[0-9]+"/>
+          <configd:pattern-help text="&lt;lttpN&gt;"/>
+        </type>
+        <configd:help text="L2tpeth interface name"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/xconnect/l2tpeth/configd_validate1.cli"/>
+      </leaf>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane/interfaces-dataplane:vif">
+    <container name="xconnect">
+      <configd:priority priority="525"/>
+      <configd:help text="L2tpeth interface name"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/xconnect/configd_end.sh"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/xconnect/configd_validate.cli"/>
+      <leaf name="ttl">
+        <type name="uint8">
+          <range value="1..127"/>
+        </type>
+        <configd:help text="TTL value"/>
+      </leaf>
+      <leaf name="l2tpeth">
+        <type name="string">
+          <pattern value="lttp[0-9]+"/>
+          <configd:pattern-help text="lttpN"/>
+        </type>
+        <configd:help text="L2tpeth interface name"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/xconnect/l2tpeth/configd_validate1.cli"/>
+      </leaf>
+    </container>
+  </augment>
+</module>

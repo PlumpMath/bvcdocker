@@ -1,0 +1,69 @@
+
+#hostname = ""
+bind-address = "0.0.0.0"
+reporting-disabled = true
+
+[logging]
+level  = "info"                         # logging level can be one of "fine", "debug", "info", "warn" or "error"
+file   = "/bvc/system/logs/influxdb.log" # stdout to log to standard out, or syslog facility
+
+[admin]
+port   = 8083                           # binding is disabled if the port isn't set
+
+[api]
+port     = 8086                         # binding is disabled if the port isn't set
+# ssl-port = 8087                       # Ssl support is enabled if you set a port and cert
+# ssl-cert = /path/to/cert.pem
+
+read-timeout = "5s"
+
+[input_plugins]
+
+  # Configure the collectd api
+  [input_plugins.collectd]
+  enabled = true
+  address = "0.0.0.0" # If not set, is actually set to bind-address.
+  port = 25826
+  database = "collectd"
+  typesdb = "/bvc/configs/influxdb/types.db" # The path to the collectd types.db file
+
+#[raft]
+#port = 8090
+#dir  = "/opt/influxdb/shared/data/raft"
+#debug = false
+#election-timeout = "1s"
+
+[storage]
+dir = "/bvc/data/influxdb/data/db"
+
+#[storage.engines.leveldb]
+
+#[storage.engines.rocksdb]
+#max-open-files = 1000
+#lru-cache-size = "200m"
+
+#[storage.engines.hyperleveldb]
+#max-open-files = 1000
+#lru-cache-size = "200m"
+
+#[storage.engines.lmdb]
+#map-size = "100g"
+
+[cluster]
+dir = "/bvc/data/influxdb/data/state"
+## seed-servers = ["hosta:8090","hostb:8090"]
+#protobuf_port = 8099
+#protobuf_timeout = "2s" # the write timeout on the protobuf conn any duration parseable by time.ParseDuration
+#protobuf_heartbeat = "200ms" # the heartbeat interval between the servers. must be parseable by time.ParseDuration
+#protobuf_min_backoff = "1s" # the minimum backoff after a failed heartbeat attempt
+#protobuf_max_backoff = "10s" # the maxmimum backoff after a failed heartbeat attempt
+#write-buffer-size = 1000
+#max-response-buffer-size = 100
+#concurrent-shard-query-limit = 10
+
+[wal]
+dir   = "/bvc/data/influxdb/data/wal"
+flush-after = 1000 # the number of writes after which wal will be flushed, 0 for flushing on every write
+bookmark-after = 1000 # the number of writes after which a bookmark will be created
+index-after = 1000
+requests-per-logfile = 10000

@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-protocols-msdp"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:protocols-msdp="urn:vyatta.com:mgmt:vyatta-protocols-msdp"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:protocols="urn:vyatta.com:mgmt:vyatta-protocols"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-protocols-msdp"/>
+  <prefix value="protocols-msdp"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-protocols">
+    <prefix value="protocols"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/protocols:protocols">
+    <container name="msdp">
+      <presence value="true"/>
+      <configd:priority priority="790"/>
+      <configd:help text="Multicast Source Discovery Protocol (MSDP)"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/configd_validate1.cli"/>
+      <list name="peer">
+        <configd:priority priority="795"/>
+        <configd:help text="Configure an MSDP peer"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/configd_delete.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="types:ipv4-address"/>
+          <configd:help text="Configure an MSDP peer"/>
+        </leaf>
+        <container name="export">
+          <presence value="true"/>
+          <configd:help text="Configure which outgoing filter for (S,G) entries are advertising to the MSDP peer"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/configd_validate1.cli"/>
+          <leaf name="access-list">
+            <type name="uint32">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/access-list/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Configure which outgoing filter for (S,G) entries are advertising to the MSDP peer"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/access-list/configd_allowed.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/access-list/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/access-list/configd_update.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/access-list/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="rp-list">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/rp-list/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Configure which outgoing filter for (S,G) entries are advertising to the MSDP peer"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/rp-list/configd_allowed.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/rp-list/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/rp-list/configd_update.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/export/rp-list/configd_validate1.cli"/>
+          </leaf>
+        </container>
+        <container name="default-peer">
+          <presence value="true"/>
+          <configd:help text="Configure an MSDP default peer"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/default-peer/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/default-peer/configd_validate1.cli"/>
+          <leaf name="priority">
+            <type name="uint32"/>
+            <configd:help text="Configure priority for default peer"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/default-peer/priority/configd_update.sh"/>
+          </leaf>
+          <leaf name="prefix-list">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/default-peer/prefix-list/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Prefix-list that specifies the peer will be a default peer only for the listed prefixes"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/default-peer/prefix-list/configd_allowed.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/default-peer/prefix-list/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/default-peer/prefix-list/configd_update.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/default-peer/prefix-list/configd_validate1.cli"/>
+          </leaf>
+        </container>
+        <leaf name="holdtime">
+          <type name="uint32">
+            <range value="3..75">
+              <error-message>
+                <value>Must be between 3-75 sec</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Configure hold time during which keepalive messages are waited before declaring the MSDP peer down"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/holdtime/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/holdtime/configd_delete.sh"/>
+        </leaf>
+        <leaf name="password">
+          <type name="string"/>
+          <configd:secret bool="true"/>
+          <configd:help text="Password for the given peer"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="data-encapsulation-ttl">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>Must be between 1-255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="To limit which multicast data packets are sent in SA messages to a MSDP peer"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/data-encapsulation-ttl/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/data-encapsulation-ttl/configd_delete.sh"/>
+        </leaf>
+        <leaf name="connect-retry">
+          <type name="uint32">
+            <range value="1..60">
+              <error-message>
+                <value>Must be between 1-60 sec</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Configure connect-retry time period after which the closed TCP session is tried to restore"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/connect-retry/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/connect-retry/configd_delete.sh"/>
+        </leaf>
+        <leaf name="shutdown">
+          <type name="empty"/>
+          <configd:help text="To administratively shut down a configured MSDP peer"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/shutdown/configd_allowed.sh"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/shutdown/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/shutdown/configd_delete.sh"/>
+        </leaf>
+        <leaf name="keepalive">
+          <type name="uint32">
+            <range value="1..60">
+              <error-message>
+                <value>Must be between 1-60 sec</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Configure keep alive time period at which the messages will be send to a MSDP peer"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/keepalive/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/keepalive/configd_delete.sh"/>
+        </leaf>
+        <leaf name="local-address">
+          <type name="types:ipv4-address"/>
+          <configd:help text="IPv4 address is used as the source IP for setting up a TCP connection to the peer"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/local-address/configd_delete.sh"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/local-address/configd_update.sh"/>
+        </leaf>
+        <container name="import">
+          <presence value="true"/>
+          <configd:help text="Configure which incomming filter for (S,G) entries received from the MSDP peer"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/configd_validate1.cli"/>
+          <leaf name="access-list">
+            <type name="uint32">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/access-list/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Configure which incomming filter for (S,G) entries received from the MSDP peer"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/access-list/configd_allowed.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/access-list/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/access-list/configd_update.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/access-list/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="rp-list">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/rp-list/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Configure which incomming filter for (S,G) entries received from the MSDP peer"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/rp-list/configd_allowed.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/rp-list/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/rp-list/configd_update.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer/import/rp-list/configd_validate1.cli"/>
+          </leaf>
+        </container>
+      </list>
+      <container name="export">
+        <presence value="true"/>
+        <configd:priority priority="793"/>
+        <configd:help text="Configure which (S,G) entries are advertising in SA messages to other peers"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/configd_delete.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/configd_validate1.cli"/>
+        <leaf name="access-list">
+          <type name="uint32">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/access-list/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="Configure which (S,G) entries are advertising in SA messages to other peers"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/access-list/configd_allowed.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/access-list/configd_delete.sh"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/access-list/configd_update.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/access-list/configd_validate1.cli"/>
+        </leaf>
+        <leaf name="rp-list">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/rp-list/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="Configure which (S,G) entries are advertising in SA messages to other peers"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/rp-list/configd_allowed.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/rp-list/configd_delete.sh"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/rp-list/configd_update.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/export/rp-list/configd_validate1.cli"/>
+        </leaf>
+      </container>
+      <list name="peer-group">
+        <configd:priority priority="796"/>
+        <configd:help text="Configure an MSDP peer-group (peers common paramters)"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/configd_delete.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string"/>
+          <configd:help text="Configure an MSDP peer-group (peers common paramters)"/>
+        </leaf>
+        <leaf-list name="peer">
+          <type name="types:ipv4-address"/>
+          <ordered-by value="user"/>
+          <configd:priority priority="797"/>
+          <configd:help text="IP address of the MSDP peer to be a member of the peer-group"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/peer/configd_allowed.sh"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/peer/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/peer/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/peer/configd_validate1.cli"/>
+        </leaf-list>
+        <container name="export">
+          <presence value="true"/>
+          <configd:help text="Configure which (S,G) entries are advertising in SA messages to peer-group members"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/configd_validate1.cli"/>
+          <leaf name="access-list">
+            <type name="uint32">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/access-list/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Prefix-list that controls which local sources are advertised by peer (applied to members of the peer-group)"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/access-list/configd_allowed.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/access-list/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/access-list/configd_update.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/access-list/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="rp-list">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/rp-list/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Prefix-list that controls which rendezvous points are advertised by peer (applied to members of the peer-group)"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/rp-list/configd_allowed.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/rp-list/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/rp-list/configd_update.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/export/rp-list/configd_validate1.cli"/>
+          </leaf>
+        </container>
+        <leaf name="holdtime">
+          <type name="uint32">
+            <range value="3..75">
+              <error-message>
+                <value>Must be between 3-75 sec</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Configure hold time during which keepalive messages are waited before declaring the MSDP peer down"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/holdtime/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/holdtime/configd_delete.sh"/>
+        </leaf>
+        <leaf name="data-encapsulation-ttl">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>Must be between 1-255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="To limit which multicast data packets are sent in SA messages to a MSDP peer"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/data-encapsulation-ttl/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/data-encapsulation-ttl/configd_delete.sh"/>
+        </leaf>
+        <leaf name="connect-retry">
+          <type name="uint32">
+            <range value="1..60">
+              <error-message>
+                <value>Must be between 1-60 sec</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Configure connect-retry time period after which the closed TCP session is tried to restore"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/connect-retry/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/connect-retry/configd_delete.sh"/>
+        </leaf>
+        <leaf name="shutdown">
+          <type name="empty"/>
+          <configd:priority priority="799"/>
+          <configd:help text="To administratively shut down a configured MSDP peer"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/shutdown/configd_allowed.sh"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/shutdown/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/shutdown/configd_delete.sh"/>
+        </leaf>
+        <leaf name="keepalive">
+          <type name="uint32">
+            <range value="1..60">
+              <error-message>
+                <value>Must be between 1-60 sec</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Configure keep alive time period at which the messages will be send to a MSDP peer"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/keepalive/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/keepalive/configd_delete.sh"/>
+        </leaf>
+        <container name="import">
+          <presence value="true"/>
+          <configd:help text="Configure which incomming filter for (S,G) entries received from the MSDP peer-group"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/configd_validate1.cli"/>
+          <leaf name="access-list">
+            <type name="uint32">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/access-list/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Prefix-list that controls which local sources are received from the other peer (applied to members of the peer-group)"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/access-list/configd_allowed.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/access-list/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/access-list/configd_update.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/access-list/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="rp-list">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/rp-list/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Prefix-list that controls which rendezvous points are received from the other peer (applied to members of the peer-group)"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/rp-list/configd_allowed.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/rp-list/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/rp-list/configd_update.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/peer-group/import/rp-list/configd_validate1.cli"/>
+          </leaf>
+        </container>
+      </list>
+      <list name="mesh-group">
+        <configd:priority priority="797"/>
+        <configd:help text="Configure a Multicast Source Discovery Protocol (MSDP) peer to be a member of a mesh group"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/mesh-group/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string"/>
+          <configd:help text="Configure a Multicast Source Discovery Protocol (MSDP) peer to be a member of a mesh group"/>
+        </leaf>
+        <leaf-list name="peer">
+          <type name="types:ipv4-address"/>
+          <ordered-by value="user"/>
+          <configd:help text="IP address of the MSDP peer to be a member of the mesh group"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/mesh-group/peer/configd_allowed.sh"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/msdp/mesh-group/peer/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/mesh-group/peer/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/mesh-group/peer/configd_validate1.cli"/>
+        </leaf-list>
+      </list>
+      <container name="import">
+        <presence value="true"/>
+        <configd:priority priority="793"/>
+        <configd:help text="Configure which (S,G) entries receiving in SA messages frome other peers are cached"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/configd_delete.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/configd_validate1.cli"/>
+        <leaf name="access-list">
+          <type name="uint32">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/access-list/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="Configure which (S,G) entries receiving in SA messages frome other peers are cached by the given access-list"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/access-list/configd_allowed.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/access-list/configd_delete.sh"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/access-list/configd_update.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/access-list/configd_validate1.cli"/>
+        </leaf>
+        <leaf name="rp-list">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/rp-list/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="Configure which (S,G) entries receiving in SA messages frome other peers are cached"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/rp-list/configd_allowed.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/rp-list/configd_delete.sh"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/rp-list/configd_update.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/msdp/import/rp-list/configd_validate1.cli"/>
+        </leaf>
+      </container>
+      <leaf name="originated-id">
+        <type name="types:ipv4-address"/>
+        <configd:priority priority="793"/>
+        <configd:help text="Allow a MSDP speaker that originates a SA message to use the IP address as the rendezvous point (RP) address in the SA message"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/msdp/originated-id/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/msdp/originated-id/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+</module>

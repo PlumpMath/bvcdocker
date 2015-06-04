@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-policy-qos"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:policy-qos="urn:vyatta.com:mgmt:vyatta-policy-qos"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:interfaces-dataplane="urn:vyatta.com:mgmt:vyatta-interfaces-dataplane"
+        xmlns:policy="urn:vyatta.com:mgmt:vyatta-policy"
+        xmlns:dscp="urn:vyatta.com:mgmt:vyatta-dscp"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-policy-qos"/>
+  <prefix value="policy-qos"/>
+  <import module="vyatta-interfaces">
+    <prefix value="if"/>
+  </import>
+  <import module="vyatta-interfaces-dataplane">
+    <prefix value="interfaces-dataplane"/>
+  </import>
+  <import module="vyatta-policy">
+    <prefix value="policy"/>
+  </import>
+  <import module="vyatta-dscp">
+    <prefix value="dscp"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2015-01-09">
+    <description>
+      <text>Add dscp symbolic names</text>
+    </description>
+  </revision>
+  <revision date="2014-12-04">
+    <description>
+      <text>Update for 3.2.1R3</text>
+    </description>
+  </revision>
+  <revision date="2014-11-07">
+    <description>
+      <text>Update for 3.2.1R2</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <typedef name="name">
+    <type name="string">
+      <pattern value="[0-9A-Za-z][-_0-9A-Za-z]*">
+        <error-message>
+          <value>Only alpha-numeric name allowed</value>
+        </error-message>
+      </pattern>
+      <configd:pattern-help text="&lt;name&gt;"/>
+    </type>
+  </typedef>
+  <typedef name="bandwidth-suffix">
+    <type name="string">
+      <pattern value="[0-9]+(\.([0-9]+))?(([KMBGTkmgt][iI]?)?(bit|bps))?"/>
+      <configd:pattern-help text="&lt;number&gt;&lt;suffix&gt;"/>
+    </type>
+  </typedef>
+  <typedef name="bandwidth-percent">
+    <type name="string">
+      <pattern value="(100|[1-9][0-9]?(\.[0-9]*)?)%"/>
+      <configd:pattern-help text="&lt;number&gt;%"/>
+    </type>
+  </typedef>
+  <typedef name="burst-size">
+    <type name="uint32">
+      <range value="1..312500000"/>
+    </type>
+  </typedef>
+  <typedef name="dscp-name">
+    <type name="string">
+      <configd:syntax executable="qos-policy.pl --dscp $VAR(@)"/>
+      <configd:allowed executable="qos-policy.pl --allowed-dscp"/>
+      <configd:help text="DSCP value, name or range"/>
+    </type>
+  </typedef>
+  <grouping name="marking">
+    <container name="mark">
+      <configd:help text="Packet marking action"/>
+      <leaf name="pcp">
+        <type name="uint32">
+          <range value="0..7"/>
+        </type>
+        <configd:help text="802.1 priority code point to apply"/>
+      </leaf>
+      <leaf name="dscp">
+        <type name="dscp:dscp-name-or-value"/>
+        <configd:help text="DSCP value to be marked"/>
+      </leaf>
+    </container>
+  </grouping>
+  <grouping name="match-rule">
+    <container name="tcp">
+      <presence value="true"/>
+      <configd:help text="TCP flags to match"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/tcp/configd_validate1.cli"/>
+      <leaf name="flags">
+        <type name="string">
+          <pattern value="(((!?(SYN|ACK|FIN|RST|PSH|URG),)*(!?(SYN|ACK|FIN|RST|PSH|URG))))">
+            <error-message>
+              <value>Invalid value for TCP flags. Allowed values : SYN ACK FIN RST URG PSH
+When specifying more than one flag, flags should be comma-separated.
+For example : value of 'SYN,!ACK,!FIN,!RST' will only match packets with
+the SYN flag set, and the ACK, FIN and RST flags unset</value>
+            </error-message>
+          </pattern>
+          <configd:pattern-help text="&lt;TCP-flags&gt;"/>
+        </type>
+        <configd:help text="TCP flags to match"/>
+        <configd:comp_help text="/opt/vyatta/share/tmplscripts/security/firewall/name/rule/tcp/flags/configd_comp_help.txt"/>
+      </leaf>
+    </container>
+    <leaf name="description">
+      <type name="string"/>
+      <configd:help text="Description for this match rule"/>
+    </leaf>
+    <leaf name="action">
+      <type name="enumeration">
+        <enum name="pass"/>
+        <enum name="drop"/>
+      </type>
+      <configd:help text="Rule action"/>
+      <default value="pass"/>
+    </leaf>
+    <leaf name="pcp">
+      <type name="uint32">
+        <range value="0..7"/>
+      </type>
+      <configd:help text="802.1 priority code point to match (0 to 7)"/>
+    </leaf>
+    <uses name="marking"/>
+    <container name="police">
+      <configd:help text="Packet rate limiting"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/security/firewall/name/rule/police/configd_validate.cli"/>
+      <leaf name="bandwidth">
+        <type name="bandwidth-suffix"/>
+        <configd:help text="Bandwidth limit"/>
+      </leaf>
+      <leaf name="burst">
+        <type name="burst-size"/>
+        <configd:help text="Burst size in bytes"/>
+      </leaf>
+      <container name="then">
+        <configd:help text="Result for packets over police limit"/>
+        <leaf name="action">
+          <type name="enumeration">
+            <enum name="pass"/>
+            <enum name="drop"/>
+          </type>
+          <configd:help text="Rule action"/>
+        </leaf>
+        <uses name="marking"/>
+      </container>
+    </container>
+    <leaf name="fragment">
+      <type name="empty"/>
+      <configd:help text="Match on fragmented packets"/>
+    </leaf>
+    <container name="source">
+      <presence value="true"/>
+      <configd:help text="Source parameters"/>
+      <leaf name="mac-address">
+        <type name="types:mac-address"/>
+        <configd:help text="Source MAC address"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/source/mac-address/configd_validate1.cli"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/source/mac-address/configd_validate2.cli"/>
+      </leaf>
+      <leaf name="address">
+        <type name="string">
+          <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/source/address/configd_syntax1.cli"/>
+        </type>
+        <configd:help text="Source IP subnet"/>
+      </leaf>
+      <leaf name="port">
+        <type name="string">
+          <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/source/port/configd_syntax1.cli"/>
+        </type>
+        <configd:help text="Source port"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/source/port/configd_validate1.cli"/>
+      </leaf>
+    </container>
+    <leaf name="log">
+      <type name="empty"/>
+      <configd:help text="Enable logging for QoS rule"/>
+    </leaf>
+    <container name="destination">
+      <presence value="true"/>
+      <configd:help text="Destination parameters"/>
+      <leaf name="mac-address">
+        <type name="types:mac-address"/>
+        <configd:help text="Destination MAC address"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/destination/mac-address/configd_validate1.cli"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/destination/mac-address/configd_validate2.cli"/>
+      </leaf>
+      <leaf name="address">
+        <type name="string">
+          <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/destination/address/configd_syntax1.cli"/>
+        </type>
+        <configd:help text="Destination IP subnet"/>
+      </leaf>
+      <leaf name="port">
+        <type name="string">
+          <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/destination/port/configd_syntax1.cli"/>
+        </type>
+        <configd:help text="Destination port"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/destination/port/configd_validate1.cli"/>
+      </leaf>
+    </container>
+    <leaf name="dscp">
+      <type name="dscp:dscp-name-or-value"/>
+      <configd:help text="DSCP value to match in an incoming IP header"/>
+    </leaf>
+    <leaf name="protocol">
+      <type name="string">
+        <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/protocol/configd_syntax1.cli"/>
+      </type>
+      <configd:help text="Protocol to match"/>
+      <configd:allowed executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/class/match/protocol/configd_allowed.sh"/>
+    </leaf>
+  </grouping>
+  <grouping name="class-list">
+    <list name="class">
+      <configd:help text="Class number"/>
+      <max-elements value="1048576"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="uint32">
+          <range value="1..999999"/>
+        </type>
+        <configd:help text="Class number (1-999999)"/>
+      </leaf>
+      <leaf name="description">
+        <type name="string"/>
+        <configd:help text="Description for this policy class"/>
+      </leaf>
+      <leaf name="profile">
+        <type name="name"/>
+        <configd:help text="QoS profile for class [REQUIRED]"/>
+        <configd:allowed executable="echo $VAR(../../profile/@@)"/>
+      </leaf>
+      <list name="match">
+        <configd:help text="Class matching rule"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="name"/>
+          <configd:help text="Class matching rule"/>
+        </leaf>
+        <uses name="match-rule"/>
+      </list>
+    </list>
+  </grouping>
+  <grouping name="traffic-class-list">
+    <list name="traffic-class">
+      <configd:help text="Traffic Class"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="uint32">
+          <range value="0..3"/>
+        </type>
+        <configd:help text="Traffic Class"/>
+      </leaf>
+      <leaf name="description">
+        <type name="string"/>
+        <configd:help text="Description for this traffic-class"/>
+      </leaf>
+      <leaf name="bandwidth">
+        <type name="union">
+          <type name="bandwidth-suffix"/>
+          <type name="bandwidth-percent"/>
+        </type>
+        <default value="100%"/>
+        <configd:help text="Bandwidth limit"/>
+      </leaf>
+      <leaf name="burst">
+        <type name="burst-size"/>
+        <configd:help text="Burst size in bytes"/>
+      </leaf>
+    </list>
+  </grouping>
+  <grouping name="subport-parameters">
+    <leaf name="default">
+      <type name="name"/>
+      <configd:help text="Qos profile for default traffic"/>
+      <configd:allowed executable="echo $VAR(../profile/@@)"/>
+    </leaf>
+    <leaf name="burst">
+      <type name="burst-size"/>
+      <configd:help text="Burst size"/>
+    </leaf>
+    <leaf name="period">
+      <type name="uint32">
+        <range value="1..3000"/>
+      </type>
+      <configd:help text="Enforcement period (ms)"/>
+      <default value="40"/>
+    </leaf>
+  </grouping>
+  <grouping name="red-parameter">
+    <container name="random-detect">
+      <presence value="true"/>
+      <configd:help text="Random Early Detection (RED) parameters"/>
+      <leaf name="min-threshold">
+        <type name="uint16">
+          <range value="1..1022"/>
+        </type>
+        <configd:help text="Minimum threshold"/>
+      </leaf>
+      <leaf name="max-threshold">
+        <type name="uint16">
+          <range value="1..1023"/>
+        </type>
+        <configd:help text="Maximum threshold"/>
+      </leaf>
+      <leaf name="filter-weight">
+        <type name="uint16">
+          <range value="1..12"/>
+        </type>
+        <configd:help text="EWMA Filter Weight"/>
+        <default value="9"/>
+      </leaf>
+      <leaf name="mark-probability">
+        <type name="uint16">
+          <range value="1..255"/>
+        </type>
+        <configd:help text="Inverse of packet marking probability maximum value"/>
+        <default value="10"/>
+      </leaf>
+    </container>
+  </grouping>
+  <augment target-node="/policy:policy">
+    <list name="qos">
+      <configd:priority priority="400"/>
+      <configd:help text="Quality of Service (QOS) policy"/>
+      <configd:validate executable="qos-policy.pl --validate $VAR(@)"/>
+      <configd:end executable="qos-policy.pl --update $VAR(@)"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="name"/>
+        <configd:help text="Quality of Service (QOS) policy"/>
+      </leaf>
+      <container name="shaper">
+        <configd:help text="Shaping QOS policy"/>
+        <list name="vlan">
+          <configd:help text="Virtual Local Area Network (VLAN) ID"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint16">
+              <range value="1..4094"/>
+            </type>
+            <configd:help text="Virtual Local Area Network (VLAN) ID"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this vlan"/>
+          </leaf>
+          <leaf name="bandwidth">
+            <type name="union">
+              <type name="bandwidth-suffix"/>
+              <type name="bandwidth-percent"/>
+            </type>
+            <default value="100%"/>
+            <configd:help text="Bandwidth limit"/>
+          </leaf>
+          <uses name="subport-parameters"/>
+          <uses name="traffic-class-list"/>
+          <uses name="class-list"/>
+        </list>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for this QoS policy"/>
+        </leaf>
+        <leaf name="frame-overhead">
+          <type name="uint32">
+            <range value="0..1000"/>
+          </type>
+          <configd:help text="Framing overhead"/>
+          <default value="24"/>
+        </leaf>
+        <list name="profile">
+          <configd:help text="QoS traffic profile"/>
+          <max-elements value="256"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="name"/>
+            <configd:help text="QoS traffic profile"/>
+          </leaf>
+          <leaf name="period">
+            <type name="uint32">
+              <range value="1..3000"/>
+            </type>
+            <configd:help text="Enforcement period (ms)"/>
+            <default value="10"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this traffic profile"/>
+          </leaf>
+          <leaf name="burst">
+            <type name="burst-size"/>
+            <configd:help text="Burst size in bytes"/>
+          </leaf>
+          <leaf name="bandwidth">
+            <type name="bandwidth-suffix"/>
+            <configd:help text="Bandwidth limit"/>
+          </leaf>
+          <container name="map">
+            <configd:help text="Type to queue mapping"/>
+            <list name="pcp">
+              <configd:help text="Priority Control Point"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="uint32">
+                  <range value="0..7"/>
+                </type>
+                <configd:help text="Priority Control Point"/>
+              </leaf>
+              <leaf name="to">
+                <type name="uint32">
+                  <range value="0..7"/>
+                </type>
+                <configd:help text="Queue [REQUIRED]"/>
+              </leaf>
+            </list>
+            <list name="dscp">
+              <configd:help text="DSCP to queue mapping"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="dscp-name"/>
+                <configd:help text="DSCP value"/>
+              </leaf>
+              <leaf name="to">
+                <type name="uint32">
+                  <range value="0..7"/>
+                </type>
+                <configd:help text="Queue [REQUIRED]"/>
+              </leaf>
+            </list>
+          </container>
+          <list name="queue">
+            <configd:help text="Queue properties"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="uint32">
+                <range value="0..7"/>
+              </type>
+              <configd:help text="Queue properties"/>
+            </leaf>
+            <leaf name="description">
+              <type name="string"/>
+              <configd:help text="Description for this queue"/>
+            </leaf>
+            <leaf name="traffic-class">
+              <type name="uint32">
+                <range value="0..3"/>
+              </type>
+              <configd:help text="Traffic class"/>
+            </leaf>
+            <leaf name="weight">
+              <type name="uint8">
+                <range value="1..100"/>
+              </type>
+              <configd:help text="WRR weight"/>
+              <default value="1"/>
+            </leaf>
+          </list>
+          <uses name="traffic-class-list"/>
+        </list>
+        <list name="traffic-class">
+          <configd:help text="Traffic Class"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="0..3"/>
+            </type>
+            <configd:help text="Traffic Class"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description for this traffic-class"/>
+          </leaf>
+          <leaf name="bandwidth">
+            <type name="union">
+              <type name="bandwidth-suffix"/>
+              <type name="bandwidth-percent"/>
+            </type>
+            <default value="100%"/>
+            <configd:help text="Bandwidth limit"/>
+          </leaf>
+          <leaf name="burst">
+            <type name="burst-size"/>
+            <configd:help text="Burst size in bytes"/>
+          </leaf>
+          <leaf name="queue-limit">
+            <type name="uint16">
+              <range value="1..max"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/policy/qos/shaper/traffic-class/queue-limit/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Queue size"/>
+            <default value="64"/>
+          </leaf>
+          <uses name="red-parameter"/>
+        </list>
+        <leaf name="bandwidth">
+          <type name="bandwidth-suffix"/>
+          <default value="10Gbit"/>
+          <configd:help text="Bandwidth limit"/>
+        </leaf>
+        <uses name="subport-parameters"/>
+        <uses name="class-list"/>
+      </container>
+    </list>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane">
+    <leaf name="qos-policy">
+      <type name="string"/>
+      <configd:help text="Qos policy for interface"/>
+      <configd:allowed executable="echo $VAR(/policy/qos/@@)"/>
+      <configd:update executable="qos-policy.pl --apply $VAR(../@) $VAR(@)"/>
+      <configd:delete executable="qos-policy.pl --remove $VAR(../@)"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/qos-policy/configd_validate1.cli"/>
+    </leaf>
+  </augment>
+</module>

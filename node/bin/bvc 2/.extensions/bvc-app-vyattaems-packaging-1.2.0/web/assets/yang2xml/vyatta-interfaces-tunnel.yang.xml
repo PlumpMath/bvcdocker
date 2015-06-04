@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-interfaces-tunnel"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:interfaces-tunnel="urn:vyatta.com:mgmt:vyatta-interfaces-tunnel"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-interfaces-tunnel"/>
+  <prefix value="interfaces-tunnel"/>
+  <import module="vyatta-interfaces">
+    <prefix value="if"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2015-02-11">
+    <description>
+      <text>Add path-mtu-discovery-disable to tunnels</text>
+    </description>
+  </revision>
+  <revision date="2015-01-23">
+    <description>
+      <text>Remove range restriction on IP key field</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/if:interfaces">
+    <list name="tunnel">
+      <configd:priority priority="380"/>
+      <configd:help text="Tunnel interface"/>
+      <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/configd_create.sh"/>
+      <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/configd_delete.sh"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/configd_end.sh"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/configd_validate1.cli"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/configd_validate2.cli"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/configd_validate3.cli"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/configd_validate4.cli"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/configd_validate5.cli"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="string">
+          <pattern value="tun[0-9]+">
+            <error-message>
+              <value>tunnel must be (tun0-tun999)</value>
+            </error-message>
+          </pattern>
+          <configd:pattern-help text="&lt;tunN&gt;"/>
+        </type>
+        <configd:help text="Tunnel interface"/>
+      </leaf>
+      <container name="parameters">
+        <presence value="true"/>
+        <configd:help text="Tunnel parameters"/>
+        <container name="ip">
+          <presence value="true"/>
+          <configd:help text="IPv4 specific tunnel parameters"/>
+          <leaf name="ttl">
+            <type name="uint32">
+              <range value="0..255">
+                <error-message>
+                  <value>Must be between 0-255</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Time to live field"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/ttl/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/ttl/configd_delete.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/ttl/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="key">
+            <type name="uint32">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/key/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Tunnel key"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/key/configd_validate1.cli"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/key/configd_create1.cli"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/key/configd_update1.cli"/>
+          </leaf>
+          <container name="bridge-group">
+            <presence value="true"/>
+            <configd:help text="Add this interface to a bridge group"/>
+            <leaf name="priority">
+              <type name="uint32">
+                <range value="0..63">
+                  <error-message>
+                    <value>Port priority must be between 0-63</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Bridge port priority"/>
+            </leaf>
+            <leaf name="bridge">
+              <type name="string"/>
+              <configd:help text="Bridge group interface"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/bridge-group/bridge/configd_allowed.sh"/>
+              <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/bridge-group/bridge/configd_create.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/bridge-group/bridge/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/bridge-group/bridge/configd_validate1.cli"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/bridge-group/bridge/configd_validate2.cli"/>
+            </leaf>
+            <leaf name="cost">
+              <type name="uint32">
+                <range value="1..65535">
+                  <error-message>
+                    <value>Bridge cost value must be between 1 and 65535</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Path cost for this port"/>
+            </leaf>
+          </container>
+          <leaf name="tos">
+            <type name="uint32">
+              <range value="0..99">
+                <error-message>
+                  <value>Must be between 0-99</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Type of Service (TOS)"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/tos/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/tos/configd_delete.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ip/tos/configd_validate1.cli"/>
+          </leaf>
+        </container>
+        <container name="ipv6">
+          <presence value="true"/>
+          <configd:help text="IPv6 specific tunnel parameters"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ipv6/configd_delete.sh"/>
+          <leaf name="tclass">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ipv6/tclass/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Traffic class (Tclass)"/>
+            <default value="0x00"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ipv6/tclass/configd_update.sh"/>
+          </leaf>
+          <leaf name="hoplimit">
+            <type name="uint32">
+              <range value="0..255">
+                <error-message>
+                  <value>Must be between 0-255</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Hoplimit"/>
+            <default value="64"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ipv6/hoplimit/configd_update.sh"/>
+          </leaf>
+          <leaf name="encaplimit">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ipv6/encaplimit/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Encaplimit field"/>
+            <default value="4"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ipv6/encaplimit/configd_update.sh"/>
+          </leaf>
+          <leaf name="flowlabel">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ipv6/flowlabel/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Flowlabel"/>
+            <default value="0x00000"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/parameters/ipv6/flowlabel/configd_update.sh"/>
+          </leaf>
+        </container>
+      </container>
+      <leaf name="local-ip">
+        <type name="union">
+          <type name="types:ipv4-address"/>
+          <type name="types:ipv6-address"/>
+        </type>
+        <configd:help text="Local IP address for this tunnel [REQUIRED]"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/local-ip/configd_update.sh"/>
+      </leaf>
+      <leaf name="description">
+        <type name="string">
+          <pattern value=".{1,256}">
+            <error-message>
+              <value>interface description is too long (limit 256 characters)</value>
+            </error-message>
+          </pattern>
+        </type>
+        <configd:help text="Description"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/description/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/description/configd_delete.sh"/>
+      </leaf>
+      <leaf name="mtu">
+        <type name="uint32">
+          <range value="68..8024">
+            <error-message>
+              <value>MTU must be between 68 and 8024</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:priority priority="381"/>
+        <configd:help text="Maximum Transmission Unit (MTU)"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/mtu/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/mtu/configd_delete.sh"/>
+      </leaf>
+      <leaf name="multicast">
+        <type name="enumeration">
+          <enum name="enable">
+            <configd:help text="Enable Multicast"/>
+          </enum>
+          <enum name="disable">
+            <configd:help text="Disable Multicast (default)"/>
+          </enum>
+        </type>
+        <configd:help text="Multicast operation over tunnel"/>
+        <default value="disable"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/multicast/configd_allowed.sh"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/multicast/configd_update.sh"/>
+      </leaf>
+      <leaf name="path-mtu-discovery-disable">
+        <type name="empty"/>
+        <configd:help text="Disable pmtu discovery support"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/pmtudisc/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/pmtudisc/configd_delete.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/pmtudisc/configd_validate1.sh"/>
+      </leaf>
+      <leaf name="disable">
+        <type name="empty"/>
+        <configd:help text="Disable interface"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/disable/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/disable/configd_delete.sh"/>
+      </leaf>
+      <leaf name="remote-ip">
+        <type name="union">
+          <type name="types:ipv4-address"/>
+          <type name="types:ipv6-address"/>
+        </type>
+        <configd:help text="Remote IP address for this tunnel"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/remote-ip/configd_update.sh"/>
+      </leaf>
+      <leaf-list name="address">
+        <type name="if:address"/>
+        <ordered-by value="user"/>
+        <configd:help text="IP address"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/address/configd_create.sh"/>
+      </leaf-list>
+      <leaf name="disable-link-detect">
+        <type name="empty"/>
+        <configd:help text="Ignore link state changes"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/disable-link-detect/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/disable-link-detect/configd_delete.sh"/>
+      </leaf>
+      <leaf name="encapsulation">
+        <type name="string">
+          <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/encapsulation/configd_syntax1.cli"/>
+        </type>
+        <configd:help text="Encapsulation of this tunnel interface [REQUIRED]"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/encapsulation/configd_allowed.sh"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/encapsulation/configd_create1.cli"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/encapsulation/configd_update1.cli"/>
+      </leaf>
+      <container name="ip">
+        <configd:help text="IPv4 parameters"/>
+      </container>
+      <container name="ipv6">
+        <presence value="true"/>
+        <configd:help text="IPv6 parameters"/>
+      </container>
+    </list>
+  </augment>
+</module>

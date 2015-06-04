@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-resources-service-users"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:resources-service-users="urn:vyatta.com:mgmt:vyatta-resources-service-users"
+        xmlns:resources="urn:vyatta.com:mgmt:vyatta-resources"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-resources-service-users"/>
+  <prefix value="resources-service-users"/>
+  <import module="vyatta-resources">
+    <prefix value="resources"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/resources:resources">
+    <container name="service-users">
+      <presence value="true"/>
+      <configd:help text="Service-User management"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/resources/service-users/configd_end.sh"/>
+      <list name="ldap">
+        <configd:help text="LDAP profile name"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/resources/service-users/ldap/configd_delete.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string"/>
+          <configd:help text="LDAP profile name"/>
+        </leaf>
+        <leaf name="base-dn">
+          <type name="string"/>
+          <configd:help text="Base Distinguished Name (Base DN) for authorization"/>
+        </leaf>
+        <leaf name="search-filter">
+          <type name="string"/>
+          <configd:help text="LDAP search filter for authorization"/>
+        </leaf>
+        <leaf name="bind-dn">
+          <type name="string"/>
+          <configd:help text="Bind DN user to authenticate against LDAP server"/>
+        </leaf>
+        <leaf name="schema">
+          <type name="string"/>
+          <configd:help text="LDAP schema standard"/>
+        </leaf>
+        <leaf name="password">
+          <type name="string"/>
+          <configd:help text="LDAP Bind Password"/>
+        </leaf>
+        <container name="group">
+          <presence value="true"/>
+          <configd:help text="LDAP group tree options"/>
+          <leaf name="base-dn">
+            <type name="string"/>
+            <configd:help text="Base DN for group-based LDAP authorization"/>
+          </leaf>
+          <leaf name="member-attribute">
+            <type name="string"/>
+            <configd:help text="The member attribute to use for LDAP group-based authorization"/>
+          </leaf>
+        </container>
+        <leaf name="url">
+          <type name="string">
+            <pattern value="ldap://.*">
+              <error-message>
+                <value>Needs to start with ldap://</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:help text="URL to LDAP server"/>
+        </leaf>
+        <leaf name="follow-referrals">
+          <type name="empty"/>
+          <configd:help text="Follow LDAP Referrals"/>
+        </leaf>
+        <container name="tls">
+          <presence value="true"/>
+          <configd:help text="Transport Layer Security (TLS) options for LDAP server connection"/>
+          <leaf name="reqcert">
+            <type name="string"/>
+            <configd:help text="Request and perform check on TLS certificate of the LDAP server"/>
+          </leaf>
+          <leaf name="cacert">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/service-users/ldap/tls/cacert/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="File containing certificate for Certificate Authority (CA)"/>
+          </leaf>
+        </container>
+      </list>
+      <container name="local">
+        <presence value="true"/>
+        <configd:help text="Local service user management"/>
+        <leaf-list name="group">
+          <type name="string">
+            <pattern value="[a-zA-Z_][a-zA-Z0-9_-]*$?">
+              <configd:error-message message="Invalid group name $VAR(@)"/>
+            </pattern>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/service-users/local/group/configd_syntax1.cli"/>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="Group for service-users"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/resources/service-users/local/group/configd_allowed.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/resources/service-users/local/group/configd_delete.sh"/>
+        </leaf-list>
+        <list name="user">
+          <configd:help text="Service user account information"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/resources/service-users/local/user/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/resources/service-users/local/user/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string"/>
+            <configd:help text="Service user account information"/>
+          </leaf>
+          <container name="auth">
+            <presence value="true"/>
+            <configd:help text="Authentication password"/>
+            <leaf name="plaintext-password">
+              <type name="string"/>
+              <configd:secret bool="true"/>
+              <configd:help text="Plaintext password for encryption"/>
+              <configd:subst executable="/opt/vyatta/share/tmplscripts/resources/service-users/local/user/auth/plaintext-password/configd_subst1.cli"/>
+            </leaf>
+            <leaf name="encrypted-password">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/service-users/local/user/auth/encrypted-password/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Encrypted password"/>
+            </leaf>
+          </container>
+          <leaf-list name="group">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/service-users/local/user/group/configd_syntax1.cli"/>
+            </type>
+            <ordered-by value="user"/>
+            <configd:help text="Service-user group name"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/resources/service-users/local/user/group/configd_allowed.sh"/>
+          </leaf-list>
+          <leaf name="lock">
+            <type name="empty"/>
+            <configd:help text="Lock local service-user"/>
+          </leaf>
+          <leaf name="full-name">
+            <type name="string">
+              <pattern value="[^:]*">
+                <error-message>
+                  <value>Cannot use ':' in full name</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="Full name of the user (use quotes for names with spaces)"/>
+          </leaf>
+        </list>
+      </container>
+    </container>
+  </augment>
+</module>

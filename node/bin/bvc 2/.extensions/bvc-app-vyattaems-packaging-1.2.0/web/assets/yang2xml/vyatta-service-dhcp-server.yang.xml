@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-service-dhcp-server"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:service-dhcp-server="urn:vyatta.com:mgmt:vyatta-service-dhcp-server"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:service="urn:vyatta.com:mgmt:vyatta-service"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-service-dhcp-server"/>
+  <prefix value="service-dhcp-server"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-services">
+    <prefix value="service"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2015-01-25">
+    <description>
+      <text>VRVDR-3385 ping-check</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/service:service">
+    <container name="dhcp-server">
+      <presence value="true"/>
+      <configd:priority priority="911"/>
+      <configd:help text="Dynamic Host Configuration Protocol (DHCP) for DHCP server"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/service/dhcp-server/configd_end1.cli"/>
+      <leaf name="disabled">
+        <type name="boolean"/>
+        <default value="false"/>
+        <configd:help text="Option to disable DHCP server"/>
+      </leaf>
+      <leaf-list name="global-parameters">
+        <type name="string"/>
+        <ordered-by value="user"/>
+        <configd:help text="Additional global parameters for DHCP server. You must &#10;use the syntax of dhcpd.conf in this text-field. Using this &#10;without proper knowledge may result in a crashed DHCP server.&#10;Check system log to look for errors."/>
+      </leaf-list>
+      <container name="listento">
+        <presence value="true"/>
+        <configd:help text="force dhcpd listens to interfaces"/>
+        <leaf-list name="interface">
+          <type name="string"/>
+          <ordered-by value="user"/>
+          <configd:help text="interfaces dhcpd listens to"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/dhcp-server/interface/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dhcp-server/configd_validate1.cli"/>
+        </leaf-list>
+      </container>
+      <list name="shared-network-name">
+        <configd:help text="DHCP shared network [REQUIRED]"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[-_a-zA-Z0-9\.]+">
+              <configd:error-message message='invalid DHCP pool name "$VAR(@)"'/>
+            </pattern>
+          </type>
+          <configd:help text="DHCP shared network [REQUIRED]"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Shared-network-name description"/>
+        </leaf>
+        <leaf-list name="shared-network-parameters">
+          <type name="string"/>
+          <ordered-by value="user"/>
+          <configd:help text="Additional shared-network parameters for DHCP server.&#10;You must use the syntax of dhcpd.conf in this text-field. &#10;Using this without proper knowledge may result in a crashed &#10;DHCP server. Check system log to look for errors."/>
+        </leaf-list>
+        <list name="subnet">
+          <configd:help text="DHCP subnet for shared network [REQUIRED]"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="types:ipv4-prefix"/>
+            <configd:help text="DHCP subnet for shared network [REQUIRED]"/>
+          </leaf>
+          <leaf-list name="dns-server">
+            <type name="types:ipv4-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IP address of DNS server"/>
+          </leaf-list>
+          <leaf name="tftp-server-name">
+            <type name="string"/>
+            <configd:help text="TFTP server name"/>
+          </leaf>
+          <leaf-list name="time-server">
+            <type name="types:ipv4-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IP address of time server"/>
+          </leaf-list>
+          <leaf-list name="exclude">
+            <type name="types:ipv4-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IP address that needs to be excluded from DHCP lease range"/>
+          </leaf-list>
+          <container name="ip-forwarding">
+            <presence value="true"/>
+            <configd:help text="IP layer forwarding"/>
+            <leaf name="enable">
+              <type name="boolean"/>
+              <default value="false"/>
+              <configd:help text="Option to set IP forwarding (default: false)"/>
+            </leaf>
+          </container>
+          <leaf name="client-prefix-length">
+            <type name="uint32">
+              <range value="0..32">
+                <error-message>
+                  <value>DHCP client prefix length must be 0 to 32</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="DHCP client prefix length"/>
+          </leaf>
+          <leaf name="time-offset">
+            <type name="string">
+              <pattern value="\-?[0-9]+">
+                <configd:error-message message='invalid time offset value "$VAR(@)"'/>
+              </pattern>
+            </type>
+            <configd:help text="Offset of the client's subnet in seconds from Coordinated Universal Time (UTC)"/>
+          </leaf>
+          <leaf name="server-identifier">
+            <type name="types:ipv4-address"/>
+            <configd:help text="Address for DHCP server identifier"/>
+          </leaf>
+          <leaf-list name="smtp-server">
+            <type name="types:ipv4-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IP address of SMTP server"/>
+          </leaf-list>
+          <leaf-list name="ntp-server">
+            <type name="types:ipv4-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IP address of NTP server"/>
+          </leaf-list>
+          <leaf-list name="wins-server">
+            <type name="types:ipv4-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IP address for Windows Internet Name Service (WINS) server"/>
+          </leaf-list>
+          <container name="static-route">
+            <presence value="true"/>
+            <configd:help text="Classless static route"/>
+            <leaf name="destination-subnet">
+              <type name="types:ipv4-prefix"/>
+              <configd:help text="Destination subnet [REQUIRED]"/>
+            </leaf>
+            <leaf name="router">
+              <type name="types:ipv4-address"/>
+              <configd:help text="IP address of router to be used to reach the destination subnet [REQUIRED]"/>
+            </leaf>
+          </container>
+          <leaf name="bootfile-server">
+            <type name="string"/>
+            <configd:help text="Server (IP address or domain name) from which the initial boot file is to be loaded"/>
+          </leaf>
+          <leaf-list name="subnet-parameters">
+            <type name="string"/>
+            <ordered-by value="user"/>
+            <configd:help text="Additional subnet parameters for DHCP server. You must&#10;use the syntax of dhcpd.conf in this text-field. Using this &#10;without proper knowledge may result in a crashed DHCP server.&#10;Check system log to look for errors."/>
+          </leaf-list>
+          <leaf name="bootfile-name">
+            <type name="string"/>
+            <configd:help text="Bootstrap file name"/>
+          </leaf>
+          <container name="failover">
+            <presence value="true"/>
+            <configd:help text="DHCP failover parameters"/>
+            <leaf name="name">
+              <type name="string">
+                <pattern value="[-_a-zA-Z0-9\.]+">
+                  <configd:error-message message='invalid failover peer name "$VAR(@)"'/>
+                </pattern>
+              </type>
+              <configd:help text="DHCP failover peer name [REQUIRED]"/>
+            </leaf>
+            <leaf name="peer-address">
+              <type name="types:ipv4-address"/>
+              <configd:help text="IP address of failover peer [REQUIRED]"/>
+            </leaf>
+            <leaf name="status">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/dhcp-server/shared-network-name/subnet/failover/status/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="DHCP failover peer status (primary|secondary) [REQUIRED]"/>
+            </leaf>
+            <leaf name="local-address">
+              <type name="types:ipv4-address"/>
+              <configd:help text="IP address for failover peer to connect [REQUIRED]"/>
+            </leaf>
+          </container>
+          <leaf name="ping-check">
+            <type name="empty"/>
+            <configd:help text="Ping the IP address that is being offered to make sure it isn't configured on another node"/>
+          </leaf>
+          <leaf-list name="pop-server">
+            <type name="types:ipv4-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IP address of POP3 server"/>
+          </leaf-list>
+          <leaf name="default-router">
+            <type name="types:ipv4-address"/>
+            <configd:help text="IP address of default router"/>
+          </leaf>
+          <leaf name="lease">
+            <type name="uint32"/>
+            <default value="86400"/>
+            <configd:help text="Lease timeout in seconds"/>
+          </leaf>
+          <leaf name="domain-name">
+            <type name="string"/>
+            <configd:help text="Client domain name"/>
+          </leaf>
+          <list name="start">
+            <configd:help text="Starting IP address for DHCP lease range"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Starting IP address for DHCP lease range"/>
+            </leaf>
+            <leaf name="stop">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Stopping IP address for DHCP lease range [REQUIRED]"/>
+            </leaf>
+          </list>
+          <leaf name="wpad-url">
+            <type name="string"/>
+            <configd:help text="Web Proxy Autodiscovery (WPAD) URL"/>
+          </leaf>
+          <list name="static-mapping">
+            <configd:help text="Static mapping for specified address type"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="string">
+                <pattern value="[-_a-zA-Z0-9\.]+">
+                  <configd:error-message message='invalid static-mapping name "$VAR(@)"'/>
+                </pattern>
+              </type>
+              <configd:help text="Static mapping for specified address type"/>
+            </leaf>
+            <leaf-list name="static-mapping-parameters">
+              <type name="string"/>
+              <ordered-by value="user"/>
+              <configd:help text="Additional static-mapping parameters for DHCP server.&#10;You must use the syntax of dhcpd.conf in this text-field. &#10;Using this without proper knowledge may result in a crashed &#10;DHCP server. Check system log to look for errors."/>
+            </leaf-list>
+            <leaf name="ip-address">
+              <type name="types:ipv4-address"/>
+              <configd:help text="Static mapping for specified IP address [REQUIRED]"/>
+            </leaf>
+            <leaf name="mac-address">
+              <type name="types:mac-address"/>
+              <configd:help text="Static mapping for specified MAC address [REQUIRED]"/>
+            </leaf>
+            <leaf name="disable">
+              <type name="empty"/>
+              <configd:help text="Option to disable static-mapping"/>
+            </leaf>
+          </list>
+        </list>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Option to disable DHCP configuration for shared-network"/>
+        </leaf>
+        <leaf name="authoritative">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/dhcp-server/shared-network-name/authoritative/configd_syntax1.cli"/>
+          </type>
+          <default value="disable"/>
+          <configd:help text="Option to make DHCP server authoritative for this physical network"/>
+        </leaf>
+      </list>
+      <container name="dynamic-dns-update">
+        <presence value="true"/>
+        <configd:help text="DHCP server to dynamically update the Domain Name System (DNS)"/>
+        <leaf name="enable">
+          <type name="boolean"/>
+          <default value="false"/>
+          <configd:help text="Option to set dynamic DNS update (default: false)"/>
+        </leaf>
+      </container>
+    </container>
+  </augment>
+</module>

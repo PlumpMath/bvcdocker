@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-service-twamp"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:service-twamp="urn:vyatta.com:mgmt:vyatta-service-twamp"
+        xmlns:inet="urn:ietf:params:xml:ns:yang:ietf-inet-types"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:service="urn:vyatta.com:mgmt:vyatta-service"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-service-twamp"/>
+  <prefix value="service-twamp"/>
+  <import module="ietf-inet-types">
+    <prefix value="inet"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-services">
+    <prefix value="service"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2015-02-06">
+    <description>
+      <text>Enforce constraint that client-list prefixes cannot have addresses inconsistent with mask.</text>
+    </description>
+  </revision>
+  <revision date="2014-12-12">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <typedef name="session-num">
+    <type name="uint16">
+      <range value="1..64"/>
+    </type>
+  </typedef>
+  <typedef name="timeout">
+    <type name="uint16">
+      <range value="1..3600"/>
+    </type>
+  </typedef>
+  <typedef name="ip-prefix">
+    <type name="union">
+      <type name="types:ipv4-prefix">
+        <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/twamp/server/client-list/configd_syntax.cli"/>
+      </type>
+      <type name="types:ipv6-prefix">
+        <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/twamp/server/client-list/configd_syntax.cli"/>
+      </type>
+    </type>
+  </typedef>
+  <augment target-node="/service:service">
+    <container name="twamp">
+      <configd:help text="Two-Way Active Measurement Protocol"/>
+      <container name="server">
+        <presence value="Signifies the TWAMP server is enabled"/>
+        <configd:help text="Server configuration"/>
+        <configd:end executable="twampd-config.pl"/>
+        <leaf-list name="client-list">
+          <type name="ip-prefix"/>
+          <configd:help text="List of clients that can connect to the server, by default any clients"/>
+        </leaf-list>
+        <leaf-list name="mode">
+          <type name="enumeration">
+            <enum name="no-unauthenticated">
+              <configd:help text="Disable support for unauthenticated sessions"/>
+            </enum>
+            <enum name="no-mixed">
+              <configd:help text="Disable support for mixed mode sessions"/>
+            </enum>
+            <enum name="no-authenticated">
+              <configd:help text="Disable support for authenticated sessions"/>
+            </enum>
+            <enum name="no-encrypted">
+              <configd:help text="Disable support for encrypted sessions"/>
+            </enum>
+          </type>
+          <configd:help text="TWAMP authentication mode, by default all modes available"/>
+        </leaf-list>
+        <list name="user">
+          <key value="name"/>
+          <leaf name="name">
+            <type name="string">
+              <length value="1..16"/>
+            </type>
+            <configd:help text="User identity"/>
+          </leaf>
+          <leaf name="password">
+            <type name="string">
+              <length value="1..1024"/>
+            </type>
+            <configd:help text="Password used to derive AES key"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/twamp/server/user/password/password_validate.cli"/>
+            <configd:secret bool="true"/>
+          </leaf>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/twamp/server/user/configd_validate.cli"/>
+          <configd:help text="Configure user for mixed, authenticated and encrypted modes"/>
+        </list>
+        <leaf name="maximum-connections">
+          <type name="session-num"/>
+          <default value="16"/>
+          <configd:help text="Maximum number of control sessions supported per Twamp server &lt;1-64&gt;, by default 16"/>
+        </leaf>
+        <leaf name="maximum-sessions-per-connection">
+          <type name="session-num"/>
+          <default value="8"/>
+          <configd:help text="Maximum number of test sessions per control session &lt;1-64&gt;, by default 8"/>
+        </leaf>
+        <leaf name="server-inactivity-timeout">
+          <type name="timeout"/>
+          <default value="900"/>
+          <configd:help text="Control session inactivity timeout in seconds &lt;1-3600&gt;, by default 900"/>
+        </leaf>
+        <leaf name="test-inactivity-timeout">
+          <type name="timeout"/>
+          <default value="900"/>
+          <configd:help text="Test session inactivity timeout in seconds &lt;1-3600&gt;, by default 900"/>
+        </leaf>
+        <leaf name="port">
+          <type name="inet:port-number">
+            <range value="1..65535"/>
+          </type>
+          <default value="862"/>
+          <configd:help text="Server TCP port for control session &lt;1-65535&gt;, by default 862"/>
+        </leaf>
+        <leaf name="dscp-value">
+          <type name="uint8">
+            <range value="0..63"/>
+          </type>
+          <default value="0"/>
+          <configd:help text="Base 10 value of dscp byte in ip header in control packets sent from server &lt;0-63&gt;, by default 0"/>
+        </leaf>
+      </container>
+    </container>
+  </augment>
+</module>

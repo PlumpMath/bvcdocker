@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# assumed to run in <BVC install directory>/bvc/controller/etc/bvc-extensions/
+
+# this removes bvc-extensions cfg files from earlier path explorer installations to avoid multiple bundles running
+
+rm -f path-explorer-*.cfg
+
+exit 0
+

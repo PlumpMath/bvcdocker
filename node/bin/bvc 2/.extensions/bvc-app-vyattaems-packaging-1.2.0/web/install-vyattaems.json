@@ -1,0 +1,109 @@
+{
+  "install": [
+    {
+      "src": "src/app/app.module.js",
+      "cue": "//@install:modules",
+      "data": [ "  ,'app/vyattaems/vyattaems.module'" ]
+    },
+    {
+      "src": "src/app/app.module.js",
+      "cue": "//@install:packages",
+      "data": [ "  ,'bvc.vyattaems'" ]
+    },
+    {
+      "src": "index.html",
+      "cue": "<!-- @install:css -->",
+      "data": [
+        "  <link rel=\"stylesheet\" type=\"text/css\" href=\"assets/bvc-app-vyattaems.css\" />"
+      ]
+    }
+  ],
+
+  "config": {
+    "vyatta-vRouter5600-ems": {
+      "vti-prefix": "vti",
+      "tun-prefix": "tun",
+      "vti-ip-v4": "172.16.y.x/30",
+      "tunnel-ip-v6": "fde4:8dba:82e1:y::x/64",
+
+      "payload-vti": {
+        "vyatta-interfaces-vti:vti": {
+          "tagnode": "$vtiTagNode",
+          "address": "$vtiLocalIp"
+        }
+      },
+      "payload-vyatta-security": {
+        "vyatta-security:security": {
+
+        }
+      },
+      "payload-vyatta-security-vpn-ipsec-ike-group-ike-1": {
+        "vyatta-security-vpn-ipsec:ike-group": {
+          "tagnode": "IKE-1",
+          "lifetime": 28800,
+          "proposal": [
+            {
+              "tagnode": 1,
+              "dh-group": 2
+            }
+          ]
+        }
+      },
+      "payload-vyatta-security-vpn-ipsec-ike-group-esp-1": {
+        "vyatta-security-vpn-ipsec:esp-group": {
+          "tagnode": "ESP-1",
+          "lifetime": 3600,
+          "mode": "tunnel",
+          "compression": "disable",
+          "pfs": "enable",
+          "proposal": {
+            "tagnode": 1,
+            "encryption": "aes128",
+            "hash": "sha1"
+          }
+        }
+      },
+      "payload-vyatta-security-vpn-ipsec-logging": {
+        "vyatta-security-vpn-ipsec:logging": {
+          "log-modes": "all"
+        }
+      },
+      "payload-vyatta-security-vpn-ipsec-site-to-site-peer": {
+        "vyatta-security-vpn-ipsec:peer": {
+          "tagnode": "$remoteIp",
+          "authentication": {
+            "pre-shared-secret": "vyatta"
+          },
+          "ike-group": "IKE-1",
+          "local-address": "$localIp",
+          "default-esp-group": "ESP-1",
+          "vti": {
+            "bind": "$vtiTagNode",
+            "esp-group": "ESP-1"
+          }
+        }
+      },
+      "payload-static-route": {
+        "vyatta-protocols-static:route": [
+          {
+            "tagnode": "$vtiTagNode",
+            "next-hop": [
+              {
+                "tagnode": "$vtiRemoteIp"
+              }
+            ]
+          }
+        ]
+      },
+      "payload-tunnel": {
+        "vyatta-interfaces-tunnel:tunnel": {
+          "tagnode": "$tunTagNode",
+          "address": "$tunIpv6",
+          "encapsulation": "sit",
+          "local-ip": "$vtiLocalIp",
+          "remote-ip": "$vtiRemoteIp"
+        }
+      }
+    }
+  }
+}

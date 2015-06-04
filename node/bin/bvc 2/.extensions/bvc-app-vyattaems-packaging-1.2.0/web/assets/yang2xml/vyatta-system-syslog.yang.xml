@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-system-syslog"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:system-syslog="urn:vyatta.com:mgmt:vyatta-system-syslog"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:system="urn:vyatta.com:mgmt:vyatta-system"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-system-syslog"/>
+  <prefix value="system-syslog"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-system">
+    <prefix value="system"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <typedef name="remote-host">
+    <type name="union">
+      <type name="types:hostname-port"/>
+      <type name="types:ipv4-addr-port"/>
+      <type name="types:ipv6-addr-port"/>
+    </type>
+  </typedef>
+  <typedef name="facility">
+    <type name="enumeration">
+      <enum name="auth">
+        <configd:help text="Authentication and authorization"/>
+      </enum>
+      <enum name="authpriv">
+        <configd:help text="Non-system authorization"/>
+      </enum>
+      <enum name="cron">
+        <configd:help text="Cron daemon"/>
+      </enum>
+      <enum name="dataplane">
+        <configd:help text="Dataplane (local6)"/>
+      </enum>
+      <enum name="daemon">
+        <configd:help text="System daemons"/>
+      </enum>
+      <enum name="kern">
+        <configd:help text="Kernel"/>
+      </enum>
+      <enum name="lpr">
+        <configd:help text="Line printer spooler"/>
+      </enum>
+      <enum name="mail">
+        <configd:help text="Mail subsystem"/>
+      </enum>
+      <enum name="mark">
+        <configd:help text="Timestamp"/>
+      </enum>
+      <enum name="news">
+        <configd:help text="USENET subsystem"/>
+      </enum>
+      <enum name="protocols">
+        <configd:help text="Routing protocols (local7)"/>
+      </enum>
+      <enum name="security">
+        <configd:help text="Authentication and authorization"/>
+      </enum>
+      <enum name="sensors">
+        <configd:help text="Hardware sensors"/>
+      </enum>
+      <enum name="syslog">
+        <configd:help text="Authentication and authorization"/>
+      </enum>
+      <enum name="user">
+        <configd:help text="Application processes"/>
+      </enum>
+      <enum name="uucp">
+        <configd:help text="UUCP subsystem"/>
+      </enum>
+      <enum name="local0">
+        <configd:help text="Local facility 0"/>
+      </enum>
+      <enum name="local1">
+        <configd:help text="Local facility 1"/>
+      </enum>
+      <enum name="local2">
+        <configd:help text="Local facility 2"/>
+      </enum>
+      <enum name="local3">
+        <configd:help text="Local facility 3"/>
+      </enum>
+      <enum name="local4">
+        <configd:help text="Local facility 4"/>
+      </enum>
+      <enum name="local5">
+        <configd:help text="Local facility 5"/>
+      </enum>
+      <enum name="local6">
+        <configd:help text="Local facility 6"/>
+      </enum>
+      <enum name="local7">
+        <configd:help text="Local facility 7"/>
+      </enum>
+      <enum name="all">
+        <configd:help text='All facilities excluding "mark"'/>
+      </enum>
+    </type>
+  </typedef>
+  <typedef name="level">
+    <type name="enumeration">
+      <enum name="emerg">
+        <configd:help text="Emergency messages"/>
+      </enum>
+      <enum name="alert">
+        <configd:help text="Urgent messages"/>
+      </enum>
+      <enum name="crit">
+        <configd:help text="Critical messages "/>
+      </enum>
+      <enum name="err">
+        <configd:help text="Error messages"/>
+      </enum>
+      <enum name="warning">
+        <configd:help text="Warning messages"/>
+      </enum>
+      <enum name="notice">
+        <configd:help text="Messages for further investigation"/>
+      </enum>
+      <enum name="info">
+        <configd:help text="Informational messages"/>
+      </enum>
+      <enum name="debug">
+        <configd:help text="Debug messages"/>
+      </enum>
+    </type>
+  </typedef>
+  <grouping name="facility">
+    <list name="facility">
+      <configd:help text="Facility for system logging"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="facility"/>
+        <configd:help text="Facility for system logging"/>
+      </leaf>
+      <leaf name="level">
+        <type name="level"/>
+        <configd:help text="Logging level"/>
+        <default value="err"/>
+      </leaf>
+    </list>
+  </grouping>
+  <grouping name="archive">
+    <container name="archive">
+      <presence value="true"/>
+      <configd:help text="Log file size and rotation characteristics"/>
+      <leaf name="files">
+        <type name="uint32"/>
+        <configd:help text="Number of saved files"/>
+        <default value="5"/>
+      </leaf>
+      <leaf name="size">
+        <type name="uint32"/>
+        <configd:help text="Size of log files (kbytes)"/>
+        <default value="250"/>
+      </leaf>
+    </container>
+  </grouping>
+  <grouping name="facility-archive">
+    <uses name="facility"/>
+    <uses name="archive"/>
+  </grouping>
+  <augment target-node="/system:system">
+    <container name="syslog">
+      <presence value="true"/>
+      <configd:priority priority="400"/>
+      <configd:help text="System logging daemon"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/system/syslog/configd_end.sh"/>
+      <container name="global">
+        <presence value="true"/>
+        <configd:help text="Logging to system standard location"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/syslog/global/configd_validate1.cli"/>
+        <uses name="facility-archive"/>
+      </container>
+      <list name="host">
+        <configd:help text="Logging to a remote host"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/syslog/host/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="remote-host"/>
+        </leaf>
+        <uses name="facility"/>
+      </list>
+      <list name="file">
+        <configd:help text="Logging to a file"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/syslog/file/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[-a-zA-Z0-9_.]+">
+              <configd:error-message message="invalid file name $VAR(@)"/>
+            </pattern>
+          </type>
+          <configd:help text="Logging to a file"/>
+        </leaf>
+        <uses name="facility-archive"/>
+      </list>
+      <list name="user">
+        <configd:help text="Logging to specific user's terminal"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/syslog/user/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[a-zA-Z_][a-zA-Z0-9_-]*">
+              <configd:error-message message="invalid user name $VAR(@)"/>
+            </pattern>
+          </type>
+          <configd:help text="Logging to specific user's terminal"/>
+        </leaf>
+        <uses name="facility"/>
+      </list>
+      <container name="console">
+        <presence value="true"/>
+        <configd:help text="Logging to system console"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/syslog/console/configd_validate1.cli"/>
+        <uses name="facility"/>
+      </container>
+    </container>
+  </augment>
+</module>

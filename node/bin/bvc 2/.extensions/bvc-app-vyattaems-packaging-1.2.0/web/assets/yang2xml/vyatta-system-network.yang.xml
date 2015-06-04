@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-system-network"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:system-network="urn:vyatta.com:mgmt:vyatta-system-network"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:system="urn:vyatta.com:mgmt:vyatta-system"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-system-network"/>
+  <prefix value="system-network"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-system">
+    <prefix value="system"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/system:system">
+    <leaf name="domain-name">
+      <type name="string">
+        <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/domain-name/configd_syntax1.cli"/>
+      </type>
+      <configd:priority priority="400"/>
+      <configd:help text="System domain name"/>
+      <configd:update executable="/opt/vyatta/share/tmplscripts/system/domain-name/configd_update.sh"/>
+      <configd:delete executable="/opt/vyatta/share/tmplscripts/system/domain-name/configd_delete.sh"/>
+    </leaf>
+    <container name="domain-search">
+      <presence value="true"/>
+      <configd:priority priority="400"/>
+      <configd:help text="Domain Name Server (DNS) domain completion order"/>
+      <leaf-list name="domain">
+        <type name="string">
+          <pattern value="[-a-zA-Z0-9\.]+">
+            <configd:error-message message="invalid domain name $VAR(@)"/>
+          </pattern>
+        </type>
+        <ordered-by value="user"/>
+        <configd:help text="DNS domain completion order"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/system/domain-search/domain/configd_create1.cli"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/system/domain-search/domain/configd_delete1.cli"/>
+      </leaf-list>
+    </container>
+    <leaf name="host-name">
+      <type name="string">
+        <pattern value="[0-9A-Za-z][-\.0-9A-Za-z]*[0-9A-Za-z]">
+          <configd:error-message message="invalid host name $VAR(@)"/>
+        </pattern>
+        <length value="2..63"/>
+      </type>
+      <configd:priority priority="100"/>
+      <configd:help text="System host name (default: vyatta)"/>
+      <default value="vyatta"/>
+      <configd:update executable="/opt/vyatta/share/tmplscripts/system/host-name/configd_update.sh"/>
+      <configd:delete executable="/opt/vyatta/share/tmplscripts/system/host-name/configd_delete.sh"/>
+    </leaf>
+    <container name="ip">
+      <presence value="true"/>
+      <configd:priority priority="400"/>
+      <configd:help text="IPv4 settings"/>
+      <leaf name="arp">
+        <type name="empty"/>
+        <configd:help text="Parameters for ARP cache"/>
+      </leaf>
+      <leaf name="disable-forwarding">
+        <type name="empty"/>
+        <configd:help text="Disable IPv4 forwarding"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/system/ip/disable-forwarding/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/system/ip/disable-forwarding/configd_delete.sh"/>
+      </leaf>
+    </container>
+    <container name="ipv6">
+      <presence value="true"/>
+      <configd:help text="IPv6 settings"/>
+      <leaf name="disable">
+        <type name="empty"/>
+        <configd:priority priority="400"/>
+        <configd:help text="Disable assignment of IPv6 addresses on all interfaces"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/system/ipv6/disable/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/system/ipv6/disable/configd_delete.sh"/>
+      </leaf>
+      <leaf name="strict-dad">
+        <type name="empty"/>
+        <configd:priority priority="290"/>
+        <configd:help text="Disable IPv6 operation on interface when DAD fails on LL addr"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/system/ipv6/strict-dad/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/system/ipv6/strict-dad/configd_delete.sh"/>
+      </leaf>
+      <container name="neighbor">
+        <presence value="true"/>
+        <configd:priority priority="400"/>
+        <configd:help text="Parameters for Neighbor cache"/>
+        <leaf name="table-size">
+          <type name="enumeration">
+            <enum name="1024"/>
+            <enum name="2048"/>
+            <enum name="4096"/>
+            <enum name="8192"/>
+            <enum name="16384"/>
+            <enum name="32768"/>
+          </type>
+          <configd:help text="Maximum number of entries to keep in the Neighbor cache"/>
+          <default value="8192"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/ipv6/neighbor/table-size/configd_allowed.sh"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/system/ipv6/neighbor/table-size/configd_update.sh"/>
+        </leaf>
+      </container>
+      <leaf name="disable-forwarding">
+        <type name="empty"/>
+        <configd:priority priority="400"/>
+        <configd:help text="Disable IPv6 forwarding on all interfaces"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/system/ipv6/disable-forwarding/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/system/ipv6/disable-forwarding/configd_delete.sh"/>
+      </leaf>
+    </container>
+    <leaf-list name="name-server">
+      <type name="union">
+        <type name="types:ipv4-address"/>
+        <type name="types:ipv6-address"/>
+      </type>
+      <ordered-by value="user"/>
+      <configd:priority priority="400"/>
+      <configd:help text="Domain Name Server (DNS)"/>
+      <configd:create executable="/opt/vyatta/share/tmplscripts/system/name-server/configd_create.sh"/>
+      <configd:delete executable="/opt/vyatta/share/tmplscripts/system/name-server/configd_delete.sh"/>
+    </leaf-list>
+    <container name="static-host-mapping">
+      <presence value="true"/>
+      <configd:priority priority="400"/>
+      <configd:help text="Map host names to addresses"/>
+      <list name="host-name">
+        <configd:help text="Host name for static address mapping"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/system/static-host-mapping/host-name/configd_end.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/static-host-mapping/host-name/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[0-9A-Za-z][-\.0-9A-Za-z]*[0-9A-Za-z]">
+              <configd:error-message message="invalid host name $VAR(@)"/>
+            </pattern>
+          </type>
+          <configd:help text="Host name for static address mapping"/>
+        </leaf>
+        <leaf name="inet">
+          <type name="union">
+            <type name="types:ipv4-address"/>
+            <type name="types:ipv6-address"/>
+          </type>
+          <configd:help text="Address [REQUIRED]"/>
+        </leaf>
+        <leaf-list name="alias">
+          <type name="string"/>
+          <ordered-by value="user"/>
+          <configd:help text="Alias for this address"/>
+        </leaf-list>
+      </list>
+    </container>
+  </augment>
+</module>

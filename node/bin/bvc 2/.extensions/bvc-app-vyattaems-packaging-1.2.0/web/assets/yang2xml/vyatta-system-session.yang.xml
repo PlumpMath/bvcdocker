@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-system-session"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:system-session="urn:vyatta.com:mgmt:vyatta-system-session"
+        xmlns:system="urn:vyatta.com:mgmt:vyatta-system"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-system-session"/>
+  <prefix value="system-session"/>
+  <import module="vyatta-system">
+    <prefix value="system"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/system:system">
+    <container name="session">
+      <presence value="true"/>
+      <configd:help text="Configure timeouts for session"/>
+      <leaf name="table-size">
+        <type name="uint32">
+          <range value="1..100000000">
+            <error-message>
+              <value>Value must be between 1 and 100000000</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Size of connection tracking table"/>
+        <default value="1048576"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/table-size/configd_update.sh"/>
+      </leaf>
+      <container name="timeout">
+        <presence value="true"/>
+        <configd:help text="Connection timeout options"/>
+        <container name="tcp">
+          <presence value="true"/>
+          <configd:help text="TCP connection timeout options"/>
+          <leaf name="close-wait">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP CLOSE-WAIT timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/close-wait/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/close-wait/configd_update.sh"/>
+          </leaf>
+          <leaf name="established">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP ESTABLISHED timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/established/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/established/configd_update.sh"/>
+          </leaf>
+          <leaf name="syn-sent">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP SYN-SENT timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/syn-sent/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/syn-sent/configd_update.sh"/>
+          </leaf>
+          <leaf name="fin-received">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP FIN-RECEIVED timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/fin-received/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/fin-received/configd_update.sh"/>
+          </leaf>
+          <leaf name="fin-sent">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP FIN-SENT timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/fin-sent/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/fin-sent/configd_update.sh"/>
+          </leaf>
+          <leaf name="closing">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP CLOSING timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/closing/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/closing/configd_update.sh"/>
+          </leaf>
+          <leaf name="simsyn-sent">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP SIMSYN-SENT timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/simsyn-sent/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/simsyn-sent/configd_update.sh"/>
+          </leaf>
+          <leaf name="time-wait">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP TIME-WAIT timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/time-wait/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/time-wait/configd_update.sh"/>
+          </leaf>
+          <leaf name="last-ack">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP LAST-ACK timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/last-ack/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/last-ack/configd_update.sh"/>
+          </leaf>
+          <leaf name="syn-received">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP SYN-RECEIVED timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/syn-received/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/syn-received/configd_update.sh"/>
+          </leaf>
+          <leaf name="closed">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP CLOSED timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/closed/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/closed/configd_update.sh"/>
+          </leaf>
+          <leaf name="fin-wait">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="TCP FIN-WAIT timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/fin-wait/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/tcp/fin-wait/configd_update.sh"/>
+          </leaf>
+        </container>
+        <container name="icmp">
+          <presence value="true"/>
+          <configd:help text="ICMP timeout"/>
+          <leaf name="established">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="ICMP ESTABLISHED timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/icmp/established/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/icmp/established/configd_update.sh"/>
+          </leaf>
+          <leaf name="new">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="ICMP NEW timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/icmp/new/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/icmp/new/configd_update.sh"/>
+          </leaf>
+        </container>
+        <container name="other">
+          <presence value="true"/>
+          <configd:help text="Generic connection timeout"/>
+          <leaf name="established">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Generic ESTABLISHED timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/other/established/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/other/established/configd_update.sh"/>
+          </leaf>
+          <leaf name="new">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Generic NEW timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/other/new/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/other/new/configd_update.sh"/>
+          </leaf>
+        </container>
+        <container name="custom">
+          <presence value="true"/>
+          <configd:help text="Custom connection timeout options"/>
+          <list name="rule">
+            <configd:help text="Rule number (1-9999)"/>
+            <configd:end executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/configd_end.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/configd_validate1.cli"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="uint32">
+                <range value="1..9999">
+                  <error-message>
+                    <value>rule number must be between 1 and 9999</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Rule number (1-9999)"/>
+            </leaf>
+            <leaf name="expire">
+              <type name="uint32">
+                <range value="1..21474836">
+                  <error-message>
+                    <value>Value must be between 1 and 21474836</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Expire time out value for this rule"/>
+            </leaf>
+            <container name="source">
+              <presence value="true"/>
+              <configd:help text="Source parameters"/>
+              <leaf name="address">
+                <type name="string">
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/address/configd_syntax1.cli"/>
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/address/configd_syntax2.cli"/>
+                </type>
+                <configd:help text="Source IP address, subnet, or address-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/address/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/address/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/address/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/address/configd_validate3.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/address/configd_validate4.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/address/configd_validate5.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/address/configd_validate6.cli"/>
+              </leaf>
+              <leaf name="port">
+                <type name="string"/>
+                <configd:help text="Source port or port-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/port/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/port/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/source/port/configd_validate2.cli"/>
+              </leaf>
+            </container>
+            <container name="destination">
+              <presence value="true"/>
+              <configd:help text="Destination parameters"/>
+              <leaf name="address">
+                <type name="string">
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/address/configd_syntax1.cli"/>
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/address/configd_syntax2.cli"/>
+                </type>
+                <configd:help text="Destination IP address, subnet, or address-group"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/address/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/address/configd_validate2.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/address/configd_validate3.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/address/configd_validate4.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/address/configd_validate5.cli"/>
+              </leaf>
+              <leaf name="port">
+                <type name="string"/>
+                <configd:help text="Destination port or port-group"/>
+                <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/port/configd_allowed.sh"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/port/configd_validate1.cli"/>
+                <configd:validate executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/destination/port/configd_validate2.cli"/>
+              </leaf>
+            </container>
+            <leaf name="protocol">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/protocol/configd_syntax1.cli"/>
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/protocol/configd_syntax2.cli"/>
+              </type>
+              <configd:help text="Protocol to match"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/session/timeout/custom/rule/protocol/configd_allowed.sh"/>
+            </leaf>
+          </list>
+        </container>
+        <container name="udp">
+          <presence value="true"/>
+          <configd:help text="UDP timeout"/>
+          <leaf name="established">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="UDP ESTABLISHED timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/udp/established/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/udp/established/configd_update.sh"/>
+          </leaf>
+          <leaf name="new">
+            <type name="uint32">
+              <range value="1..21474836">
+                <error-message>
+                  <value>Value must be between 1 and 21474836</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="UDP NEW timeout in seconds"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/system/session/timeout/udp/new/configd_delete.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/system/session/timeout/udp/new/configd_update.sh"/>
+          </leaf>
+        </container>
+      </container>
+    </container>
+  </augment>
+</module>

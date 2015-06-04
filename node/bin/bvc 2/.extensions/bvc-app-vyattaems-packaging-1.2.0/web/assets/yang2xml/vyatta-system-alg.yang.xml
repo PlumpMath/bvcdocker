@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-system-alg"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:system-alg="urn:vyatta.com:mgmt:vyatta-system-alg"
+        xmlns:system="urn:vyatta.com:mgmt:vyatta-system"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-system-alg"/>
+  <prefix value="system-alg"/>
+  <import module="vyatta-system">
+    <prefix value="system"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/system:system">
+    <container name="alg">
+      <presence value="true"/>
+      <configd:help text="Connection tracking modules settings"/>
+      <container name="icmp">
+        <presence value="true"/>
+        <configd:help text="ICMP connection tracking settings"/>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable ICMP connection tracking"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/system/alg/icmp/disable/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/system/alg/icmp/disable/configd_delete.sh"/>
+        </leaf>
+      </container>
+      <container name="pptp">
+        <presence value="true"/>
+        <configd:help text="PPTP connection tracking settings"/>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable PPTP connection tracking"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/system/alg/pptp/disable/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/system/alg/pptp/disable/configd_delete.sh"/>
+        </leaf>
+      </container>
+      <container name="tftp">
+        <presence value="true"/>
+        <configd:help text="TFTP connection tracking settings"/>
+        <configd:end executable="/opt/vyatta/sbin/vyatta-dp-npf-alg.pl --module=tftp"/>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable TFTP connection tracking"/>
+        </leaf>
+        <leaf-list name="port">
+          <max-elements value="32"/>
+          <configd:help text="Configure TFTP control ports"/>
+          <type name="uint16">
+            <range value="1..65535"/>
+          </type>
+        </leaf-list>
+      </container>
+      <container name="ftp">
+        <presence value="true"/>
+        <configd:help text="FTP connection tracking settings"/>
+        <configd:end executable="/opt/vyatta/sbin/vyatta-dp-npf-alg.pl --module=ftp"/>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable FTP connection tracking"/>
+        </leaf>
+        <leaf-list name="port">
+          <max-elements value="32"/>
+          <configd:help text="Configure FTP control ports"/>
+          <type name="uint16">
+            <range value="1..65535"/>
+          </type>
+        </leaf-list>
+      </container>
+      <container name="sip">
+        <presence value="true"/>
+        <configd:help text="SIP connection tracking settings"/>
+        <configd:end executable="/opt/vyatta/sbin/vyatta-dp-npf-alg.pl --module=sip"/>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable SIP connection tracking"/>
+        </leaf>
+        <leaf-list name="port">
+          <max-elements value="32"/>
+          <configd:help text="Configure SIP control ports"/>
+          <type name="uint16">
+            <range value="1..65535"/>
+          </type>
+        </leaf-list>
+        <leaf name="enable-indirect-media">
+          <type name="empty"/>
+          <configd:help text="Enable SIP indirect media mode"/>
+        </leaf>
+        <leaf name="enable-indirect-signaling">
+          <type name="empty"/>
+          <configd:help text="Enable SIP indirect signaling mode"/>
+        </leaf>
+      </container>
+      <container name="h323">
+        <presence value="true"/>
+        <configd:help text="H323 connection tracking settings"/>
+        <configd:end executable="/opt/vyatta/sbin/vyatta-dp-npf-alg.pl --module=h323"/>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable H323 connection tracking"/>
+        </leaf>
+        <container name="port">
+          <configd:help text="Configure H323 control ports"/>
+          <leaf-list name="ras">
+            <max-elements value="32"/>
+            <configd:help text="Configure H323 RAS control ports"/>
+            <type name="uint16">
+              <range value="1..65535"/>
+            </type>
+          </leaf-list>
+          <leaf-list name="call-setup">
+            <max-elements value="32"/>
+            <configd:help text="Configure H323 call-setup control ports"/>
+            <type name="uint16">
+              <range value="1..65535"/>
+            </type>
+          </leaf-list>
+        </container>
+        <leaf name="enable-indirect-media">
+          <type name="empty"/>
+          <configd:help text="Enable H323 indirect media mode"/>
+        </leaf>
+        <leaf name="enable-indirect-signaling">
+          <type name="empty"/>
+          <configd:help text="Enable H323 indirect signaling mode"/>
+        </leaf>
+      </container>
+      <container name="rpc">
+        <presence value="true"/>
+        <configd:help text="RPC connection tracking settings"/>
+        <configd:end executable="/opt/vyatta/sbin/vyatta-dp-npf-alg.pl --module=rpc"/>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable RPC connection tracking"/>
+        </leaf>
+        <leaf-list name="program">
+          <type name="uint32"/>
+          <max-elements value="32"/>
+          <configd:help text="Configure allowed RPC programs"/>
+        </leaf-list>
+      </container>
+    </container>
+  </augment>
+</module>

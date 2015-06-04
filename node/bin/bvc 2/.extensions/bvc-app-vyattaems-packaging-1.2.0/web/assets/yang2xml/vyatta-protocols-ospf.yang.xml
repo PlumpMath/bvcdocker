@@ -1,0 +1,2401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-protocols-ospf"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:protocols-ospf="urn:vyatta.com:mgmt:vyatta-protocols-ospf"
+        xmlns:protocols="urn:vyatta.com:mgmt:vyatta-protocols"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:interfaces-bridge="urn:vyatta.com:mgmt:vyatta-interfaces-bridge"
+        xmlns:interfaces-dataplane="urn:vyatta.com:mgmt:vyatta-interfaces-dataplane"
+        xmlns:interfaces-l2tpeth="urn:vyatta.com:mgmt:vyatta-interfaces-l2tpeth"
+        xmlns:interfaces-loopback="urn:vyatta.com:mgmt:vyatta-interfaces-loopback"
+        xmlns:interfaces-openvpn="urn:vyatta.com:mgmt:vyatta-interfaces-openvpn"
+        xmlns:interfaces-tunnel="urn:vyatta.com:mgmt:vyatta-interfaces-tunnel"
+        xmlns:interfaces-vti="urn:vyatta.com:mgmt:vyatta-interfaces-vti">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-protocols-ospf"/>
+  <prefix value="protocols-ospf"/>
+  <import module="vyatta-protocols">
+    <prefix value="protocols"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <import module="vyatta-interfaces">
+    <prefix value="if"/>
+  </import>
+  <import module="vyatta-interfaces-bridge">
+    <prefix value="interfaces-bridge"/>
+  </import>
+  <import module="vyatta-interfaces-dataplane">
+    <prefix value="interfaces-dataplane"/>
+  </import>
+  <import module="vyatta-interfaces-l2tpeth">
+    <prefix value="interfaces-l2tpeth"/>
+  </import>
+  <import module="vyatta-interfaces-loopback">
+    <prefix value="interfaces-loopback"/>
+  </import>
+  <import module="vyatta-interfaces-openvpn">
+    <prefix value="interfaces-openvpn"/>
+  </import>
+  <import module="vyatta-interfaces-tunnel">
+    <prefix value="interfaces-tunnel"/>
+  </import>
+  <import module="vyatta-interfaces-vti">
+    <prefix value="interfaces-vti"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-11-07">
+    <description>
+      <text>Update for 3.2.1R2</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-09-08">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/protocols:protocols">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:priority priority="620"/>
+      <configd:help text="Open Shortest Path First protocol (OSPF) parameters"/>
+      <configd:begin executable="/opt/vyatta/share/tmplscripts/protocols/ospf/configd_begin.sh"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/protocols/ospf/configd_end.sh"/>
+      <container name="parameters">
+        <presence value="true"/>
+        <configd:help text="OSPF specific parameters"/>
+        <leaf name="opaque-lsa">
+          <type name="empty"/>
+          <configd:help text="Enable the Opaque-LSA capability (rfc2370)"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/parameters/opaque-lsa/configd_create1.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/parameters/opaque-lsa/configd_delete1.cli"/>
+        </leaf>
+        <leaf name="abr-type">
+          <type name="enumeration">
+            <enum name="cisco">
+              <configd:help text="Cisco ABR type (default)"/>
+            </enum>
+            <enum name="ibm">
+              <configd:help text="Ibm ABR type"/>
+            </enum>
+            <enum name="shortcut">
+              <configd:help text="Shortcut ABR type"/>
+            </enum>
+            <enum name="standard">
+              <configd:help text="Standard ABR type"/>
+            </enum>
+          </type>
+          <configd:help text="OSPF ABR type"/>
+          <default value="cisco"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/parameters/abr-type/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/parameters/abr-type/configd_delete.sh"/>
+        </leaf>
+        <leaf name="router-id">
+          <type name="types:ipv4-address"/>
+          <configd:help text="Override the default router identifier"/>
+        </leaf>
+        <leaf name="rfc1583-compatibility">
+          <type name="empty"/>
+          <configd:help text="Enable rfc1583 criteria for handling AS external routes"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/parameters/rfc1583-compatibility/configd_create1.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/parameters/rfc1583-compatibility/configd_delete1.cli"/>
+        </leaf>
+      </container>
+      <list name="distribute-list">
+        <configd:help text="Access list to filter networks in routing updates"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="uint32">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distribute-list/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="Access list to filter networks in routing updates"/>
+        </leaf>
+        <leaf-list name="export">
+          <type name="enumeration">
+            <enum name="bgp"/>
+            <enum name="connected"/>
+            <enum name="kernel"/>
+            <enum name="rip"/>
+            <enum name="static"/>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="Filter for outgoing routing updates [REQUIRED]"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distribute-list/export/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distribute-list/export/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distribute-list/export/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distribute-list/export/configd_validate2.cli"/>
+        </leaf-list>
+        <leaf name="import">
+          <type name="empty"/>
+          <configd:help text="Filter for incoming routing updates"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distribute-list/import/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distribute-list/import/configd_delete.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distribute-list/import/configd_validate1.cli"/>
+        </leaf>
+      </list>
+      <leaf-list name="passive-interface">
+        <type name="string"/>
+        <ordered-by value="user"/>
+        <configd:help text="Suppress routing updates on an interface"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/ospf/passive-interface/configd_allowed.sh"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/passive-interface/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/passive-interface/configd_delete.sh"/>
+      </leaf-list>
+      <leaf name="default-metric">
+        <type name="uint32">
+          <range value="1..16777214">
+            <error-message>
+              <value>Must be between 1-16777214</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Metric of redistributed routes"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-metric/configd_update1.cli"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-metric/configd_delete1.cli"/>
+      </leaf>
+      <container name="refresh">
+        <presence value="true"/>
+        <configd:help text="Adjust refresh parameters"/>
+        <leaf name="timers">
+          <type name="uint32">
+            <range value="10..1800">
+              <error-message>
+                <value>must be between 10-1800</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Refresh timer"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/refresh/timers/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/refresh/timers/configd_delete.sh"/>
+        </leaf>
+      </container>
+      <list name="neighbor">
+        <configd:help text="Neighbor IP address"/>
+        <configd:begin executable="/opt/vyatta/share/tmplscripts/protocols/ospf/neighbor/configd_begin.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/neighbor/configd_delete.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="types:ipv4-address"/>
+          <configd:help text="Neighbor IP address"/>
+        </leaf>
+        <leaf name="priority">
+          <type name="uint32">
+            <range value="0..255">
+              <error-message>
+                <value>Priority must be between 0-255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Neighbor priority in seconds"/>
+          <default value="0"/>
+        </leaf>
+        <leaf name="poll-interval">
+          <type name="uint32">
+            <range value="1..65535">
+              <error-message>
+                <value>Must be between 1-65535 seconds</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Dead neighbor polling interval"/>
+          <default value="60"/>
+        </leaf>
+      </list>
+      <container name="redistribute">
+        <presence value="true"/>
+        <configd:help text="Redistribute information from another routing protocol"/>
+        <container name="bgp">
+          <presence value="true"/>
+          <configd:help text="Redistribute BGP routes"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/configd_create.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/configd_delete.cli"/>
+          <leaf name="metric-type">
+            <type name="uint32">
+              <range value="1..2">
+                <error-message>
+                  <value>metric must be either 1 or 2</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="OSPF metric type"/>
+            <default value="2"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/metric-type/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/metric-type/configd_delete.cli"/>
+          </leaf>
+          <leaf name="route-map">
+            <type name="string"/>
+            <configd:help text="Route map reference"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/route-map/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/route-map/configd_validate1.cli"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/route-map/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/route-map/configd_delete.cli"/>
+          </leaf>
+          <leaf name="metric">
+            <type name="uint32">
+              <range value="1..16777214">
+                <error-message>
+                  <value>metric must be between 1 and 16777214</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Metric for redistributed routes"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/metric/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/bgp/metric/configd_delete.cli"/>
+          </leaf>
+        </container>
+        <container name="kernel">
+          <presence value="true"/>
+          <configd:help text="Redistribute kernel routes"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/configd_create.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/configd_delete.cli"/>
+          <leaf name="metric-type">
+            <type name="uint32">
+              <range value="1..2">
+                <error-message>
+                  <value>metric must be either 1 or 2</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="OSPF metric type"/>
+            <default value="2"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/metric-type/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/metric-type/configd_delete.cli"/>
+          </leaf>
+          <leaf name="route-map">
+            <type name="string"/>
+            <configd:help text="Route map reference"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/route-map/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/route-map/configd_validate1.cli"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/route-map/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/route-map/configd_delete.cli"/>
+          </leaf>
+          <leaf name="metric">
+            <type name="uint32">
+              <range value="1..16777214">
+                <error-message>
+                  <value>metric must be between 1 and 16777214</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Metric for redistributed routes"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/metric/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/kernel/metric/configd_delete.cli"/>
+          </leaf>
+        </container>
+        <container name="rip">
+          <presence value="true"/>
+          <configd:help text="Redistribute RIP routes"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/configd_create.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/configd_delete.cli"/>
+          <leaf name="metric-type">
+            <type name="uint32">
+              <range value="1..2">
+                <error-message>
+                  <value>metric must be either 1 or 2</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="OSPF metric type"/>
+            <default value="2"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/metric-type/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/metric-type/configd_delete.cli"/>
+          </leaf>
+          <leaf name="route-map">
+            <type name="string"/>
+            <configd:help text="Route map reference"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/route-map/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/route-map/configd_validate1.cli"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/route-map/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/route-map/configd_delete.cli"/>
+          </leaf>
+          <leaf name="metric">
+            <type name="uint32">
+              <range value="1..16777214">
+                <error-message>
+                  <value>metric must be between 1 and 16777214</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Metric for redistributed routes"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/metric/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/rip/metric/configd_delete.cli"/>
+          </leaf>
+        </container>
+        <container name="connected">
+          <presence value="true"/>
+          <configd:help text="Redistribute connected routes"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/configd_create.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/configd_delete.cli"/>
+          <leaf name="metric-type">
+            <type name="uint32">
+              <range value="1..2">
+                <error-message>
+                  <value>metric must be either 1 or 2</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="OSPF metric type"/>
+            <default value="2"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/metric-type/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/metric-type/configd_delete.cli"/>
+          </leaf>
+          <leaf name="route-map">
+            <type name="string"/>
+            <configd:help text="Route map reference"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/route-map/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/route-map/configd_validate1.cli"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/route-map/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/route-map/configd_delete.cli"/>
+          </leaf>
+          <leaf name="metric">
+            <type name="uint32">
+              <range value="1..16777214">
+                <error-message>
+                  <value>metric must be between 1 and 16777214</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Metric for redistributed routes"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/metric/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/connected/metric/configd_delete.cli"/>
+          </leaf>
+        </container>
+        <container name="static">
+          <presence value="true"/>
+          <configd:help text="Redistribute static routes"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/configd_create.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/configd_delete.cli"/>
+          <leaf name="metric-type">
+            <type name="uint32">
+              <range value="1..2">
+                <error-message>
+                  <value>metric must be either 1 or 2</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="OSPF metric type"/>
+            <default value="2"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/metric-type/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/metric-type/configd_delete.cli"/>
+          </leaf>
+          <leaf name="route-map">
+            <type name="string"/>
+            <configd:help text="Route map reference"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/route-map/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/route-map/configd_validate1.cli"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/route-map/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/route-map/configd_delete.cli"/>
+          </leaf>
+          <leaf name="metric">
+            <type name="uint32">
+              <range value="1..16777214">
+                <error-message>
+                  <value>metric must be between 1 and 16777214</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Metric for redistributed routes"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/metric/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/redistribute/static/metric/configd_delete.cli"/>
+          </leaf>
+        </container>
+      </container>
+      <container name="distance">
+        <presence value="true"/>
+        <configd:help text="Administrative distance"/>
+        <leaf name="global">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>Must be between 1-255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="OSPF administrative distance"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distance/global/configd_create.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distance/global/configd_delete.cli"/>
+        </leaf>
+        <container name="ospf">
+          <presence value="true"/>
+          <configd:help text="OSPF administrative distance"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distance/ospf/configd_delete.cli"/>
+          <leaf name="external">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>Must be between 1-255</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Distance for external routes"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distance/ospf/external/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distance/ospf/external/configd_delete.cli"/>
+          </leaf>
+          <leaf name="inter-area">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>Must be between 1-255</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Distance for inter-area routes"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distance/ospf/inter-area/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distance/ospf/inter-area/configd_delete.cli"/>
+          </leaf>
+          <leaf name="intra-area">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>Must be between 1-255</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Distance for intra-area routes"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distance/ospf/intra-area/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/distance/ospf/intra-area/configd_delete.cli"/>
+          </leaf>
+        </container>
+      </container>
+      <list name="summary-address">
+        <configd:help text="Summary network and mask"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/summary-address/configd_create1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="types:ipv4-prefix"/>
+          <configd:help text="Summary network and mask"/>
+        </leaf>
+        <leaf name="tag">
+          <type name="uint32">
+            <range value="0..max">
+              <error-message>
+                <value>Tag must be between 0-4294967295</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="OSPF tag identifier for summary address."/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/summary-address/tag/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/summary-address/tag/configd_delete.sh"/>
+        </leaf>
+        <leaf name="advertise">
+          <type name="empty"/>
+          <configd:help text="Summary address to be advertised."/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/summary-address/advertise/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/summary-address/advertise/configd_delete.sh"/>
+        </leaf>
+        <leaf name="not-advertise">
+          <type name="empty"/>
+          <configd:help text="Summary address which shouldn't be advertised."/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/summary-address/not-advertise/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/summary-address/not-advertise/configd_delete.sh"/>
+        </leaf>
+      </list>
+      <container name="default-information">
+        <presence value="true"/>
+        <configd:help text="Control distribution of default information"/>
+        <container name="originate">
+          <presence value="true"/>
+          <configd:help text="Distribute a default route"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/configd_create.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/configd_delete.cli"/>
+          <leaf name="metric-type">
+            <type name="enumeration">
+              <enum name="1"/>
+              <enum name="2"/>
+            </type>
+            <configd:help text="OSPF metric type for default routes"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/metric-type/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/metric-type/configd_delete.cli"/>
+          </leaf>
+          <leaf name="always">
+            <type name="empty"/>
+            <configd:help text="Always advertise default route"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/always/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/always/configd_delete.cli"/>
+          </leaf>
+          <leaf name="route-map">
+            <type name="string"/>
+            <configd:help text="Route map reference"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/route-map/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/route-map/configd_validate.cli"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/route-map/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/route-map/configd_delete.cli"/>
+          </leaf>
+          <leaf name="metric">
+            <type name="uint32">
+              <range value="0..16777214">
+                <error-message>
+                  <value>must be between 0-16777214</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="OSPF default metric"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/metric/configd_create.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/default-information/originate/metric/configd_delete.cli"/>
+          </leaf>
+        </container>
+      </container>
+      <list name="area">
+        <configd:help text="OSPF Area"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="union">
+            <type name="types:ipv4-address"/>
+            <type name="uint32"/>
+          </type>
+          <configd:help text="OSPF Area"/>
+        </leaf>
+        <leaf name="authentication">
+          <type name="enumeration">
+            <enum name="plaintext">
+              <configd:help text="Use plain-text authentication"/>
+            </enum>
+            <enum name="md5">
+              <configd:help text="Use md5 authentication"/>
+            </enum>
+          </type>
+          <configd:help text="OSPF area authentication type"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/authentication/configd_allowed.sh"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/authentication/configd_update1.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/authentication/configd_delete1.cli"/>
+        </leaf>
+        <list name="virtual-link">
+          <configd:help text="Virtual link"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/configd_create1.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/configd_delete1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="types:ipv4-address"/>
+            <configd:help text="Virtual link"/>
+          </leaf>
+          <container name="authentication">
+            <presence value="true"/>
+            <configd:help text="Authentication"/>
+            <leaf name="plaintext-password">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/plaintext-password/configd_syntax1.cli"/>
+              </type>
+              <configd:secret bool="true"/>
+              <configd:help text="Plain text password"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/plaintext-password/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/plaintext-password/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/plaintext-password/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="plaintext">
+              <type name="empty"/>
+              <configd:help text="Plain text authentication"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/plaintext/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/plaintext/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/plaintext/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="md5">
+              <type name="empty"/>
+              <configd:help text="MD5 key id"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/md5/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/md5/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/md5/configd_validate1.cli"/>
+            </leaf>
+            <list name="md5-key-id">
+              <configd:help text="MD5 key id"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/md5-key-id/configd_validate1.cli"/>
+              <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/md5-key-id/configd_create1.cli"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/md5-key-id/configd_delete1.cli"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="uint32">
+                  <range value="1..255">
+                    <error-message>
+                      <value>ID must be between (1-255)</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="MD5 key id"/>
+              </leaf>
+              <leaf name="md5-key">
+                <type name="string">
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/authentication/md5-key-id/md5-key/configd_syntax1.cli"/>
+                </type>
+                <configd:help text="MD5 key"/>
+              </leaf>
+            </list>
+          </container>
+          <leaf name="dead-interval">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>Must be between 1-65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Interval after which a neighbor is declared dead"/>
+            <default value="40"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/dead-interval/configd_update1.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/dead-interval/configd_delete1.cli"/>
+          </leaf>
+          <leaf name="hello-interval">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>Must be between 1-65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Interval between hello packets"/>
+            <default value="10"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/hello-interval/configd_update1.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/hello-interval/configd_delete1.cli"/>
+          </leaf>
+          <leaf name="retransmit-interval">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>Must be between 1-65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Interval between retransmitting lost link state advertisements"/>
+            <default value="5"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/retransmit-interval/configd_update1.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/retransmit-interval/configd_delete1.cli"/>
+          </leaf>
+          <leaf name="transmit-delay">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>Must be between 1-65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Link state transmit delay"/>
+            <default value="1"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/transmit-delay/configd_update1.cli"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/virtual-link/transmit-delay/configd_delete1.cli"/>
+          </leaf>
+        </list>
+        <container name="area-type">
+          <presence value="true"/>
+          <configd:help text="Area type"/>
+          <container name="stub">
+            <presence value="true"/>
+            <configd:help text="Stub OSPF area"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/stub/configd_create.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/stub/configd_delete.sh"/>
+            <leaf name="default-cost">
+              <type name="uint32">
+                <range value="0..16777215">
+                  <error-message>
+                    <value>Cost must be between 0-16777215</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Summary-default cost of stub area"/>
+              <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/stub/default-cost/configd_create.sh"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/stub/default-cost/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/stub/default-cost/configd_delete.sh"/>
+            </leaf>
+            <leaf name="no-summary">
+              <type name="empty"/>
+              <configd:help text="Do not inject inter-area routes into stub"/>
+              <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/stub/no-summary/configd_create.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/stub/no-summary/configd_delete.sh"/>
+            </leaf>
+          </container>
+          <container name="nssa">
+            <presence value="true"/>
+            <configd:help text="Nssa OSPF area"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/configd_create.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/configd_delete.sh"/>
+            <leaf name="default-cost">
+              <type name="uint32">
+                <range value="0..16777215">
+                  <error-message>
+                    <value>Cost must be between 0-16777215</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Summary-default cost of nssa area"/>
+              <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/default-cost/configd_create.sh"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/default-cost/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/default-cost/configd_delete.sh"/>
+            </leaf>
+            <container name="default-information-originate">
+              <presence value="true"/>
+              <configd:help text="Distribute a default route into an NSSA area"/>
+              <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/default-information-originate/configd_create.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/default-information-originate/configd_delete.sh"/>
+              <leaf name="metric-type">
+                <type name="enumeration">
+                  <enum name="1"/>
+                  <enum name="2"/>
+                </type>
+                <configd:help text="OSPF metric type for default routes"/>
+                <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/default-information-originate/metric-type/configd_create.sh"/>
+                <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/default-information-originate/metric-type/configd_delete.sh"/>
+              </leaf>
+              <leaf name="metric">
+                <type name="uint32">
+                  <range value="0..16777214">
+                    <error-message>
+                      <value>must be between 0-16777214</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="OSPF default metric"/>
+                <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/default-information-originate/metric/configd_create.sh"/>
+                <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/default-information-originate/metric/configd_delete.sh"/>
+              </leaf>
+            </container>
+            <leaf name="translate">
+              <type name="enumeration">
+                <enum name="always">
+                  <configd:help text="NSSA-ABR to always translate"/>
+                </enum>
+                <enum name="candidate">
+                  <configd:help text="NSSA-ABR for translate election (default)"/>
+                </enum>
+              </type>
+              <configd:help text="Nssa-abr"/>
+              <default value="candidate"/>
+              <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/translate/configd_create.sh"/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/translate/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/translate/configd_delete.sh"/>
+            </leaf>
+            <leaf name="no-summary">
+              <type name="empty"/>
+              <configd:help text="Do not inject inter-area routes into stub"/>
+              <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/no-summary/configd_create.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/area-type/nssa/no-summary/configd_delete.sh"/>
+            </leaf>
+          </container>
+        </container>
+        <leaf name="shortcut">
+          <type name="enumeration">
+            <enum name="default">
+              <configd:help text="Set default; "/>
+            </enum>
+            <enum name="disable">
+              <configd:help text="Disable shortcutting mode; "/>
+            </enum>
+            <enum name="enable">
+              <configd:help text="Enable  shortcutting mode; "/>
+            </enum>
+          </type>
+          <configd:help text="Area's shortcut mode"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/shortcut/configd_allowed.sh"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/shortcut/configd_update1.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/shortcut/configd_delete1.cli"/>
+        </leaf>
+        <list name="range">
+          <configd:help text="Summarize routes matching prefix (border routers only)"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/range/configd_end.sh"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="types:ipv4-prefix">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/range/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Summarize routes matching prefix (border routers only)"/>
+          </leaf>
+          <leaf name="not-advertise">
+            <type name="empty"/>
+            <configd:help text="Do not advertise this range"/>
+          </leaf>
+        </list>
+        <leaf-list name="network">
+          <type name="types:ipv4-prefix">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/network/configd_syntax1.cli"/>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="OSPF network [REQUIRED]"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/network/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/area/network/configd_delete.sh"/>
+        </leaf-list>
+      </list>
+      <container name="auto-cost">
+        <presence value="true"/>
+        <configd:help text="Calculate OSPF interface cost according to bandwidth"/>
+        <leaf name="reference-bandwidth">
+          <type name="uint32">
+            <range value="1..4294967">
+              <error-message>
+                <value>Must be between 1-4294967</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Reference bandwidth method to assign OSPF cost"/>
+          <default value="100"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/auto-cost/reference-bandwidth/configd_update1.cli"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/auto-cost/reference-bandwidth/configd_delete1.cli"/>
+        </leaf>
+      </container>
+      <container name="overflow">
+        <presence value="true"/>
+        <configd:help text="Configure OSPF Overflow handling capabilities."/>
+        <container name="database">
+          <presence value="true"/>
+          <configd:help text="configure type of ospf overflow protection"/>
+          <container name="hard">
+            <presence value="true"/>
+            <configd:help text="Hard limit on number of LSAs, instance will shut down if limit exceeded"/>
+            <leaf name="limit">
+              <type name="uint32">
+                <range value="0..4294967294">
+                  <error-message>
+                    <value>must be between 0-4294967294</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Max LSAs in database."/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/overflow/database/hard/limit/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/overflow/database/hard/limit/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/overflow/database/hard/limit/configd_validate1.cli"/>
+            </leaf>
+          </container>
+          <container name="external">
+            <presence value="true"/>
+            <configd:help text="Max AS-External LSAs in database."/>
+            <list name="limit">
+              <configd:help text="Max LSAs in database."/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/overflow/database/external/limit/configd_validate1.cli"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="uint32">
+                  <range value="0..2147483647">
+                    <error-message>
+                      <value>must be between 0-2147483647</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Max LSAs in database."/>
+              </leaf>
+              <leaf name="recovery">
+                <type name="uint32">
+                  <range value="0..65535">
+                    <error-message>
+                      <value>must be between 0-65535</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Time to recover (0 implies no recovery)"/>
+                <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/overflow/database/external/limit/recovery/configd_update.sh"/>
+                <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/overflow/database/external/limit/recovery/configd_delete.sh"/>
+              </leaf>
+            </list>
+          </container>
+          <container name="soft">
+            <presence value="true"/>
+            <configd:help text="Soft limit on number of LSAs in database, will warn if exceeded"/>
+            <leaf name="limit">
+              <type name="uint32">
+                <range value="0..4294967294">
+                  <error-message>
+                    <value>must be between 0-4294967294</value>
+                  </error-message>
+                </range>
+              </type>
+              <configd:help text="Max LSAs in database."/>
+              <configd:update executable="/opt/vyatta/share/tmplscripts/protocols/ospf/overflow/database/soft/limit/configd_update.sh"/>
+              <configd:delete executable="/opt/vyatta/share/tmplscripts/protocols/ospf/overflow/database/soft/limit/configd_delete.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/protocols/ospf/overflow/database/soft/limit/configd_validate1.cli"/>
+            </leaf>
+          </container>
+        </container>
+      </container>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-bridge:bridge/interfaces-bridge:ip">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:help text="Open Shortest Path First (OSPF) parameters"/>
+      <leaf name="priority">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Must be between 0-255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Router priority"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/priority/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/priority/configd_delete.sh"/>
+      </leaf>
+      <container name="authentication">
+        <presence value="true"/>
+        <configd:help text="OSPF interface authentication"/>
+        <leaf name="plaintext-password">
+          <type name="string">
+            <pattern value="[^&#9;&#10;\r ]{1,8}">
+              <error-message>
+                <value>Password must be 8 characters or less</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="Plain text password"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/plaintext-password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/plaintext-password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="plaintext">
+          <type name="empty"/>
+          <configd:help text="Enable/disable plain text authentication"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/plaintext/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/plaintext/configd_delete.sh"/>
+        </leaf>
+        <leaf name="md5">
+          <type name="empty"/>
+          <configd:help text="MD5 parameters"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/md5/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/md5/configd_delete.sh"/>
+        </leaf>
+        <list name="md5-key-id">
+          <configd:help text="MD5 key id"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/md5-key-id/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>ID must be between (1-255)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="MD5 key id"/>
+          </leaf>
+          <leaf name="md5-key">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,16}">
+                <error-message>
+                  <value>MD5 key must be 16 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="MD5 key"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/md5-key-id/md5-key/configd_create.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/md5-key-id/md5-key/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/authentication/md5-key-id/md5-key/configd_delete.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <leaf name="mtu-ignore">
+        <type name="empty"/>
+        <configd:help text="Disable Maximum Transmission Unit (MTU) mismatch detection"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/mtu-ignore/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/mtu-ignore/configd_delete.sh"/>
+      </leaf>
+      <leaf name="dead-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval after which neighbor is dead"/>
+        <default value="40"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/dead-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/dead-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="hello-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between hello packets"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/hello-interval/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/hello-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="retransmit-interval">
+        <type name="uint32">
+          <range value="5..65535">
+            <error-message>
+              <value>Must be between 5-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between retransmitting lost link state advertisements"/>
+        <default value="5"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/retransmit-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/retransmit-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="cost">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interface cost"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/cost/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/cost/configd_delete.sh"/>
+      </leaf>
+      <leaf name="network">
+        <type name="enumeration">
+          <enum name="broadcast">
+            <configd:help text="Broadcast network type"/>
+          </enum>
+          <enum name="non-broadcast">
+            <configd:help text="Non-broadcast network type"/>
+          </enum>
+          <enum name="point-to-multipoint">
+            <configd:help text="Point-to-multipoint network type"/>
+          </enum>
+          <enum name="point-to-point">
+            <configd:help text="Point-to-point network type"/>
+          </enum>
+        </type>
+        <configd:help text="Network type"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/network/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/network/configd_delete.sh"/>
+      </leaf>
+      <leaf name="transmit-delay">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Link state transmit delay"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/transmit-delay/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/bridge/ip/ospf/transmit-delay/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane/interfaces-dataplane:ip">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:help text="Open Shortest Path First (OSPF) parameters"/>
+      <leaf name="priority">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Must be between 0-255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Router priority"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/priority/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/priority/configd_delete.sh"/>
+      </leaf>
+      <container name="authentication">
+        <presence value="true"/>
+        <configd:help text="OSPF interface authentication"/>
+        <leaf name="plaintext-password">
+          <type name="string">
+            <pattern value="[^&#9;&#10;\r ]{1,8}">
+              <error-message>
+                <value>Password must be 8 characters or less</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="Plain text password"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/plaintext-password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/plaintext-password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="plaintext">
+          <type name="empty"/>
+          <configd:help text="Enable/disable plain text authentication"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/plaintext/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/plaintext/configd_delete.sh"/>
+        </leaf>
+        <leaf name="md5">
+          <type name="empty"/>
+          <configd:help text="MD5 parameters"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/md5/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/md5/configd_delete.sh"/>
+        </leaf>
+        <list name="md5-key-id">
+          <configd:help text="MD5 key id"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/md5-key-id/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>ID must be between (1-255)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="MD5 key id"/>
+          </leaf>
+          <leaf name="md5-key">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,16}">
+                <error-message>
+                  <value>MD5 key must be 16 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="MD5 key"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/md5-key-id/md5-key/configd_create.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/md5-key-id/md5-key/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/authentication/md5-key-id/md5-key/configd_delete.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <leaf name="mtu-ignore">
+        <type name="empty"/>
+        <configd:help text="Disable Maximum Transmission Unit (MTU) mismatch detection"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/mtu-ignore/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/mtu-ignore/configd_delete.sh"/>
+      </leaf>
+      <leaf name="dead-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval after which neighbor is dead"/>
+        <default value="40"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/dead-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/dead-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="hello-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between hello packets"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/hello-interval/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/hello-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="retransmit-interval">
+        <type name="uint32">
+          <range value="5..65535">
+            <error-message>
+              <value>Must be between 5-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between retransmitting lost link state advertisements"/>
+        <default value="5"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/retransmit-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/retransmit-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="cost">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interface cost"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/cost/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/cost/configd_delete.sh"/>
+      </leaf>
+      <leaf name="network">
+        <type name="enumeration">
+          <enum name="broadcast">
+            <configd:help text="Broadcast network type"/>
+          </enum>
+          <enum name="non-broadcast">
+            <configd:help text="Non-broadcast network type"/>
+          </enum>
+          <enum name="point-to-multipoint">
+            <configd:help text="Point-to-multipoint network type"/>
+          </enum>
+          <enum name="point-to-point">
+            <configd:help text="Point-to-point network type"/>
+          </enum>
+        </type>
+        <configd:help text="Network type"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/network/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/network/configd_delete.sh"/>
+      </leaf>
+      <leaf name="transmit-delay">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Link state transmit delay"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/transmit-delay/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/ospf/transmit-delay/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane/interfaces-dataplane:vif/interfaces-dataplane:ip">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:help text="Open Shortest Path First (OSPF) parameters"/>
+      <leaf name="priority">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Must be between 0-255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Router priority"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/priority/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/priority/configd_delete.sh"/>
+      </leaf>
+      <container name="authentication">
+        <presence value="true"/>
+        <configd:help text="OSPF interface authentication"/>
+        <leaf name="plaintext-password">
+          <type name="string">
+            <pattern value="[^&#9;&#10;\r ]{1,8}">
+              <error-message>
+                <value>Password must be 8 characters or less</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="Plain text password"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/plaintext-password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/plaintext-password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="plaintext">
+          <type name="empty"/>
+          <configd:help text="Enable/disable plain text authentication"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/plaintext/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/plaintext/configd_delete.sh"/>
+        </leaf>
+        <leaf name="md5">
+          <type name="empty"/>
+          <configd:help text="MD5 parameters"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/md5/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/md5/configd_delete.sh"/>
+        </leaf>
+        <list name="md5-key-id">
+          <configd:help text="MD5 key id"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/md5-key-id/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>ID must be between (1-255)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="MD5 key id"/>
+          </leaf>
+          <leaf name="md5-key">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,16}">
+                <error-message>
+                  <value>MD5 key must be 16 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="MD5 key"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/md5-key-id/md5-key/configd_create.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/md5-key-id/md5-key/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/authentication/md5-key-id/md5-key/configd_delete.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <leaf name="mtu-ignore">
+        <type name="empty"/>
+        <configd:help text="Disable Maximum Transmission Unit (MTU) mismatch detection"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/mtu-ignore/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/mtu-ignore/configd_delete.sh"/>
+      </leaf>
+      <leaf name="dead-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval after which neighbor is dead"/>
+        <default value="40"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/dead-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/dead-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="hello-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between hello packets"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/hello-interval/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/hello-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="retransmit-interval">
+        <type name="uint32">
+          <range value="5..65535">
+            <error-message>
+              <value>Must be between 5-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between retransmitting lost link state advertisements"/>
+        <default value="5"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/retransmit-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/retransmit-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="cost">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interface cost"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/cost/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/cost/configd_delete.sh"/>
+      </leaf>
+      <leaf name="network">
+        <type name="enumeration">
+          <enum name="broadcast">
+            <configd:help text="Broadcast network type"/>
+          </enum>
+          <enum name="non-broadcast">
+            <configd:help text="Non-broadcast network type"/>
+          </enum>
+          <enum name="point-to-multipoint">
+            <configd:help text="Point-to-multipoint network type"/>
+          </enum>
+          <enum name="point-to-point">
+            <configd:help text="Point-to-point network type"/>
+          </enum>
+        </type>
+        <configd:help text="Network type"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/network/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/network/configd_delete.sh"/>
+      </leaf>
+      <leaf name="transmit-delay">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Link state transmit delay"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/transmit-delay/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/ospf/transmit-delay/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-l2tpeth:l2tpeth/interfaces-l2tpeth:ip">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:help text="Open Shortest Path First (OSPF) parameters"/>
+      <leaf name="priority">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Must be between 0-255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Router priority"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/priority/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/priority/configd_delete.sh"/>
+      </leaf>
+      <container name="authentication">
+        <presence value="true"/>
+        <configd:help text="OSPF interface authentication"/>
+        <leaf name="plaintext-password">
+          <type name="string">
+            <pattern value="[^&#9;&#10;\r ]{1,8}">
+              <error-message>
+                <value>Password must be 8 characters or less</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="Plain text password"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/plaintext-password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/plaintext-password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="plaintext">
+          <type name="empty"/>
+          <configd:help text="Enable/disable plain text authentication"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/plaintext/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/plaintext/configd_delete.sh"/>
+        </leaf>
+        <leaf name="md5">
+          <type name="empty"/>
+          <configd:help text="MD5 parameters"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/md5/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/md5/configd_delete.sh"/>
+        </leaf>
+        <list name="md5-key-id">
+          <configd:help text="MD5 key id"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/md5-key-id/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>ID must be between (1-255)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="MD5 key id"/>
+          </leaf>
+          <leaf name="md5-key">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,16}">
+                <error-message>
+                  <value>MD5 key must be 16 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="MD5 key"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/md5-key-id/md5-key/configd_create.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/md5-key-id/md5-key/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/authentication/md5-key-id/md5-key/configd_delete.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <leaf name="mtu-ignore">
+        <type name="empty"/>
+        <configd:help text="Disable Maximum Transmission Unit (MTU) mismatch detection"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/mtu-ignore/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/mtu-ignore/configd_delete.sh"/>
+      </leaf>
+      <leaf name="dead-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval after which neighbor is dead"/>
+        <default value="40"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/dead-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/dead-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="hello-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between hello packets"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/hello-interval/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/hello-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="retransmit-interval">
+        <type name="uint32">
+          <range value="5..65535">
+            <error-message>
+              <value>Must be between 5-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between retransmitting lost link state advertisements"/>
+        <default value="5"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/retransmit-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/retransmit-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="cost">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interface cost"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/cost/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/cost/configd_delete.sh"/>
+      </leaf>
+      <leaf name="network">
+        <type name="enumeration">
+          <enum name="broadcast">
+            <configd:help text="Broadcast network type"/>
+          </enum>
+          <enum name="non-broadcast">
+            <configd:help text="Non-broadcast network type"/>
+          </enum>
+          <enum name="point-to-multipoint">
+            <configd:help text="Point-to-multipoint network type"/>
+          </enum>
+          <enum name="point-to-point">
+            <configd:help text="Point-to-point network type"/>
+          </enum>
+        </type>
+        <configd:help text="Network type"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/network/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/network/configd_delete.sh"/>
+      </leaf>
+      <leaf name="transmit-delay">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Link state transmit delay"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/transmit-delay/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/ip/ospf/transmit-delay/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-l2tpeth:l2tpeth/interfaces-l2tpeth:vif/interfaces-l2tpeth:ip">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:help text="Open Shortest Path First (OSPF) parameters"/>
+      <leaf name="priority">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Must be between 0-255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Router priority"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/priority/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/priority/configd_delete.sh"/>
+      </leaf>
+      <container name="authentication">
+        <presence value="true"/>
+        <configd:help text="OSPF interface authentication"/>
+        <leaf name="plaintext-password">
+          <type name="string">
+            <pattern value="[^&#9;&#10;\r ]{1,8}">
+              <error-message>
+                <value>Password must be 8 characters or less</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="Plain text password"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/plaintext-password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/plaintext-password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="plaintext">
+          <type name="empty"/>
+          <configd:help text="Enable/disable plain text authentication"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/plaintext/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/plaintext/configd_delete.sh"/>
+        </leaf>
+        <leaf name="md5">
+          <type name="empty"/>
+          <configd:help text="MD5 parameters"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/md5/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/md5/configd_delete.sh"/>
+        </leaf>
+        <list name="md5-key-id">
+          <configd:help text="MD5 key id"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/md5-key-id/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>ID must be between (1-255)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="MD5 key id"/>
+          </leaf>
+          <leaf name="md5-key">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,16}">
+                <error-message>
+                  <value>MD5 key must be 16 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="MD5 key"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/md5-key-id/md5-key/configd_create.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/md5-key-id/md5-key/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/authentication/md5-key-id/md5-key/configd_delete.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <leaf name="mtu-ignore">
+        <type name="empty"/>
+        <configd:help text="Disable Maximum Transmission Unit (MTU) mismatch detection"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/mtu-ignore/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/mtu-ignore/configd_delete.sh"/>
+      </leaf>
+      <leaf name="dead-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval after which neighbor is dead"/>
+        <default value="40"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/dead-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/dead-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="hello-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between hello packets"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/hello-interval/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/hello-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="retransmit-interval">
+        <type name="uint32">
+          <range value="5..65535">
+            <error-message>
+              <value>Must be between 5-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between retransmitting lost link state advertisements"/>
+        <default value="5"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/retransmit-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/retransmit-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="cost">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interface cost"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/cost/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/cost/configd_delete.sh"/>
+      </leaf>
+      <leaf name="network">
+        <type name="enumeration">
+          <enum name="broadcast">
+            <configd:help text="Broadcast network type"/>
+          </enum>
+          <enum name="non-broadcast">
+            <configd:help text="Non-broadcast network type"/>
+          </enum>
+          <enum name="point-to-multipoint">
+            <configd:help text="Point-to-multipoint network type"/>
+          </enum>
+          <enum name="point-to-point">
+            <configd:help text="Point-to-point network type"/>
+          </enum>
+        </type>
+        <configd:help text="Network type"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/network/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/network/configd_delete.sh"/>
+      </leaf>
+      <leaf name="transmit-delay">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Link state transmit delay"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/transmit-delay/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/l2tpeth/vif/ip/ospf/transmit-delay/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-loopback:loopback/interfaces-loopback:ip">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:help text="Open Shortest Path First (OSPF) parameters"/>
+      <leaf name="priority">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Must be between 0-255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Router priority"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/priority/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/priority/configd_delete.sh"/>
+      </leaf>
+      <container name="authentication">
+        <presence value="true"/>
+        <configd:help text="OSPF interface authentication"/>
+        <leaf name="plaintext-password">
+          <type name="string">
+            <pattern value="[^&#9;&#10;\r ]{1,8}">
+              <error-message>
+                <value>Password must be 8 characters or less</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="Plain text password"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/plaintext-password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/plaintext-password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="plaintext">
+          <type name="empty"/>
+          <configd:help text="Enable/disable plain text authentication"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/plaintext/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/plaintext/configd_delete.sh"/>
+        </leaf>
+        <leaf name="md5">
+          <type name="empty"/>
+          <configd:help text="MD5 parameters"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/md5/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/md5/configd_delete.sh"/>
+        </leaf>
+        <list name="md5-key-id">
+          <configd:help text="MD5 key id"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/md5-key-id/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>ID must be between (1-255)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="MD5 key id"/>
+          </leaf>
+          <leaf name="md5-key">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,16}">
+                <error-message>
+                  <value>MD5 key must be 16 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="MD5 key"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/md5-key-id/md5-key/configd_create.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/md5-key-id/md5-key/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/authentication/md5-key-id/md5-key/configd_delete.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <leaf name="mtu-ignore">
+        <type name="empty"/>
+        <configd:help text="Disable Maximum Transmission Unit (MTU) mismatch detection"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/mtu-ignore/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/mtu-ignore/configd_delete.sh"/>
+      </leaf>
+      <leaf name="dead-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval after which neighbor is dead"/>
+        <default value="40"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/dead-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/dead-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="hello-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between hello packets"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/hello-interval/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/hello-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="retransmit-interval">
+        <type name="uint32">
+          <range value="5..65535">
+            <error-message>
+              <value>Must be between 5-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between retransmitting lost link state advertisements"/>
+        <default value="5"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/retransmit-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/retransmit-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="cost">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interface cost"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/cost/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/cost/configd_delete.sh"/>
+      </leaf>
+      <leaf name="network">
+        <type name="enumeration">
+          <enum name="broadcast">
+            <configd:help text="Broadcast network type"/>
+          </enum>
+          <enum name="non-broadcast">
+            <configd:help text="Non-broadcast network type"/>
+          </enum>
+          <enum name="point-to-multipoint">
+            <configd:help text="Point-to-multipoint network type"/>
+          </enum>
+          <enum name="point-to-point">
+            <configd:help text="Point-to-point network type"/>
+          </enum>
+        </type>
+        <configd:help text="Network type"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/network/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/network/configd_delete.sh"/>
+      </leaf>
+      <leaf name="transmit-delay">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Link state transmit delay"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/transmit-delay/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/loopback/ip/ospf/transmit-delay/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-openvpn:openvpn/interfaces-openvpn:ip">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:help text="Open Shortest Path First (OSPF) parameters"/>
+      <leaf name="priority">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Must be between 0-255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Router priority"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/priority/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/priority/configd_delete.sh"/>
+      </leaf>
+      <container name="authentication">
+        <presence value="true"/>
+        <configd:help text="OSPF interface authentication"/>
+        <leaf name="plaintext-password">
+          <type name="string">
+            <pattern value="[^&#9;&#10;\r ]{1,8}">
+              <error-message>
+                <value>Password must be 8 characters or less</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="Plain text password"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/plaintext-password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/plaintext-password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="plaintext">
+          <type name="empty"/>
+          <configd:help text="Enable/disable plain text authentication"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/plaintext/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/plaintext/configd_delete.sh"/>
+        </leaf>
+        <leaf name="md5">
+          <type name="empty"/>
+          <configd:help text="MD5 parameters"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/md5/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/md5/configd_delete.sh"/>
+        </leaf>
+        <list name="md5-key-id">
+          <configd:help text="MD5 key id"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/md5-key-id/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>ID must be between (1-255)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="MD5 key id"/>
+          </leaf>
+          <leaf name="md5-key">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,16}">
+                <error-message>
+                  <value>MD5 key must be 16 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="MD5 key"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/md5-key-id/md5-key/configd_create.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/md5-key-id/md5-key/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/authentication/md5-key-id/md5-key/configd_delete.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <leaf name="mtu-ignore">
+        <type name="empty"/>
+        <configd:help text="Disable Maximum Transmission Unit (MTU) mismatch detection"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/mtu-ignore/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/mtu-ignore/configd_delete.sh"/>
+      </leaf>
+      <leaf name="dead-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval after which neighbor is dead"/>
+        <default value="40"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/dead-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/dead-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="hello-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between hello packets"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/hello-interval/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/hello-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="retransmit-interval">
+        <type name="uint32">
+          <range value="5..65535">
+            <error-message>
+              <value>Must be between 5-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between retransmitting lost link state advertisements"/>
+        <default value="5"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/retransmit-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/retransmit-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="cost">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interface cost"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/cost/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/cost/configd_delete.sh"/>
+      </leaf>
+      <leaf name="network">
+        <type name="enumeration">
+          <enum name="broadcast">
+            <configd:help text="Broadcast network type"/>
+          </enum>
+          <enum name="non-broadcast">
+            <configd:help text="Non-broadcast network type"/>
+          </enum>
+          <enum name="point-to-multipoint">
+            <configd:help text="Point-to-multipoint network type"/>
+          </enum>
+          <enum name="point-to-point">
+            <configd:help text="Point-to-point network type"/>
+          </enum>
+        </type>
+        <configd:help text="Network type"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/network/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/network/configd_delete.sh"/>
+      </leaf>
+      <leaf name="transmit-delay">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Link state transmit delay"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/transmit-delay/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/ip/ospf/transmit-delay/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-tunnel:tunnel/interfaces-tunnel:ip">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:help text="Open Shortest Path First (OSPF) parameters"/>
+      <leaf name="priority">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Must be between 0-255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Router priority"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/priority/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/priority/configd_delete.sh"/>
+      </leaf>
+      <container name="authentication">
+        <presence value="true"/>
+        <configd:help text="OSPF interface authentication"/>
+        <leaf name="plaintext-password">
+          <type name="string">
+            <pattern value="[^&#9;&#10;\r ]{1,8}">
+              <error-message>
+                <value>Password must be 8 characters or less</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="Plain text password"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/plaintext-password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/plaintext-password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="plaintext">
+          <type name="empty"/>
+          <configd:help text="Enable/disable plain text authentication"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/plaintext/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/plaintext/configd_delete.sh"/>
+        </leaf>
+        <leaf name="md5">
+          <type name="empty"/>
+          <configd:help text="MD5 parameters"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/md5/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/md5/configd_delete.sh"/>
+        </leaf>
+        <list name="md5-key-id">
+          <configd:help text="MD5 key id"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/md5-key-id/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>ID must be between (1-255)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="MD5 key id"/>
+          </leaf>
+          <leaf name="md5-key">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,16}">
+                <error-message>
+                  <value>MD5 key must be 16 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="MD5 key"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/md5-key-id/md5-key/configd_create.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/md5-key-id/md5-key/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/authentication/md5-key-id/md5-key/configd_delete.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <leaf name="mtu-ignore">
+        <type name="empty"/>
+        <configd:help text="Disable Maximum Transmission Unit (MTU) mismatch detection"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/mtu-ignore/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/mtu-ignore/configd_delete.sh"/>
+      </leaf>
+      <leaf name="dead-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval after which neighbor is dead"/>
+        <default value="40"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/dead-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/dead-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="hello-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between hello packets"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/hello-interval/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/hello-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="retransmit-interval">
+        <type name="uint32">
+          <range value="5..65535">
+            <error-message>
+              <value>Must be between 5-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between retransmitting lost link state advertisements"/>
+        <default value="5"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/retransmit-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/retransmit-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="cost">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interface cost"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/cost/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/cost/configd_delete.sh"/>
+      </leaf>
+      <leaf name="network">
+        <type name="enumeration">
+          <enum name="broadcast">
+            <configd:help text="Broadcast network type"/>
+          </enum>
+          <enum name="non-broadcast">
+            <configd:help text="Non-broadcast network type"/>
+          </enum>
+          <enum name="point-to-multipoint">
+            <configd:help text="Point-to-multipoint network type"/>
+          </enum>
+          <enum name="point-to-point">
+            <configd:help text="Point-to-point network type"/>
+          </enum>
+        </type>
+        <configd:help text="Network type"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/network/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/network/configd_delete.sh"/>
+      </leaf>
+      <leaf name="transmit-delay">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Link state transmit delay"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/transmit-delay/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/tunnel/ip/ospf/transmit-delay/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-vti:vti/interfaces-vti:ip">
+    <container name="ospf">
+      <presence value="true"/>
+      <configd:help text="Open Shortest Path First (OSPF) parameters"/>
+      <leaf name="priority">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Must be between 0-255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Router priority"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/priority/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/priority/configd_delete.sh"/>
+      </leaf>
+      <container name="authentication">
+        <presence value="true"/>
+        <configd:help text="OSPF interface authentication"/>
+        <leaf name="plaintext-password">
+          <type name="string">
+            <pattern value="[^&#9;&#10;\r ]{1,8}">
+              <error-message>
+                <value>Password must be 8 characters or less</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:secret bool="true"/>
+          <configd:help text="Plain text password"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/plaintext-password/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/plaintext-password/configd_delete.sh"/>
+        </leaf>
+        <leaf name="plaintext">
+          <type name="empty"/>
+          <configd:help text="Enable/disable plain text authentication"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/plaintext/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/plaintext/configd_delete.sh"/>
+        </leaf>
+        <leaf name="md5">
+          <type name="empty"/>
+          <configd:help text="MD5 parameters"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/md5/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/md5/configd_delete.sh"/>
+        </leaf>
+        <list name="md5-key-id">
+          <configd:help text="MD5 key id"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/md5-key-id/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..255">
+                <error-message>
+                  <value>ID must be between (1-255)</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="MD5 key id"/>
+          </leaf>
+          <leaf name="md5-key">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,16}">
+                <error-message>
+                  <value>MD5 key must be 16 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="MD5 key"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/md5-key-id/md5-key/configd_create.sh"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/md5-key-id/md5-key/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/authentication/md5-key-id/md5-key/configd_delete.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <leaf name="mtu-ignore">
+        <type name="empty"/>
+        <configd:help text="Disable Maximum Transmission Unit (MTU) mismatch detection"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/mtu-ignore/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/mtu-ignore/configd_delete.sh"/>
+      </leaf>
+      <leaf name="dead-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval after which neighbor is dead"/>
+        <default value="40"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/dead-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/dead-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="hello-interval">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between hello packets"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/hello-interval/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/hello-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="retransmit-interval">
+        <type name="uint32">
+          <range value="5..65535">
+            <error-message>
+              <value>Must be between 5-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interval between retransmitting lost link state advertisements"/>
+        <default value="5"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/retransmit-interval/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/retransmit-interval/configd_delete.sh"/>
+      </leaf>
+      <leaf name="cost">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Interface cost"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/cost/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/cost/configd_delete.sh"/>
+      </leaf>
+      <leaf name="network">
+        <type name="enumeration">
+          <enum name="broadcast">
+            <configd:help text="Broadcast network type"/>
+          </enum>
+          <enum name="non-broadcast">
+            <configd:help text="Non-broadcast network type"/>
+          </enum>
+          <enum name="point-to-multipoint">
+            <configd:help text="Point-to-multipoint network type"/>
+          </enum>
+          <enum name="point-to-point">
+            <configd:help text="Point-to-point network type"/>
+          </enum>
+        </type>
+        <configd:help text="Network type"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/network/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/network/configd_delete.sh"/>
+      </leaf>
+      <leaf name="transmit-delay">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Must be between 1-65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Link state transmit delay"/>
+        <default value="1"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/transmit-delay/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/vti/ip/ospf/transmit-delay/configd_delete.sh"/>
+      </leaf>
+    </container>
+  </augment>
+</module>

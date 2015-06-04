@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-interfaces"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:configd="urn:vyatta.com:mgmt:configd"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-interfaces"/>
+  <prefix value="if"/>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+	 San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-12-02">
+    <description>
+      <text>Add post-processing of interface changes</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-05-30">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+  </revision>
+  <typedef name="address">
+    <type name="union">
+      <type name="types:ipv4-prefix">
+        <configd:help text="IPv4 Address"/>
+      </type>
+      <type name="types:ipv6-prefix">
+        <configd:help text="IPv6 Address"/>
+      </type>
+      <configd:syntax executable="valid_address $VAR(@)"/>
+    </type>
+  </typedef>
+  <typedef name="address-dhcp">
+    <type name="union">
+      <type name="enumeration">
+        <enum name="dhcp">
+          <configd:help text="Use DHCP to acquire an address"/>
+        </enum>
+        <enum name="dhcpv6">
+          <configd:help text="Use DHCPv6 to acquire an address"/>
+        </enum>
+      </type>
+      <type name="address"/>
+    </type>
+  </typedef>
+  <container name="interfaces">
+    <presence value="true"/>
+    <configd:help text="Network interfaces"/>
+    <configd:begin executable="/opt/vyatta/sbin/vyatta-delete-addrs.pl"/>
+    <configd:end executable="/bin/run-parts ${vyatta_datarootdir}/tmplscripts${CONFIGD_PATH}/configd_end.d"/>
+  </container>
+</module>

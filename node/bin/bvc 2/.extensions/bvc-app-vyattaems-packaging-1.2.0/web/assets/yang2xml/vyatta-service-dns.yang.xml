@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-service-dns"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:service-dns="urn:vyatta.com:mgmt:vyatta-service-dns"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:service="urn:vyatta.com:mgmt:vyatta-service"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-service-dns"/>
+  <prefix value="service-dns"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-services">
+    <prefix value="service"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/service:service">
+    <container name="dns">
+      <presence value="true"/>
+      <configd:help text="Domain Name Server (DNS) parameters"/>
+      <container name="forwarding">
+        <presence value="true"/>
+        <configd:priority priority="918"/>
+        <configd:help text="DNS forwarding"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/forwarding/configd_validate1.cli"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/service/dns/forwarding/configd_end.sh"/>
+        <leaf-list name="dhcp">
+          <type name="string"/>
+          <ordered-by value="user"/>
+          <configd:help text="Use nameservers received from DHCP server for specified interface"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/dns/forwarding/dhcp/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/forwarding/dhcp/configd_validate1.cli"/>
+        </leaf-list>
+        <leaf name="cache-size">
+          <type name="uint32">
+            <range value="0..10000">
+              <error-message>
+                <value>Cache size must be between 0 and 10000</value>
+              </error-message>
+            </range>
+          </type>
+          <default value="150"/>
+          <configd:help text="DNS forwarding cache size"/>
+        </leaf>
+        <leaf-list name="listen-on">
+          <type name="string"/>
+          <ordered-by value="user"/>
+          <configd:help text="Interface to listen for DNS queries [REQUIRED]"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/dns/forwarding/listen-on/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/forwarding/listen-on/configd_validate1.cli"/>
+        </leaf-list>
+        <leaf-list name="name-server">
+          <type name="types:ipv4-address"/>
+          <ordered-by value="user"/>
+          <configd:help text="DNS server to forward queries"/>
+        </leaf-list>
+        <leaf name="system">
+          <type name="empty"/>
+          <configd:help text="DNS forwarding to system nameservers"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/forwarding/system/configd_validate1.cli"/>
+        </leaf>
+        <list name="domain">
+          <configd:help text="DNS domain to forward to a local server"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/forwarding/domain/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string"/>
+            <configd:help text="DNS domain to forward to a local server"/>
+          </leaf>
+          <leaf name="server">
+            <type name="types:ipv4-address"/>
+            <configd:help text="DNS server to forward queries"/>
+          </leaf>
+        </list>
+      </container>
+      <container name="dynamic">
+        <presence value="true"/>
+        <configd:priority priority="919"/>
+        <configd:help text="Dynamic DNS"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/configd_validate1.cli"/>
+        <list name="interface">
+          <configd:help text="Interface to send DDNS updates for [REQUIRED]"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/configd_allowed.sh"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/configd_end.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/configd_validate2.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string"/>
+            <configd:help text="Interface to send DDNS updates for [REQUIRED]"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/configd_allowed.sh"/>
+          </leaf>
+          <list name="service">
+            <configd:help text="Service being used for Dynamic DNS [REQUIRED]"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/service/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/service/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/service/configd_validate2.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/service/configd_validate3.cli"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/service/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Service being used for Dynamic DNS [REQUIRED]"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/dns/dynamic/interface/service/configd_allowed.sh"/>
+            </leaf>
+            <leaf name="password">
+              <type name="string"/>
+              <configd:secret bool="true"/>
+              <configd:help text="Password for DDNS service [REQUIRED]"/>
+            </leaf>
+            <leaf name="login">
+              <type name="string"/>
+              <configd:help text="Login for DDNS service [REQUIRED]"/>
+            </leaf>
+            <leaf name="server">
+              <type name="string"/>
+              <configd:help text="Server to send DDNS update to (IP address|hostname)"/>
+            </leaf>
+            <leaf-list name="host-name">
+              <type name="string"/>
+              <ordered-by value="user"/>
+              <configd:help text="Hostname registered with DDNS service [REQUIRED]"/>
+            </leaf-list>
+          </list>
+        </list>
+      </container>
+    </container>
+  </augment>
+</module>

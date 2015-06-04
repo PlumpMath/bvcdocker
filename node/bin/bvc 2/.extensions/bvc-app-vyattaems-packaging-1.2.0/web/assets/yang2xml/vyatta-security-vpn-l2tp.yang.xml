@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-security-vpn-l2tp"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:security-vpn-l2tp="urn:vyatta.com:mgmt:vyatta-security-vpn-l2tp"
+        xmlns:security="urn:vyatta.com:mgmt:vyatta-security"
+        xmlns:security-vpn-ipsec="urn:vyatta.com:mgmt:vyatta-security-vpn-ipsec"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-security-vpn-l2tp"/>
+  <prefix value="security-vpn-l2tp"/>
+  <import module="vyatta-security">
+    <prefix value="security"/>
+  </import>
+  <import module="vyatta-security-vpn-ipsec">
+    <prefix value="security-vpn-ipsec"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/security:security/security-vpn-ipsec:vpn">
+    <container name="l2tp">
+      <presence value="true"/>
+      <configd:help text="Layer 2 Tunneling Protocol (L2TP) Virtual Private Network (VPN)"/>
+      <container name="remote-access">
+        <presence value="true"/>
+        <configd:help text="Remote access L2TP VPN"/>
+        <container name="authentication">
+          <presence value="true"/>
+          <configd:help text="Authentication for remote access L2TP VPN"/>
+          <list name="radius-server">
+            <configd:help text="IP address of radius server"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="types:ipv4-address"/>
+              <configd:help text="IP address of radius server"/>
+            </leaf>
+            <leaf name="key">
+              <type name="string"/>
+              <configd:help text="Key for accessing the specified server"/>
+            </leaf>
+          </list>
+          <container name="local-users">
+            <presence value="true"/>
+            <configd:help text="Local user authentication for remote access L2TP VPN"/>
+            <list name="username">
+              <configd:help text="User name for authentication"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="string"/>
+                <configd:help text="User name for authentication"/>
+              </leaf>
+              <leaf name="password">
+                <type name="string"/>
+                <configd:secret bool="true"/>
+                <configd:help text="Password for authentication"/>
+              </leaf>
+              <leaf name="disable">
+                <type name="empty"/>
+                <configd:help text="Option to disable L2TP remote-access user"/>
+              </leaf>
+              <leaf name="static-ip">
+                <type name="types:ipv4-address"/>
+                <configd:help text="Static IP address"/>
+              </leaf>
+            </list>
+          </container>
+          <leaf name="mode">
+            <type name="enumeration">
+              <enum name="local">
+                <configd:help text="Use username/password in the configuration"/>
+              </enum>
+              <enum name="radius">
+                <configd:help text="Use Radius server"/>
+              </enum>
+            </type>
+            <configd:help text="Authentication mode for remote access L2TP VPN"/>
+          </leaf>
+        </container>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description for L2TP remote-access settings"/>
+        </leaf>
+        <leaf name="mtu">
+          <type name="uint32">
+            <range value="128..16384">
+              <error-message>
+                <value>MTU must be between 128 and 16384 bytes</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Maximum Transmission Unit (MTU)"/>
+        </leaf>
+        <container name="server-ip-pool">
+          <presence value="true"/>
+          <configd:help text="Pool of IP addresses for the Server"/>
+          <leaf name="stop">
+            <type name="types:ipv4-address"/>
+            <configd:help text="Last IP address in the pool"/>
+          </leaf>
+          <leaf name="start">
+            <type name="types:ipv4-address"/>
+            <configd:help text="First IP address in the pool"/>
+          </leaf>
+        </container>
+        <container name="ipsec-settings">
+          <presence value="true"/>
+          <configd:help text="Internet Protocol Security (IPsec) for remote access L2TP VPN"/>
+          <container name="authentication">
+            <presence value="true"/>
+            <configd:help text="IPsec authentication settings"/>
+            <leaf name="pre-shared-secret">
+              <type name="string"/>
+              <configd:secret bool="true"/>
+              <configd:help text="Pre-shared secret for IPsec"/>
+            </leaf>
+            <container name="x509">
+              <presence value="true"/>
+              <configd:help text="X.509 certificate"/>
+              <leaf name="server-cert-file">
+                <type name="string">
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/l2tp/remote-access/ipsec-settings/authentication/x509/server-cert-file/configd_syntax1.cli"/>
+                </type>
+                <configd:help text="File containing the X.509 certificate for the remote access VPN server (this host)"/>
+              </leaf>
+              <leaf name="ca-cert-file">
+                <type name="string">
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/l2tp/remote-access/ipsec-settings/authentication/x509/ca-cert-file/configd_syntax1.cli"/>
+                </type>
+                <configd:help text="File containing the X.509 certificate for the Certificate Authority (CA)"/>
+              </leaf>
+              <leaf name="server-key-file">
+                <type name="string">
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/l2tp/remote-access/ipsec-settings/authentication/x509/server-key-file/configd_syntax1.cli"/>
+                </type>
+                <configd:help text="File containing the private key for the X.509 certificate for the remote access VPN server (this host)"/>
+              </leaf>
+              <leaf name="server-key-password">
+                <type name="string"/>
+                <configd:secret bool="true"/>
+                <configd:help text="Password that protects the private key"/>
+              </leaf>
+              <leaf name="crl-file">
+                <type name="string">
+                  <configd:syntax executable="/opt/vyatta/share/tmplscripts/security/vpn/l2tp/remote-access/ipsec-settings/authentication/x509/crl-file/configd_syntax1.cli"/>
+                </type>
+                <configd:help text="File containing the X.509 Certificate Revocation List (CRL)"/>
+              </leaf>
+            </container>
+            <leaf name="mode">
+              <type name="enumeration">
+                <enum name="pre-shared-secret">
+                  <configd:help text="Use pre-shared secret for IPsec authentication"/>
+                </enum>
+                <enum name="x509">
+                  <configd:help text="Use X.509 certificate for IPsec authentication"/>
+                </enum>
+              </type>
+              <configd:help text="Authentication mode for IPsec"/>
+            </leaf>
+          </container>
+          <leaf name="ike-lifetime">
+            <type name="uint32">
+              <range value="30..86400">
+                <error-message>
+                  <value>must between 30-86400 seconds</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="IKE lifetime"/>
+            <default value="3600"/>
+          </leaf>
+        </container>
+        <leaf name="outside-address">
+          <type name="types:ipv4-address"/>
+          <configd:help text="Outside IP address to which VPN clients will connect"/>
+        </leaf>
+        <leaf name="outside-nexthop">
+          <type name="types:ipv4-address"/>
+          <configd:help text="Nexthop IP address for reaching the VPN clients"/>
+        </leaf>
+        <leaf name="dhcp-interface">
+          <type name="string"/>
+          <configd:help text="DHCP interface to listen on"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/security/vpn/l2tp/remote-access/dhcp-interface/configd_allowed.sh"/>
+        </leaf>
+        <container name="dns-servers">
+          <presence value="true"/>
+          <configd:help text="Domain Name Service (DNS) server"/>
+          <leaf name="server-1">
+            <type name="types:ipv4-address"/>
+            <configd:help text="Primary DNS server"/>
+          </leaf>
+          <leaf name="server-2">
+            <type name="types:ipv4-address"/>
+            <configd:help text="Secondary DNS server"/>
+          </leaf>
+        </container>
+        <container name="wins-servers">
+          <presence value="true"/>
+          <configd:help text="Windows Inernet Name Service (WINS) server settings"/>
+          <leaf name="server-1">
+            <type name="types:ipv4-address"/>
+            <configd:help text="Primary WINS server"/>
+          </leaf>
+          <leaf name="server-2">
+            <type name="types:ipv4-address"/>
+            <configd:help text="Secondary WINS server"/>
+          </leaf>
+        </container>
+        <container name="client-ip-pool">
+          <presence value="true"/>
+          <configd:help text="Pool of IP address to be assigned to remote clients"/>
+          <leaf name="stop">
+            <type name="types:ipv4-address"/>
+            <configd:help text="Last IP address in the pool"/>
+          </leaf>
+          <leaf name="start">
+            <type name="types:ipv4-address"/>
+            <configd:help text="First IP address in the pool"/>
+          </leaf>
+        </container>
+      </container>
+    </container>
+  </augment>
+</module>

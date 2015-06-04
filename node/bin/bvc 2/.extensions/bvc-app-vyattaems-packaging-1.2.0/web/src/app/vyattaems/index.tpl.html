@@ -1,0 +1,137 @@
+<h2>Vyatta vRouter 5600 EMS</h2>
+<h3>Tunnel Builder</h3>
+<div id="alerts">
+  <alert class="{{alertStatus.type}}" ng-show="alertStatus.isWorking" type="alertStatus.type" close="closeAlert()"><i class="{{alertStatus.icon}}"></i>
+    <b>{{alertStatus.text}}</b>
+  </alert>
+</div>
+<div>
+  <form role="form" name="vyattaemsForm">
+    <div class="row">
+      <div class="col-md-2 form-group">
+        <label id="lbl-netconfDeviceName" for="netconfDeviceName" tooltip="Enter a name for this device (only alphanumeric, hyphen and underscore allowed)">Device Name</label><br>
+        <input id="netconfDeviceName" class="form-control" ng-model="netconfDeviceName" placeholder="Enter a name for this device" ng-pattern="/^[a-zA-Z0-9\-\_]*$/" required/>
+      </div>
+      <div class="col-md-2 form-group">
+        <label id="lbl-netconfIpAddress" for="netconfIpAddress" tooltip="Enter a valid Netconf IP Address / Hostname of this device">Netconf IP / Hostname</label><br>
+        <input id="netconfIpAddress" class="form-control" ng-model="netconfIpAddress" placeholder="Enter IP Address or Hostname" ng-pattern="/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?=.*?[a-z])(?!\.)[a-z\d.-]*[a-z\d]$/" required/>
+      </div>
+      <div class="col-md-2 form-group">
+        <label id="lbl-netconfPort" for="netconfPort" tooltip="Enter a valid Netconf Port that the device listens to">Netconf Port</label><br>
+        <input id="netconfPort" class="form-control" ng-model="netconfPort" placeholder="Enter Port" ng-pattern="/^\d{1,5}$/" required/>
+      </div>
+      <div class="col-md-2 form-group">
+        <label id="lbl-userName" for="userName" tooltip="Enter the user name to connect to the Netconf device">User</label><br>
+        <input id="userName" class="form-control" ng-model="userName" placeholder="Enter User ID" required/>
+      </div>
+      <div class="col-md-2 form-group">
+        <label id="lbl-password" for="password" tooltip="Enter the password to connect to the Netconf device">Password</label><br>
+        <input id="password" class="form-control" ng-model="password" placeholder="Enter Password" type="password" required/>
+      </div>
+      <div class="col-md-2 form-group">
+        <label id="lbl-mountDevice" for="mountDevice">&nbsp;</label><br>
+        <button-submit name="mountDevice" class="btn-primary" form="vyattaemsForm" function="submit" label="Mount Device" glyph="plus"></button-submit>
+      </div>
+    </div>
+  </form>
+  <hr/>
+
+  <div ng-if="vyattaInterfacesMapLength > 0">
+    <div id="mountedDevices" class="container-fluid">
+      <h4>Mounted Devices</h4>
+
+      <div class="btn-group">
+        <label id="addIPv6Tunnel" class="btn btn-default" ng-model="tunnelOptions.ipv6" btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false" tooltip="Toggle for IPv4 or IPv6 Tunnel"><i class="icon-resize-full">&nbsp;&nbsp;Add IPv6 Tunnel</i></label>
+      </div>
+      <div class="btn-group">
+        <button name="createTunnel" class="btn btn-primary btn-orange" ng-click="createTunnel()" tooltip="Select any two routers to create a tunnel" ng-disabled="connectors.length != 2">
+          <i class="icon-random"></i>&nbsp;Create Tunnel
+        </button>
+      </div>
+      <div class="btn-group">
+      <button class="btn btn-primary btn-orange" name="deleteTunnel" ng-click="deleteTunnel()" tooltip="Select any two routers to delete an existing tunnel"  ng-disabled="connectors.length != 2">
+      <i class="icon-remove"></i>&nbsp;Delete Tunnel
+      </button>
+      </div>
+      <div class="btn-group">
+        <button name="refresh" class="btn btn-primary btn-orange" ng-click="refresh()  "><i class="icon-refresh"></i>&nbsp;Refresh</button>
+      </div>
+
+      <div id="hint">
+        <br>
+        <small ng-show="connectors.length == 0">
+          <span id="hint-text-1"><strong>Hint:</strong>&nbsp;Select any two routers to create a secure VPN Tunnel between them</span>
+        </small>
+        <small ng-show="connectors.length == 1">
+          <span id="hint-text-1"><strong>Hint:</strong>&nbsp;Select another router to create a secure VPN Tunnel to <strong>{{connectors.join('')}}</strong></span>
+        </small>
+        <small ng-show="connectors.length == 2">
+          <strong>Hint:</strong>&nbsp;Click on Create Tunnel button to create an
+          <span id="hint-text-1"><strong><span ng-show="tunnelOptions.ipv6">IPv6 VPN Tunnel</span><span ng-show="!tunnelOptions.ipv6">IPv4 VPN Tunnel</span></strong></span>
+          between <strong>{{connectors.join(' and ')}}</strong>
+        </small>
+      </div>
+
+      <br/>
+      <table class="table footable">
+        <thead>
+        <tr>
+          <th width="40%">Device Name</th>
+          <th width="60%">Vyatta Interfaces</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="(routerName, viData) in vyattaInterfacesMap">
+          <td>
+            <div class="row">
+              <div class="col-xs-6">
+                <label id="lbl-{{routerName}}">
+                  <input id="chk-{{routerName}}" type="checkbox" value="{{routerName}}" ng-model="connectors" ng-true-value="routerName" ng-click="toggleSelection(routerName)"/>
+                  {{routerName}} [{{viData['local-ip']}}]
+                </label>
+              </div>
+              <div name="{{routerName}}">
+                <i id="btn-unmount-{{routerName}}"  class="icon icon-fixedwidth icon-remove-sign hand-pointer smallButton" ng-click="unmountDevice(routerName)" tooltip="Unmount Device"></i>
+                <a id="lnkapi-{{routerName}}" href="{{controllerUrl}}/apidoc/explorer/index.html" target="_blank" style="text-decoration:none"><i class="icon icon-fixedwidth icon-code hand-pointer smallButton" style="color: black" tooltip="Show API (Advanced users only)"></i></a>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div ng-repeat="(viKey, viList) in viData">
+              <div ng-repeat="viItem in viList track by $index">
+                <span name="{{viItem['tagnode']}}">
+                  {{[viItem['tagnode'],viItem['address'].join(','),viItem['description']].join(' ')}}
+                </span>
+              </div>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+        <tfoot class="hide-if-no-paging">
+        <tr>
+          <td colspan="2">
+            <div class="pagination pagination-centered"></div>
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div id="vyattaEmsGraph" class="container-fluid">
+      <div class="row">
+        <div class="col-xs-11">
+          <vyatta-netconf-tunnel-builder vyatta-interfaces-map="vyattaInterfacesMap"></vyatta-netconf-tunnel-builder>
+        </div>
+        <div class="col-xs-1 collapseGutter">
+          <div id="legend" class="vyattaems-legend-area">
+            <div class="legendTitle">Legend</div>
+            <div id="vyatta-legend-icons">
+              <vyatta-netconf-legend></vyatta-netconf-legend>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br/>
+</div>

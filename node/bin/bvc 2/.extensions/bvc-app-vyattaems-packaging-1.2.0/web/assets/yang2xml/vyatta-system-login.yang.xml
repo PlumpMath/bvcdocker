@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-system-login"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:system-login="urn:vyatta.com:mgmt:vyatta-system-login"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:system="urn:vyatta.com:mgmt:vyatta-system"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-system-login"/>
+  <prefix value="system-login"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-system">
+    <prefix value="system"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2015-01-28">
+    <description>
+      <text>Disallow empty user passwords.</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/system:system">
+    <container name="login">
+      <presence value="true"/>
+      <configd:priority priority="400"/>
+      <configd:help text="User login"/>
+      <configd:delete executable="/opt/vyatta/share/tmplscripts/system/login/configd_delete.sh"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/system/login/configd_end.sh"/>
+      <leaf name="session-timeout">
+        <type name="uint32">
+          <range value="0..1000000">
+            <error-message>
+              <value>Timeout must be between 0 and 1000000</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Idle Session timeout"/>
+        <default value="0"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/system/login/session-timeout/configd_update.sh"/>
+      </leaf>
+      <list name="radius-server">
+        <configd:help text="Radius server authentication"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/login/radius-server/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="types:ipv4-address"/>
+          <configd:help text="Radius server authentication"/>
+        </leaf>
+        <leaf name="port">
+          <type name="uint32">
+            <range value="1..65535">
+              <error-message>
+                <value>Port number must be in range 1 to 65535</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Radius port [REQUIRED]"/>
+          <default value="1812"/>
+        </leaf>
+        <leaf name="secret">
+          <type name="string"/>
+          <configd:help text="Secret for radius access [REQUIRED]"/>
+        </leaf>
+        <leaf name="timeout">
+          <type name="uint32">
+            <range value="1..30">
+              <error-message>
+                <value>Timeout must be between 1 and 30 seconds</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Timeout for radius session [REQUIRED]"/>
+          <default value="2"/>
+        </leaf>
+      </list>
+      <list name="group">
+        <configd:help text="Group name"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/system/login/group/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/system/login/group/configd_delete.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string"/>
+          <configd:help text="Group name"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description"/>
+        </leaf>
+      </list>
+      <list name="user">
+        <configd:help text="User account information"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/login/user/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[a-zA-Z_][a-zA-Z0-9_-]*">
+              <configd:error-message message="Username should only contain lower case letters, digits, underscores or dashes"/>
+            </pattern>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/login/user/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="User account information"/>
+        </leaf>
+        <container name="authentication">
+          <presence value="true"/>
+          <configd:help text="Authentication password"/>
+          <leaf name="plaintext-password">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/login/user/authentication/plaintext-password/configd_syntax.cli"/>
+            </type>
+            <configd:secret bool="true"/>
+            <configd:help text="Plaintext password for encryption"/>
+            <configd:subst executable="/opt/vyatta/share/tmplscripts/system/login/user/authentication/plaintext-password/configd_subst1.cli"/>
+          </leaf>
+          <list name="public-keys">
+            <configd:help text="Remote access public keys"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/system/login/user/authentication/public-keys/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/system/login/user/authentication/public-keys/configd_validate2.cli"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="string"/>
+              <configd:help text="Remote access public keys"/>
+            </leaf>
+            <leaf name="options">
+              <type name="string"/>
+              <configd:help text="Additional public key options"/>
+            </leaf>
+            <leaf name="key">
+              <type name="string">
+                <pattern value="[0-9A-Za-z\+/=]*">
+                  <error-message>
+                    <value>Invalid public key character not base-64</value>
+                  </error-message>
+                </pattern>
+              </type>
+              <configd:help text="Public key value (base64-encoded)"/>
+              <configd:comp_help text="/opt/vyatta/share/tmplscripts/system/login/user/authentication/public-keys/key/configd_comp_help.txt"/>
+            </leaf>
+            <leaf name="type">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/login/user/authentication/public-keys/type/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Public key type"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/login/user/authentication/public-keys/type/configd_allowed.sh"/>
+            </leaf>
+          </list>
+          <leaf name="encrypted-password">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/login/user/authentication/encrypted-password/configd_syntax1.cli"/>
+            </type>
+            <configd:secret bool="true"/>
+            <configd:help text="Encrypted password"/>
+          </leaf>
+        </container>
+        <leaf name="home-directory">
+          <type name="string"/>
+          <configd:help text="Home directory"/>
+        </leaf>
+        <leaf-list name="group">
+          <type name="string">
+            <pattern value="[a-zA-Z_][a-zA-Z0-9_-]*$?">
+              <configd:error-message message="Invalid group name $VAR(@)"/>
+            </pattern>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/login/user/group/configd_syntax1.cli"/>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="Additional group membership"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/login/user/group/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/system/login/user/group/configd_validate1.cli"/>
+        </leaf-list>
+        <leaf name="level">
+          <type name="enumeration">
+            <enum name="admin">
+              <configd:help text="Administrators"/>
+            </enum>
+            <enum name="operator">
+              <configd:help text="Operators"/>
+            </enum>
+            <enum name="superuser">
+              <configd:help text="Superusers"/>
+            </enum>
+          </type>
+          <configd:help text="User privilege level"/>
+          <default value="admin"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/system/login/user/level/configd_allowed.sh"/>
+        </leaf>
+        <leaf name="full-name">
+          <type name="string">
+            <pattern value="[^:]*">
+              <error-message>
+                <value>Cannot use ':' in full name</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:help text="Full name of the user (use quotes for names with spaces)"/>
+        </leaf>
+      </list>
+      <container name="banner">
+        <presence value="true"/>
+        <configd:help text="System login banners"/>
+        <leaf name="pre-login">
+          <type name="string"/>
+          <configd:help text="System loging banner pre-login"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/system/login/banner/pre-login/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/system/login/banner/pre-login/configd_delete.sh"/>
+          <configd:comp_help text="/opt/vyatta/share/tmplscripts/system/login/banner/pre-login/configd_comp_help.txt"/>
+        </leaf>
+        <leaf name="post-login">
+          <type name="string"/>
+          <configd:help text="System loging banner post-login"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/system/login/banner/post-login/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/system/login/banner/post-login/configd_delete.sh"/>
+          <configd:comp_help text="/opt/vyatta/share/tmplscripts/system/login/banner/post-login/configd_comp_help.txt"/>
+        </leaf>
+      </container>
+    </container>
+  </augment>
+</module>

@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-interfaces-dataplane"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:interfaces-dataplane="urn:vyatta.com:mgmt:vyatta-interfaces-dataplane"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-interfaces-dataplane"/>
+  <prefix value="interfaces-dataplane"/>
+  <import module="vyatta-interfaces">
+    <prefix value="if"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2015-01-09">
+    <description>
+      <text>Modified dhcpv6-options priority</text>
+    </description>
+  </revision>
+  <revision date="2014-11-26">
+    <description>
+      <text>Update interface typedef and datalane end action</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <typedef name="dataplane-ifname">
+    <type name="union">
+      <type name="string">
+        <pattern value="dp[0-9]+(P[0-9]+)?p[0-9]{1,3}p[0-9]{1,3}"/>
+        <configd:pattern-help text="&lt;dpFpNpS&gt;"/>
+      </type>
+      <type name="string">
+        <pattern value="dp[0-9]+em[0-9]+"/>
+        <configd:pattern-help text="&lt;dpFemN&gt;"/>
+      </type>
+      <type name="string">
+        <pattern value="dp[0-9]+(P[0-9]+)?s[0-9]+(f[0-9])?"/>
+        <configd:pattern-help text="&lt;dpFsN&gt;"/>
+      </type>
+    </type>
+  </typedef>
+  <augment target-node="/if:interfaces">
+    <list name="dataplane">
+      <configd:priority priority="318"/>
+      <configd:help text="Dataplane interface name"/>
+      <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/configd_allowed.sh"/>
+      <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/configd_create.sh"/>
+      <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/configd_delete.sh"/>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/configd_validate1.cli"/>
+      <configd:end executable="/opt/vyatta/sbin/vyatta-unnumbered-update-donor.pl --dev=$VAR(@)"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="dataplane-ifname"/>
+        <configd:help text="Dataplane interface name"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/configd_allowed.sh"/>
+      </leaf>
+      <leaf name="description">
+        <type name="string"/>
+        <configd:help text="Description"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/description/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/description/configd_delete.sh"/>
+      </leaf>
+      <container name="dhcpv6-options">
+        <presence value="true"/>
+        <configd:priority priority="319"/>
+        <configd:help text="DHCPv6 options"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/dhcpv6-options/configd_end.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/dhcpv6-options/configd_validate1.cli"/>
+        <leaf name="parameters-only">
+          <type name="empty"/>
+          <configd:help text="Acquire only config parameters, not address"/>
+        </leaf>
+        <leaf name="temporary">
+          <type name="empty"/>
+          <configd:help text='IPv6 "temporary" address'/>
+        </leaf>
+      </container>
+      <container name="ip">
+        <leaf name="enable-proxy-arp">
+          <type name="empty"/>
+          <configd:help text="Enable proxy-arp on this interface"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/enable-proxy-arp/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/enable-proxy-arp/configd_delete.sh"/>
+        </leaf>
+        <leaf name="rpf-check">
+          <type name="enumeration">
+            <enum name="strict">
+              <configd:help text="Enable Strict Reverse Path Forwarding as defined in RFC3704"/>
+            </enum>
+            <enum name="loose">
+              <configd:help text="Enable Loose Reverse Path Forwarding as defined in RFC3704"/>
+            </enum>
+            <enum name="disable">
+              <configd:help text="No source validation"/>
+            </enum>
+          </type>
+          <configd:help text="Policy for reverse path filter, as specified in RFC3704"/>
+          <default value="disable"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/rpf-check/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/rpf-check/configd_delete.sh"/>
+        </leaf>
+        <leaf name="disable-forwarding">
+          <type name="empty"/>
+          <configd:help text="Disable IPv4 forwarding on this interface"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/disable-forwarding/configd_create.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/ip/disable-forwarding/configd_delete.sh"/>
+        </leaf>
+      </container>
+      <container name="ipv6">
+        <presence value="true"/>
+        <configd:help text="IPv6 parameters"/>
+      </container>
+      <leaf name="log_martians">
+        <type name="empty"/>
+        <configd:help text="Enable the logging of bogus packets"/>
+        <configd:create executable="echo 1 &gt; /proc/sys/net/ipv4/conf/$VAR(../@)/log_martians"/>
+        <configd:delete executable="echo 0 &gt; /proc/sys/net/ipv4/conf/$VAR(../@)/log_martians"/>
+      </leaf>
+      <leaf name="mtu">
+        <type name="uint32">
+          <range value="68..9000">
+            <error-message>
+              <value>MTU must be between 68 and 9000</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:priority priority="381"/>
+        <configd:help text="Maximum Transmission Unit (MTU)"/>
+        <default value="1500"/>
+        <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/mtu/configd_update.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/mtu/configd_delete.sh"/>
+      </leaf>
+      <leaf name="disable">
+        <type name="empty"/>
+        <configd:help text="Disable interface"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/disable/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/disable/configd_delete.sh"/>
+      </leaf>
+      <list name="vif">
+        <configd:priority priority="319"/>
+        <configd:help text="Virtual Interface (VIF) ID"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/configd_delete.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="uint32">
+            <range value="1..4094">
+              <error-message>
+                <value>VIF ID must be between 1 and 4094</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Virtual Interface (VIF) ID"/>
+        </leaf>
+        <leaf name="vlan">
+          <type name="uint32">
+            <range value="1..4094">
+              <error-message>
+                <value>VLAN ID must be between 1 and 4094</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Virtual Local Area Network (VLAN) ID"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/description/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/description/configd_delete.sh"/>
+        </leaf>
+        <container name="dhcpv6-options">
+          <presence value="true"/>
+          <configd:priority priority="320"/>
+          <configd:help text="DHCPv6 options"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/dhcpv6-options/configd_end.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/dhcpv6-options/configd_validate1.cli"/>
+          <leaf name="parameters-only">
+            <type name="empty"/>
+            <configd:help text="Acquire only config parameters, not address"/>
+          </leaf>
+          <leaf name="temporary">
+            <type name="empty"/>
+            <configd:help text='IPv6 "temporary" address'/>
+          </leaf>
+        </container>
+        <container name="ip">
+          <presence value="true"/>
+          <leaf name="enable-proxy-arp">
+            <type name="empty"/>
+            <configd:help text="Enable proxy-arp on this interface"/>
+            <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/enable-proxy-arp/configd_create.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/enable-proxy-arp/configd_delete.sh"/>
+          </leaf>
+          <leaf name="rpf-check">
+            <type name="enumeration">
+              <enum name="strict">
+                <configd:help text="Enable Strict Reverse Path Forwarding as defined in RFC3704"/>
+              </enum>
+              <enum name="loose">
+                <configd:help text="Enable Loose Reverse Path Forwarding as defined in RFC3704"/>
+              </enum>
+              <enum name="disable">
+                <configd:help text="No source validation"/>
+              </enum>
+            </type>
+            <configd:help text="Policy for reverse path filter, as specified in RFC3704"/>
+            <default value="disable"/>
+            <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/rpf-check/configd_update.sh"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/ip/rpf-check/configd_delete.sh"/>
+          </leaf>
+        </container>
+        <container name="ipv6">
+          <presence value="true"/>
+          <configd:help text="IPv6 parameters"/>
+        </container>
+        <leaf name="mtu">
+          <type name="uint32">
+            <range value="68..9000">
+              <error-message>
+                <value>MTU must be between 68 and 9000</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:priority priority="381"/>
+          <configd:help text="Maximum Transmission Unit (MTU)"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/mtu/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/mtu/configd_delete.sh"/>
+        </leaf>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="Disable interface"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/disable/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/disable/configd_delete.sh"/>
+        </leaf>
+        <leaf-list name="address">
+          <type name="if:address-dhcp"/>
+          <ordered-by value="user"/>
+          <configd:help text="IP address"/>
+          <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/address/configd_create.sh"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/address/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/address/configd_validate1.cli"/>
+        </leaf-list>
+        <leaf name="disable-link-detect">
+          <type name="empty"/>
+          <configd:help text="Ignore link state changes"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/disable-link-detect/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/disable-link-detect/configd_delete.sh"/>
+        </leaf>
+        <container name="bridge-group">
+          <presence value="true"/>
+          <configd:priority priority="320"/>
+          <configd:help text="Add this interface to a bridge group"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/bridge-group/configd_end.sh"/>
+          <leaf name="priority">
+            <type name="uint32">
+              <range value="0..63">
+                <error-message>
+                  <value>Port priority must be between 0-63</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Bridge port priority"/>
+          </leaf>
+          <leaf name="bridge">
+            <type name="string">
+              <pattern value="br[0-9]+">
+                <configd:error-message message="$VAR(@): not a valid name for a bridge"/>
+              </pattern>
+            </type>
+            <configd:help text="Bridge group name"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/bridge-group/bridge/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/bridge-group/bridge/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="cost">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>Bridge cost value must be between 1 and 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Bridge port cost"/>
+          </leaf>
+        </container>
+      </list>
+      <leaf name="sflow">
+        <type name="empty"/>
+        <configd:help text="Enable/Disable sflow for interface"/>
+        <configd:delete executable="vplane-sflow.pl --cmd=disable --intf=$VAR(../@)"/>
+        <configd:update executable="vplane-sflow.pl --cmd=enable --intf=$VAR(../@)"/>
+      </leaf>
+      <leaf-list name="address">
+        <type name="if:address-dhcp"/>
+        <ordered-by value="user"/>
+        <configd:help text="IP address"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/address/configd_create.sh"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/address/configd_allowed.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/address/configd_validate1.cli"/>
+      </leaf-list>
+      <leaf name="mac">
+        <type name="types:mac-address">
+          <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/mac/configd_syntax1.cli"/>
+        </type>
+        <configd:help text="Media Access Control (MAC) address"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/mac/configd_create.sh"/>
+      </leaf>
+      <leaf name="disable-link-detect">
+        <type name="empty"/>
+        <configd:help text="Ignore link state changes"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/disable-link-detect/configd_create.sh"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/disable-link-detect/configd_delete.sh"/>
+      </leaf>
+      <container name="bridge-group">
+        <presence value="true"/>
+        <configd:help text="Add this interface to a bridge group"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/bridge-group/configd_end.sh"/>
+        <leaf name="priority">
+          <type name="uint32">
+            <range value="0..63">
+              <error-message>
+                <value>Port priority must be between 0-63</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Bridge port priority"/>
+        </leaf>
+        <leaf name="root-block">
+          <type name="empty"/>
+          <configd:help text="Enable Spanning Tree Protocol root guard"/>
+        </leaf>
+        <leaf name="bpdu-guard">
+          <type name="empty"/>
+          <configd:help text="Enable Spaning Tree Protocol BPDU guard"/>
+        </leaf>
+        <leaf name="bridge">
+          <type name="string">
+            <pattern value="br[0-9]+">
+              <configd:error-message message="$VAR(@): not a valid name for a bridge"/>
+            </pattern>
+          </type>
+          <configd:help text="Bridge group name"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/bridge-group/bridge/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/bridge-group/bridge/configd_validate1.cli"/>
+        </leaf>
+        <leaf name="cost">
+          <type name="uint32">
+            <range value="1..65535">
+              <error-message>
+                <value>Bridge cost value must be between 1 and 65535</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Bridge port cost"/>
+        </leaf>
+      </container>
+    </list>
+  </augment>
+</module>

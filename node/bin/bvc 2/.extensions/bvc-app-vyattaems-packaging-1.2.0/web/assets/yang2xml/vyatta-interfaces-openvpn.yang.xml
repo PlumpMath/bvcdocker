@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-interfaces-openvpn"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:interfaces-openvpn="urn:vyatta.com:mgmt:vyatta-interfaces-openvpn"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-interfaces-openvpn"/>
+  <prefix value="interfaces-openvpn"/>
+  <import module="vyatta-interfaces">
+    <prefix value="if"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/if:interfaces">
+    <list name="openvpn">
+      <configd:priority priority="460"/>
+      <configd:help text="OpenVPN tunnel interface name"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/configd_end.sh"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="string">
+          <pattern value="vtun[0-9]+">
+            <error-message>
+              <value>OpenVPN tunnel interface must be named "vtun&lt;num&gt;"</value>
+            </error-message>
+          </pattern>
+          <configd:pattern-help text="&lt;vtunN&gt;"/>
+        </type>
+        <configd:help text="OpenVPN tunnel interface name"/>
+      </leaf>
+      <leaf name="client-cert-not-required">
+        <type name="empty"/>
+        <configd:help text="Client certificates not required"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/client-cert-not-required/configd_validate1.cli"/>
+      </leaf>
+      <container name="auth">
+        <presence value="true"/>
+        <configd:help text="OpenVPN authentication method"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/auth/configd_end.sh"/>
+        <leaf-list name="ldap">
+          <type name="string"/>
+          <ordered-by value="user"/>
+          <configd:help text="Service-User LDAP profile name"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/auth/ldap/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/auth/ldap/configd_validate1.cli"/>
+        </leaf-list>
+        <container name="local">
+          <presence value="true"/>
+          <configd:help text="Local Service User Authentication"/>
+          <leaf-list name="group">
+            <type name="string"/>
+            <ordered-by value="user"/>
+            <configd:help text="Service-user group name"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/auth/local/group/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/auth/local/group/configd_validate1.cli"/>
+          </leaf-list>
+          <leaf-list name="user">
+            <type name="string"/>
+            <ordered-by value="user"/>
+            <configd:help text="Service User"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/auth/local/user/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/auth/local/user/configd_validate1.cli"/>
+          </leaf-list>
+        </container>
+      </container>
+      <leaf name="description">
+        <type name="string"/>
+        <configd:help text="Description for the interface"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/description/configd_delete.sh"/>
+      </leaf>
+      <leaf name="local-host">
+        <type name="types:ipv4-address"/>
+        <configd:help text="Local IP address to accept connections (all if not set)"/>
+      </leaf>
+      <leaf name="hash">
+        <type name="enumeration">
+          <enum name="md5">
+            <configd:help text="MD5 algorithm"/>
+          </enum>
+          <enum name="sha1">
+            <configd:help text="SHA-1 algorithm"/>
+          </enum>
+          <enum name="sha256">
+            <configd:help text="SHA-256 algorithm"/>
+          </enum>
+          <enum name="sha512">
+            <configd:help text="SHA-512 algorithm"/>
+          </enum>
+        </type>
+        <configd:help text="Hashing algorithm option"/>
+      </leaf>
+      <leaf name="disable">
+        <type name="empty"/>
+        <configd:help text="Interface to be disabled"/>
+      </leaf>
+      <container name="server">
+        <presence value="true"/>
+        <configd:help text="Server-mode options"/>
+        <list name="client">
+          <configd:help text="Client-specific settings"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string"/>
+            <configd:help text="Client-specific settings"/>
+          </leaf>
+          <leaf name="ip">
+            <type name="types:ipv4-address"/>
+            <configd:help text="IP address of the client"/>
+          </leaf>
+          <leaf-list name="subnet">
+            <type name="types:ipv4-prefix"/>
+            <ordered-by value="user"/>
+            <configd:help text="Subnet belonging to the client"/>
+          </leaf-list>
+          <leaf name="disable">
+            <type name="empty"/>
+            <configd:help text="Option to disable client connection"/>
+          </leaf>
+          <leaf-list name="push-route">
+            <type name="types:ipv4-prefix"/>
+            <ordered-by value="user"/>
+            <configd:help text="Route to be pushed to the client"/>
+          </leaf-list>
+        </list>
+        <leaf-list name="name-server">
+          <type name="types:ipv4-address"/>
+          <ordered-by value="user"/>
+          <configd:help text="Domain Name Server (DNS)"/>
+        </leaf-list>
+        <leaf name="subnet">
+          <type name="types:ipv4-prefix"/>
+          <configd:help text="Server-mode subnet (from which client IPs are allocated)"/>
+        </leaf>
+        <leaf name="max-connections">
+          <type name="uint32">
+            <range value="1..4096">
+              <error-message>
+                <value>must be between 1-4096</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Number of maximum client connections"/>
+        </leaf>
+        <leaf-list name="push-route">
+          <type name="types:ipv4-prefix"/>
+          <ordered-by value="user"/>
+          <configd:help text="Route to be pushed to all clients"/>
+        </leaf-list>
+        <leaf name="topology">
+          <type name="enumeration">
+            <enum name="point-to-point">
+              <configd:help text="(null)"/>
+            </enum>
+            <enum name="subnet">
+              <configd:help text="(null)"/>
+            </enum>
+          </type>
+          <configd:help text="Topology for clients"/>
+        </leaf>
+        <leaf name="domain-name">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/server/domain-name/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="DNS suffix to be pushed to all clients"/>
+        </leaf>
+      </container>
+      <leaf name="device-type">
+        <type name="string">
+          <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/device-type/configd_syntax1.cli"/>
+        </type>
+        <configd:help text="OpenVPN interface device-type"/>
+      </leaf>
+      <leaf name="shared-secret-key-file">
+        <type name="string">
+          <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/shared-secret-key-file/configd_syntax1.cli"/>
+        </type>
+        <configd:help text="File containing the secret key shared with remote end of tunnel"/>
+      </leaf>
+      <leaf name="encryption">
+        <type name="enumeration">
+          <enum name="des">
+            <configd:help text="DES algorithm"/>
+          </enum>
+          <enum name="3des">
+            <configd:help text="DES algorithm with triple encryption"/>
+          </enum>
+          <enum name="bf128">
+            <configd:help text="Blowfish algorithm with 128-bit key"/>
+          </enum>
+          <enum name="bf256">
+            <configd:help text="Blowfish algorithm with 256-bit key"/>
+          </enum>
+          <enum name="aes128">
+            <configd:help text="AES algorithm with 128-bit key"/>
+          </enum>
+          <enum name="aes192">
+            <configd:help text="AES algorithm with 192-bit key"/>
+          </enum>
+          <enum name="aes256">
+            <configd:help text="AES algorithm with 256-bit key"/>
+          </enum>
+        </type>
+        <configd:help text="Data encryption algorithm option"/>
+      </leaf>
+      <leaf-list name="remote-host">
+        <type name="string"/>
+        <ordered-by value="user"/>
+        <configd:help text="Remote host to connect to (dynamic if not set)"/>
+      </leaf-list>
+      <leaf name="remote-port">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Port must be between 1 and 65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Remote port number to connect to"/>
+      </leaf>
+      <leaf-list name="openvpn-option">
+        <type name="string"/>
+        <ordered-by value="user"/>
+        <configd:help text="Additional OpenVPN options"/>
+      </leaf-list>
+      <leaf name="local-address">
+        <type name="string"/>
+        <configd:help text="Local IP address or network address"/>
+      </leaf>
+      <leaf name="remote-address">
+        <type name="types:ipv4-address"/>
+        <configd:help text="IP address of remote end of tunnel"/>
+      </leaf>
+      <container name="tls">
+        <presence value="true"/>
+        <configd:help text="Transport Layer Security (TLS) options"/>
+        <leaf name="dh-file">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/tls/dh-file/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="File containing Diffie Hellman parameters (server only)"/>
+        </leaf>
+        <leaf name="role">
+          <type name="enumeration">
+            <enum name="active">
+              <configd:help text="Initiate TLS negotiation actively"/>
+            </enum>
+            <enum name="passive">
+              <configd:help text="Waiting for TLS connections passively"/>
+            </enum>
+          </type>
+          <configd:help text="Role in TLS negotiation"/>
+        </leaf>
+        <leaf name="ca-cert-file">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/tls/ca-cert-file/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="File containing certificate for Certificate Authority (CA)"/>
+        </leaf>
+        <leaf name="cert-file">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/tls/cert-file/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="File containing certificate for this host"/>
+        </leaf>
+        <leaf name="key-file">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/tls/key-file/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="File containing this host's private key"/>
+        </leaf>
+        <leaf name="crl-file">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/openvpn/tls/crl-file/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="File containing certificate revocation list (CRL) for this host"/>
+        </leaf>
+      </container>
+      <leaf name="mode">
+        <type name="enumeration">
+          <enum name="site-to-site">
+            <configd:help text="Site-to-site mode"/>
+          </enum>
+          <enum name="client">
+            <configd:help text="Client in client-server mode"/>
+          </enum>
+          <enum name="server">
+            <configd:help text="Server in client-server mode"/>
+          </enum>
+        </type>
+        <configd:help text="OpenVPN mode of operation"/>
+      </leaf>
+      <container name="replace-default-route">
+        <presence value="true"/>
+        <configd:help text="OpenVPN tunnel to be used as the default route"/>
+        <leaf name="local">
+          <type name="empty"/>
+          <configd:help text="Tunnel endpoints are on the same subnet"/>
+        </leaf>
+      </container>
+      <leaf name="protocol">
+        <type name="enumeration">
+          <enum name="udp">
+            <configd:help text="UDP"/>
+          </enum>
+          <enum name="tcp-passive">
+            <configd:help text="TCP and accepts connections passively"/>
+          </enum>
+          <enum name="tcp-active">
+            <configd:help text="TCP and initiates connections actively"/>
+          </enum>
+        </type>
+        <configd:help text="OpenVPN communication protocol"/>
+      </leaf>
+      <leaf name="local-port">
+        <type name="uint32">
+          <range value="1..65535">
+            <error-message>
+              <value>Port must be between 1 and 65535</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Local port number to accept connections"/>
+      </leaf>
+      <container name="ip">
+        <configd:help text="IPv4 parameters"/>
+      </container>
+      <container name="ipv6">
+        <presence value="true"/>
+        <configd:help text="IPv6 parameters"/>
+      </container>
+    </list>
+  </augment>
+</module>

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-service-nat"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:service-nat="urn:vyatta.com:mgmt:vyatta-service-nat"
+        xmlns:service="urn:vyatta.com:mgmt:vyatta-service"
+        xmlns:configd="urn:vyatta.com:mgmt:configd"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-service-nat"/>
+  <prefix value="service-nat"/>
+  <import module="vyatta-services">
+    <prefix value="service"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+ San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/service:service">
+    <container name="nat">
+      <presence value="true"/>
+      <configd:priority priority="310"/>
+      <configd:help text="Network Address Translation (NAT) for Dataplane parameters"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/service/nat/configd_end.sh"/>
+      <container name="ipv6-to-ipv4">
+        <presence value="true"/>
+        <configd:help text="IPv6 to IPv4 NAT settings"/>
+        <list name="rule">
+          <configd:help text="Rule number for NAT"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/ipv6-to-ipv4/rule/configd_validate1.cli"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/service/nat/ipv6-to-ipv4/rule/configd_end.sh"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..9999">
+                <error-message>
+                  <value>Rule number must be between 1 and 9999.</value>
+                </error-message>
+              </range>
+            </type>
+          </leaf>
+          <leaf name="inbound-interface">
+            <type name="string"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/ipv6-to-ipv4/rule/inbound-interface/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/ipv6-to-ipv4/rule/inbound-interface/configd_validate0.sh"/>
+            <configd:help text="Interface to initiate a IPv6 to IPv4 session"/>
+          </leaf>
+          <container name="source">
+            <configd:help text="Source IPv6 prefix"/>
+            <leaf name="prefix">
+              <configd:help text="Source IPv6 prefix [supported prefixes are 32,40,48,56,64 and 96]"/>
+              <type name="types:ipv6-prefix">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/ipv6-to-ipv4/rule/source/prefix/configd_syntax1.cli"/>
+              </type>
+            </leaf>
+          </container>
+          <container name="destination">
+            <configd:help text="Destination IPv6 prefix"/>
+            <leaf name="prefix">
+              <configd:help text="Destination IPv6 prefix [supported prefixes are 32,40,48,56,64 and 96]"/>
+              <type name="types:ipv6-prefix">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/ipv6-to-ipv4/rule/destination/prefix/configd_syntax1.cli"/>
+              </type>
+            </leaf>
+          </container>
+        </list>
+      </container>
+      <container name="source">
+        <presence value="true"/>
+        <configd:help text="Source NAT settings"/>
+        <list name="rule">
+          <configd:help text="Rule number for NAT"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/configd_validate0.sh"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/configd_end.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..9999">
+                <error-message>
+                  <value>Rule number must be between 1 and 9999.</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Rule number for NAT"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Rule description"/>
+          </leaf>
+          <leaf name="exclude">
+            <type name="empty"/>
+            <configd:help text="Exclude from NAT"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/exclude/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="disable">
+            <type name="empty"/>
+            <configd:help text="Disable NAT rule"/>
+          </leaf>
+          <container name="source">
+            <presence value="true"/>
+            <configd:help text="NAT source parameters"/>
+            <leaf name="address">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/source/address/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Source IPv4 address, subnet, or address-group"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/source/address/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/source/address/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="port">
+              <type name="string"/>
+              <configd:help text="Source port or port-group"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/source/port/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/source/port/configd_validate1.cli"/>
+            </leaf>
+          </container>
+          <leaf name="log">
+            <type name="empty"/>
+            <configd:help text="Enable logging for NAT rule"/>
+          </leaf>
+          <container name="destination">
+            <presence value="true"/>
+            <configd:help text="NAT destination parameters"/>
+            <leaf name="address">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/destination/address/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Destination IPv4 address, subnet, or address-group"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/destination/address/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/destination/address/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="port">
+              <type name="string"/>
+              <configd:help text="Destination port or port-group"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/destination/port/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/destination/port/configd_validate1.cli"/>
+            </leaf>
+          </container>
+          <container name="translation">
+            <presence value="true"/>
+            <configd:help text="Outside NAT IP (used by source NAT only)"/>
+            <leaf name="address">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/translation/address/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Translated IP address or range"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/translation/address/configd_allowed.sh"/>
+            </leaf>
+            <leaf name="port">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/translation/port/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Translated port"/>
+            </leaf>
+          </container>
+          <leaf name="outbound-interface">
+            <type name="string"/>
+            <configd:help text="Outbound interface for NAT traffic"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/outbound-interface/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/outbound-interface/configd_validate0.sh"/>
+          </leaf>
+          <leaf name="protocol">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/protocol/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/protocol/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Protocol to NAT"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/source/rule/protocol/configd_allowed.sh"/>
+          </leaf>
+        </list>
+      </container>
+      <container name="destination">
+        <presence value="true"/>
+        <configd:help text="Destination NAT settings"/>
+        <list name="rule">
+          <configd:help text="Rule number for NAT"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/configd_validate0.sh"/>
+          <configd:end executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/configd_end.sh"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32">
+              <range value="1..9999">
+                <error-message>
+                  <value>Rule number must be between 1 and 9999.</value>
+                </error-message>
+              </range>
+            </type>
+            <configd:help text="Rule number for NAT"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Rule description"/>
+          </leaf>
+          <leaf name="exclude">
+            <type name="empty"/>
+            <configd:help text="Exclude from NAT"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/exclude/configd_validate1.cli"/>
+          </leaf>
+          <leaf name="disable">
+            <type name="empty"/>
+            <configd:help text="Disable NAT rule"/>
+          </leaf>
+          <leaf name="inbound-interface">
+            <type name="string"/>
+            <configd:help text="Inbound interface of NAT traffic"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/inbound-interface/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/inbound-interface/configd_validate0.sh"/>
+          </leaf>
+          <container name="source">
+            <presence value="true"/>
+            <configd:help text="NAT source parameters"/>
+            <leaf name="address">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/source/address/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Source IPv4 address, subnet, or address-group"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/source/address/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/source/address/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="port">
+              <type name="string"/>
+              <configd:help text="Source port or port-group"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/source/port/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/source/port/configd_validate1.cli"/>
+            </leaf>
+          </container>
+          <leaf name="log">
+            <type name="empty"/>
+            <configd:help text="Enable logging for NAT rule"/>
+          </leaf>
+          <container name="destination">
+            <presence value="true"/>
+            <configd:help text="NAT destination parameters"/>
+            <leaf name="address">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/destination/address/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Destination IPv4 address, subnet, or address-group"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/destination/address/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/destination/address/configd_validate1.cli"/>
+            </leaf>
+            <leaf name="port">
+              <type name="string"/>
+              <configd:help text="Destination port or port-group"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/destination/port/configd_allowed.sh"/>
+              <configd:validate executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/destination/port/configd_validate1.cli"/>
+            </leaf>
+          </container>
+          <container name="translation">
+            <presence value="true"/>
+            <configd:help text="Inside NAT IP (used by destination NAT only)"/>
+            <leaf name="address">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/translation/address/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Translated IP address or range"/>
+            </leaf>
+            <leaf name="port">
+              <type name="string">
+                <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/translation/port/configd_syntax1.cli"/>
+              </type>
+              <configd:help text="Translated port"/>
+            </leaf>
+          </container>
+          <leaf name="protocol">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/protocol/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/protocol/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Protocol to NAT"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/nat/destination/rule/protocol/configd_allowed.sh"/>
+          </leaf>
+        </list>
+      </container>
+    </container>
+  </augment>
+</module>

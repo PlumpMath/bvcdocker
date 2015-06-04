@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-op"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:vyatta-op="urn:vyatta.com:mgmt:vyatta-op"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-op"/>
+  <prefix value="vyatta-op"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <description>
+    <text>Supported RPC calls.
+Do not add anything to this file.</text>
+  </description>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+ San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-12-16">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+  </revision>
+  <rpc name="ping">
+    <description>
+      <text>Generates Ping and return response</text>
+    </description>
+    <input>
+      <leaf name="host">
+        <type name="string"/>
+        <mandatory value="true"/>
+      </leaf>
+      <leaf name="count">
+        <type name="uint32"/>
+        <default value="3"/>
+        <description>
+          <text>Number of ping echo request message to send</text>
+        </description>
+      </leaf>
+      <leaf name="ttl">
+        <type name="uint8"/>
+        <default value="255"/>
+        <description>
+          <text>IP Time To Live</text>
+        </description>
+      </leaf>
+    </input>
+    <output>
+      <leaf name="tx-packet-count">
+        <type name="uint32"/>
+        <description>
+          <text>Transmitted Packet count</text>
+        </description>
+      </leaf>
+      <leaf name="rx-packet-count">
+        <type name="uint32"/>
+        <description>
+          <text>Received packet count</text>
+        </description>
+      </leaf>
+      <leaf name="min-delay">
+        <type name="uint32"/>
+        <units name="milliseconds"/>
+        <description>
+          <text>Minimum packet delay</text>
+        </description>
+      </leaf>
+      <leaf name="average-delay">
+        <type name="uint32"/>
+        <units name="milliseconds"/>
+        <description>
+          <text>Average packet delay</text>
+        </description>
+      </leaf>
+      <leaf name="max-delay">
+        <type name="uint32"/>
+        <units name="millisecond"/>
+        <description>
+          <text>Minimum packet delay</text>
+        </description>
+      </leaf>
+    </output>
+    <configd:rpc-script executable="/opt/vyatta/bin/yangop-ping.pl"/>
+  </rpc>
+  <rpc name="interface">
+    <input>
+      <leaf name="name">
+        <type name="string"/>
+        <mandatory value="true"/>
+        <description>
+          <text>Interface name to query</text>
+        </description>
+      </leaf>
+    </input>
+    <output>
+      <list name="address">
+        <key value="ip"/>
+        <leaf name="ip">
+          <type name="types:ip-prefix"/>
+          <description>
+            <text>Interface IP address</text>
+          </description>
+        </leaf>
+      </list>
+      <leaf name="admin-status">
+        <type name="enumeration">
+          <enum name="up"/>
+          <enum name="down"/>
+          <enum name="testing"/>
+        </type>
+        <description>
+          <text>Interface's desired state</text>
+        </description>
+      </leaf>
+      <leaf name="oper-status">
+        <type name="enumeration">
+          <enum name="up"/>
+          <enum name="down"/>
+          <enum name="testing"/>
+          <enum name="unknown"/>
+          <enum name="dormant"/>
+          <enum name="notpresent"/>
+          <enum name="lowerlayerdown"/>
+        </type>
+        <description>
+          <text>Interface's current operational state</text>
+        </description>
+      </leaf>
+      <leaf name="description">
+        <type name="string"/>
+        <description>
+          <text>Interface description</text>
+        </description>
+      </leaf>
+    </output>
+    <configd:rpc-script executable="/opt/vyatta/bin/yangop-interface.pl"/>
+  </rpc>
+  <rpc name="route">
+    <typedef name="destination">
+      <type name="union">
+        <type name="types:ip-address"/>
+        <type name="types:ip-prefix"/>
+      </type>
+    </typedef>
+    <input>
+      <leaf name="family">
+        <type name="enumeration">
+          <enum name="ipv4"/>
+          <enum name="ipv6"/>
+        </type>
+        <default value="ipv4"/>
+      </leaf>
+      <leaf name="destination">
+        <type name="destination"/>
+        <description>
+          <text>Destination host or network</text>
+        </description>
+      </leaf>
+    </input>
+    <output>
+      <list name="route">
+        <key value="destination"/>
+        <leaf name="destination">
+          <type name="destination"/>
+          <description>
+            <text>Destination</text>
+          </description>
+        </leaf>
+        <leaf name="source">
+          <type name="types:ip-address"/>
+          <description>
+            <text>Source address</text>
+          </description>
+        </leaf>
+        <list name="path">
+          <key value="entry"/>
+          <leaf name="entry">
+            <type name="uint64"/>
+          </leaf>
+          <leaf name="device">
+            <type name="string"/>
+            <description>
+              <text>Device name</text>
+            </description>
+          </leaf>
+          <leaf name="next-hop">
+            <type name="types:ip-address"/>
+            <description>
+              <text>Next-hop</text>
+            </description>
+          </leaf>
+        </list>
+      </list>
+    </output>
+    <configd:rpc-script executable="/opt/vyatta/bin/yangop-route.pl"/>
+  </rpc>
+</module>

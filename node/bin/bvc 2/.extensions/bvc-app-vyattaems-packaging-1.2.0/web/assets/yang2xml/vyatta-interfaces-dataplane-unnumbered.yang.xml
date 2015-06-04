@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-interfaces-dataplane-unnumbered"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:interfaces-dataplane-unnumbered="urn:vyatta.com:mgmt:vyatta-interfaces-unnumbered"
+        xmlns:protocols="urn:vyatta.com:mgmt:vyatta-protocols"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:interfaces-dataplane="urn:vyatta.com:mgmt:vyatta-interfaces-dataplane">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-interfaces-unnumbered"/>
+  <prefix value="interfaces-dataplane-unnumbered"/>
+  <import module="vyatta-protocols">
+    <prefix value="protocols"/>
+  </import>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <import module="vyatta-interfaces">
+    <prefix value="if"/>
+  </import>
+  <import module="vyatta-interfaces-dataplane">
+    <prefix value="interfaces-dataplane"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-11-26">
+    <description>
+      <text>Update for interface types</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-10-06">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+  </revision>
+  <grouping name="unnumbered-opts">
+    <list name="donor-interface">
+      <max-elements value="1"/>
+      <configd:help text="donor interface name"/>
+      <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/unnumbered/unnumbered-allowed.sh"/>
+      <key value="tagnode"/>
+      <leaf name="tagnode">
+        <type name="union">
+          <type name="string">
+            <pattern value="lo(|[1-9]([0-9]){0,4})"/>
+            <configd:pattern-help text="&lt;lo|loN&gt;"/>
+          </type>
+          <type name="interfaces-dataplane:dataplane-ifname"/>
+        </type>
+      </leaf>
+      <leaf name="preferred-address">
+        <type name="types:ipv4-address"/>
+        <configd:help text="preferred address to use from donor interface"/>
+        <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/unnumbered/preferred-address/configd_allowed.sh"/>
+      </leaf>
+      <configd:validate executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/unnumbered/unnumbered-validate.sh"/>
+    </list>
+  </grouping>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane/interfaces-dataplane:ip">
+    <container name="unnumbered">
+      <configd:help text="Enable unnumbered IP"/>
+      <configd:priority priority="330"/>
+      <configd:end executable="/opt/vyatta/sbin/vyatta-update-unnumbered.pl --dev=$VAR(../../@)"/>
+      <uses name="unnumbered-opts"/>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane/interfaces-dataplane:vif/interfaces-dataplane:ip">
+    <container name="unnumbered">
+      <configd:help text="Enable unnumbered IP"/>
+      <configd:priority priority="330"/>
+      <configd:end executable="/opt/vyatta/sbin/vyatta-update-unnumbered.pl --dev=$VAR(../../../@).$VAR(../../@)"/>
+      <uses name="unnumbered-opts"/>
+    </container>
+  </augment>
+</module>

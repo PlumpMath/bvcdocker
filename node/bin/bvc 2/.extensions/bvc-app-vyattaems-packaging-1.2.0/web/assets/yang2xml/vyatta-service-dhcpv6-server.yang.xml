@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-service-dhcpv6-server"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:service-dhcpv6-server="urn:vyatta.com:mgmt:vyatta-service-dhcpv6-server"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:service="urn:vyatta.com:mgmt:vyatta-service"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-service-dhcpv6-server"/>
+  <prefix value="service-dhcpv6-server"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-services">
+    <prefix value="service"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/service:service">
+    <container name="dhcpv6-server">
+      <presence value="true"/>
+      <configd:priority priority="900"/>
+      <configd:help text="DHCP for IPv6 (DHCPv6) server"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/service/dhcpv6-server/configd_end.sh"/>
+      <leaf name="preference">
+        <type name="uint32">
+          <range value="0..255">
+            <error-message>
+              <value>Preference must be between 0 and 255</value>
+            </error-message>
+          </range>
+        </type>
+        <configd:help text="Preference of this DHCPv6 server compared with others"/>
+      </leaf>
+      <container name="listento">
+        <configd:help text="force dhcpdv6 listens to interfaces"/>
+        <leaf-list name="interface">
+          <type name="string"/>
+          <ordered-by value="user"/>
+          <configd:help text="interfaces dhcpdv6 listens to"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/dhcpv6-server/interface/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/dhcpv6-server/configd_validate1.cli"/>
+        </leaf-list>
+      </container>
+      <list name="shared-network-name">
+        <configd:help text="DHCPv6 shared network name [REQUIRED]"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[-_a-zA-Z0-9\.]+">
+              <configd:error-message message='invalid DHCP pool name "$VAR(@)"'/>
+            </pattern>
+          </type>
+          <configd:help text="DHCPv6 shared network name [REQUIRED]"/>
+        </leaf>
+        <list name="subnet">
+          <configd:help text="IPv6 DHCP subnet for this shared network [REQUIRED]"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="types:ipv6-prefix"/>
+            <configd:help text="IPv6 DHCP subnet for this shared network [REQUIRED]"/>
+          </leaf>
+          <leaf name="description">
+            <type name="string"/>
+            <configd:help text="Description of this subnet"/>
+          </leaf>
+          <leaf-list name="domain-search">
+            <type name="string">
+              <pattern value="[-_a-zA-Z0-9\.]+">
+                <configd:error-message message='invalid domain name syntax "$VAR(@)"'/>
+              </pattern>
+            </type>
+            <ordered-by value="user"/>
+            <configd:help text="Domain name for client to search"/>
+          </leaf-list>
+          <leaf-list name="nisplus-server">
+            <type name="types:ipv6-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IPv6 address of a NIS Plus server"/>
+          </leaf-list>
+          <leaf-list name="nis-server">
+            <type name="types:ipv6-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IPv6 address of a NIS server"/>
+          </leaf-list>
+          <container name="address-range">
+            <presence value="true"/>
+            <configd:help text="Parameters setting ranges for assigning IPv6 addresses"/>
+            <list name="prefix">
+              <configd:help text="IPv6 prefix defining range of addresses to assign"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="types:ipv6-prefix"/>
+                <configd:help text="IPv6 prefix defining range of addresses to assign"/>
+              </leaf>
+              <leaf name="temporary">
+                <type name="empty"/>
+                <configd:help text="Address range will be used for temporary addresses"/>
+              </leaf>
+            </list>
+            <list name="start">
+              <configd:help text="First in range of consecutive IPv6 addresses to assign"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="types:ipv6-address"/>
+                <configd:help text="First in range of consecutive IPv6 addresses to assign"/>
+              </leaf>
+              <leaf name="stop">
+                <type name="types:ipv6-address"/>
+                <configd:help text="Last in range of consecutive IPv6 addresses"/>
+              </leaf>
+            </list>
+          </container>
+          <leaf name="nisplus-domain">
+            <type name="string">
+              <pattern value="[-_a-zA-Z0-9\.]+">
+                <configd:error-message message='invalid NIS Plus domain name syntax "$VAR(@)"'/>
+              </pattern>
+            </type>
+            <configd:help text="NIS Plus domain name for client to use"/>
+          </leaf>
+          <leaf-list name="sip-server-name">
+            <type name="string">
+              <pattern value="[-_a-zA-Z0-9\.]+">
+                <configd:error-message message='invalid SIP server name syntax "$VAR(@)"'/>
+              </pattern>
+            </type>
+            <ordered-by value="user"/>
+            <configd:help text="SIP server name"/>
+          </leaf-list>
+          <leaf-list name="name-server">
+            <type name="types:ipv6-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IPv6 address of a Recursive DNS Server"/>
+          </leaf-list>
+          <leaf-list name="sip-server-address">
+            <type name="types:ipv6-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IPv6 address of a SIP name server"/>
+          </leaf-list>
+          <container name="prefix-delegation">
+            <presence value="true"/>
+            <configd:help text="Parameters relating to IPv6 prefix delegation"/>
+            <list name="start">
+              <configd:help text="First in range of IPv6 addresses to be used in prefix delegation"/>
+              <key value="tagnode"/>
+              <leaf name="tagnode">
+                <type name="types:ipv6-address"/>
+                <configd:help text="First in range of IPv6 addresses to be used in prefix delegation"/>
+              </leaf>
+              <leaf name="stop">
+                <type name="types:ipv6-address"/>
+                <configd:help text="Last in range of IPv6 addresses to be used in prefix delegation"/>
+              </leaf>
+              <leaf name="prefix-length">
+                <type name="uint32">
+                  <range value="0..128">
+                    <error-message>
+                      <value>Prefix must be between 0 and 128</value>
+                    </error-message>
+                  </range>
+                </type>
+                <configd:help text="Length in bits of prefixes to be delegated"/>
+              </leaf>
+            </list>
+          </container>
+          <leaf-list name="sntp-server">
+            <type name="types:ipv6-address"/>
+            <ordered-by value="user"/>
+            <configd:help text="IPv6 address of an SNTP Server for client to use"/>
+          </leaf-list>
+          <leaf name="nis-domain">
+            <type name="string">
+              <pattern value="[-_a-zA-Z0-9\.]+">
+                <configd:error-message message='invalid NIS domain name syntax "$VAR(@)"'/>
+              </pattern>
+            </type>
+            <configd:help text="NIS domain name for client to use"/>
+          </leaf>
+          <container name="lease-time">
+            <presence value="true"/>
+            <configd:help text="Parameters relating to the lease time"/>
+            <leaf name="maximum">
+              <type name="uint32"/>
+              <configd:help text="Maximum time (in seconds) that will be assigned to a lease"/>
+            </leaf>
+            <leaf name="default">
+              <type name="uint32"/>
+              <configd:help text="Default time (in seconds) that will be assigned to a lease"/>
+            </leaf>
+            <leaf name="minimum">
+              <type name="uint32"/>
+              <configd:help text="Minimum time (in seconds) that will be assigned to a lease"/>
+            </leaf>
+          </container>
+          <list name="static-mapping">
+            <configd:help text="Name of static mapping"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="string"/>
+              <configd:help text="Name of static mapping"/>
+            </leaf>
+            <leaf name="identifier">
+              <type name="string"/>
+              <configd:help text="Client identifier for this static mapping"/>
+            </leaf>
+            <leaf name="ipv6-address">
+              <type name="types:ipv6-address"/>
+              <configd:help text="Client IPv6 address for this static mapping"/>
+            </leaf>
+          </list>
+        </list>
+      </list>
+    </container>
+  </augment>
+</module>

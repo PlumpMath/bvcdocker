@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-resources-group"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:resources-group="urn:vyatta.com:mgmt:vyatta-resources-group"
+        xmlns:resources="urn:vyatta.com:mgmt:vyatta-resources"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-resources-group"/>
+  <prefix value="resources-group"/>
+  <import module="vyatta-resources">
+    <prefix value="resources"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/resources:resources">
+    <container name="group">
+      <presence value="true"/>
+      <configd:priority priority="300"/>
+      <configd:help text="Group of addresses, networks and ports"/>
+      <list name="port-group">
+        <configd:help text="Group of ports"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/resources/group/port-group/configd_end.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[!-~]{1,32}">
+              <error-message>
+                <value>Port group name must be 32 characters or less</value>
+              </error-message>
+            </pattern>
+            <pattern value="[0-9A-Za-z][_0-9A-Za-z]*">
+              <error-message>
+                <value>only alpha-numeric policy name allowed</value>
+              </error-message>
+            </pattern>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/group/port-group/configd_syntax1.cli"/>
+          </type>
+          <configd:help text="Group of ports"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Port-group description"/>
+        </leaf>
+        <leaf-list name="port">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/group/port-group/port/configd_syntax1.cli"/>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="Port-group member"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/resources/group/port-group/port/configd_validate1.cli"/>
+        </leaf-list>
+      </list>
+      <list name="address-group">
+        <configd:help text="Group of addresses and networks"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/resources/group/address-group/configd_end.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/resources/group/address-group/configd_validate1.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[!-~]{1,32}">
+              <error-message>
+                <value>Firewall group name must be 32 characters or less</value>
+              </error-message>
+            </pattern>
+            <pattern value="[0-9A-Za-z][_0-9A-Za-z]*">
+              <error-message>
+                <value>only alpha-numeric policy name allowed</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:help text="Group of addresses and networks"/>
+        </leaf>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Address-group description"/>
+        </leaf>
+        <leaf-list name="address">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/group/address-group/address/configd_syntax1.cli"/>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/group/address-group/address/configd_syntax2.cli"/>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/group/address-group/address/configd_syntax3.cli"/>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/group/address-group/address/configd_syntax4.cli"/>
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/resources/group/address-group/address/configd_syntax5.cli"/>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="Address-group member"/>
+        </leaf-list>
+      </list>
+    </container>
+  </augment>
+</module>

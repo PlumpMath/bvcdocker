@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-service-snmp"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:service-snmp="urn:vyatta.com:mgmt:vyatta-service-snmp"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:service="urn:vyatta.com:mgmt:vyatta-service"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-service-snmp"/>
+  <prefix value="service-snmp"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-services">
+    <prefix value="service"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-11-28">
+    <description>
+      <text>Fix v3 user group validation</text>
+    </description>
+  </revision>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/service:service">
+    <container name="snmp">
+      <presence value="true"/>
+      <configd:priority priority="980"/>
+      <configd:help text="Simple Network Management Protocol (SNMP)"/>
+      <configd:create executable="/opt/vyatta/share/tmplscripts/service/snmp/configd_create.sh"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/service/snmp/configd_end.sh"/>
+      <leaf name="description">
+        <type name="string"/>
+        <configd:help text="Description information"/>
+      </leaf>
+      <list name="trap-target">
+        <configd:help text="Address of trap target"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="union">
+            <type name="types:ipv4-address"/>
+            <type name="types:ipv6-address"/>
+          </type>
+          <configd:help text="Address of trap target"/>
+        </leaf>
+        <leaf name="community">
+          <type name="string"/>
+          <configd:help text="Community used when sending trap information"/>
+        </leaf>
+        <leaf name="port">
+          <type name="uint32">
+            <range value="1..65535">
+              <error-message>
+                <value>Port number must be in range 1 to 65535</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Destination port used for trap notification"/>
+        </leaf>
+      </list>
+      <leaf name="contact">
+        <type name="string"/>
+        <configd:help text="Contact information"/>
+      </leaf>
+      <leaf name="trap-source">
+        <type name="union">
+          <type name="types:ipv4-address"/>
+          <type name="types:ipv6-address"/>
+        </type>
+        <configd:help text="SNMP trap source address"/>
+      </leaf>
+      <list name="community">
+        <configd:help text="Community name [REQUIRED]"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string">
+            <pattern value="[^%]+">
+              <error-message>
+                <value>Community string may not contain %</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:help text="Community name [REQUIRED]"/>
+        </leaf>
+        <leaf-list name="client">
+          <type name="union">
+            <type name="types:ipv4-address"/>
+            <type name="types:ipv6-address"/>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="IP address of SNMP client allowed to contact system"/>
+        </leaf-list>
+        <leaf name="authorization">
+          <type name="enumeration">
+            <enum name="ro"/>
+            <enum name="rw"/>
+          </type>
+          <default value="ro"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/community/authorization/configd_allowed.sh"/>
+          <configd:help text="Authorization type (rw or ro) (default: ro)"/>
+        </leaf>
+        <leaf-list name="network">
+          <type name="union">
+            <type name="types:ipv4-prefix">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/snmp/community/network/configd_syntax1.cli"/>
+            </type>
+            <type name="types:ipv6-prefix">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/snmp/community/network/configd_syntax1.cli"/>
+            </type>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="Subnet of SNMP client(s) allowed to contact system"/>
+        </leaf-list>
+      </list>
+      <leaf name="location">
+        <type name="string"/>
+        <configd:help text="Location information"/>
+      </leaf>
+      <container name="v3">
+        <presence value="true"/>
+        <configd:help text="Simple Network Management Protocol (SNMP) v3"/>
+        <configd:create executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/configd_create.sh"/>
+        <configd:begin executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/configd_begin.sh"/>
+        <configd:end executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/configd_end.sh"/>
+        <list name="trap-target">
+          <configd:help text="Defines SNMP target for inform or traps for IP"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/configd_validate2.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/configd_validate3.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/configd_validate4.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/configd_validate5.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/configd_validate6.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="union">
+              <type name="types:ipv4-address"/>
+              <type name="types:ipv6-address"/>
+            </type>
+            <configd:help text="Defines SNMP target for inform or traps for IP"/>
+          </leaf>
+          <container name="auth">
+            <presence value="true"/>
+            <configd:help text="Defines the authentication"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/auth/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/auth/configd_validate2.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/auth/configd_validate3.cli"/>
+            <leaf name="encrypted-key">
+              <type name="string">
+                <pattern value="0x[0-9a-f]*">
+                  <error-message>
+                    <value>key must start from '0x' and contain hex digits</value>
+                  </error-message>
+                </pattern>
+              </type>
+              <configd:secret bool="true"/>
+              <configd:help text="Defines the encrypted password for authentication"/>
+            </leaf>
+            <leaf name="plaintext-key">
+              <type name="string">
+                <pattern value=".{8,}">
+                  <error-message>
+                    <value>key must contain 8 or more characters</value>
+                  </error-message>
+                </pattern>
+              </type>
+              <configd:secret bool="true"/>
+              <configd:help text="Defines the clear text password for authentication"/>
+            </leaf>
+            <leaf name="type">
+              <type name="enumeration">
+                <enum name="md5">
+                  <configd:help text="Message Digest 5"/>
+                </enum>
+                <enum name="sha">
+                  <configd:help text="Secure Hash Algorithm"/>
+                </enum>
+              </type>
+              <default value="md5"/>
+              <configd:help text="Defines the protocol using for authentication"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/auth/type/configd_allowed.sh"/>
+            </leaf>
+          </container>
+          <leaf name="user">
+            <type name="string"/>
+            <configd:help text="Defines username for authentication"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/user/configd_allowed.sh"/>
+          </leaf>
+          <container name="privacy">
+            <presence value="true"/>
+            <configd:help text="Defines the privacy"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/privacy/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/privacy/configd_validate2.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/privacy/configd_validate3.cli"/>
+            <leaf name="encrypted-key">
+              <type name="string">
+                <pattern value="0x[0-9a-f]*">
+                  <error-message>
+                    <value>key must start from '0x' and contain hex digits</value>
+                  </error-message>
+                </pattern>
+              </type>
+              <configd:secret bool="true"/>
+              <configd:help text="Defines the encrypted key for privacy protocol"/>
+            </leaf>
+            <leaf name="plaintext-key">
+              <type name="string">
+                <pattern value=".{8,}">
+                  <error-message>
+                    <value>key must contain 8 or more characters</value>
+                  </error-message>
+                </pattern>
+              </type>
+              <configd:secret bool="true"/>
+              <configd:help text="Defines the clear text key for privacy protocol"/>
+            </leaf>
+            <leaf name="type">
+              <type name="enumeration">
+                <enum name="des">
+                  <configd:help text="Data Encryption Standard"/>
+                </enum>
+                <enum name="aes">
+                  <configd:help text="Advanced Encryption Standard"/>
+                </enum>
+              </type>
+              <default value="des"/>
+              <configd:help text="Defines the protocol for privacy"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/privacy/type/configd_allowed.sh"/>
+            </leaf>
+          </container>
+          <leaf name="engineid">
+            <type name="string">
+              <pattern value="(0x){0,1}([0-9a-f][0-9a-f]){1,18}">
+                <error-message>
+                  <value>id must contain from 2 to 36 hex digits</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="Defines the engineID. (needs for trap)"/>
+          </leaf>
+          <leaf name="port">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>Port number must be in range 1 to 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <default value="162"/>
+            <configd:help text="Specifies the TCP/UDP port of a destination for SNMP traps/informs."/>
+          </leaf>
+          <leaf name="type">
+            <type name="enumeration">
+              <enum name="inform"/>
+              <enum name="trap"/>
+            </type>
+            <default value="inform"/>
+            <configd:help text="Specifies the type of notification between inform and trap"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/type/configd_allowed.sh"/>
+          </leaf>
+          <leaf name="protocol">
+            <type name="enumeration">
+              <enum name="tcp"/>
+              <enum name="udp"/>
+            </type>
+            <default value="udp"/>
+            <configd:help text="Defines protocol for notification between TCP and UDP"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/trap-target/protocol/configd_allowed.sh"/>
+          </leaf>
+        </list>
+        <list name="group">
+          <configd:help text="Specifies the group with name groupname"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/group/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/group/configd_validate2.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/group/configd_validate3.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string">
+              <pattern value="[^\(\)\|&amp;-]+">
+                <error-message>
+                  <value>illegal characters in name</value>
+                </error-message>
+              </pattern>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/group/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Specifies the group with name groupname"/>
+          </leaf>
+          <leaf name="seclevel">
+            <type name="enumeration">
+              <enum name="auth"/>
+              <enum name="priv"/>
+            </type>
+            <configd:help text="Defines security level"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/group/seclevel/configd_allowed.sh"/>
+          </leaf>
+          <leaf name="view">
+            <type name="string"/>
+            <configd:help text="Defines the name of view"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/group/view/configd_allowed.sh"/>
+          </leaf>
+          <leaf name="mode">
+            <type name="enumeration">
+              <enum name="ro"/>
+              <enum name="rw"/>
+            </type>
+            <default value="ro"/>
+            <configd:help text="Defines the read/write access"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/group/mode/configd_allowed.sh"/>
+          </leaf>
+        </list>
+        <list name="view">
+          <configd:help text="Specifies the view with name viewname"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/view/configd_validate1.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string">
+              <pattern value="[^\(\)\|&amp;-]+">
+                <error-message>
+                  <value>illegal characters in name</value>
+                </error-message>
+              </pattern>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/view/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Specifies the view with name viewname"/>
+          </leaf>
+          <list name="oid">
+            <configd:help text="Specifies the oid"/>
+            <key value="tagnode"/>
+            <leaf name="tagnode">
+              <type name="string">
+                <pattern value="[0-9]+(\.[0-9]+)*">
+                  <error-message>
+                    <value>oid must start from a number</value>
+                  </error-message>
+                </pattern>
+              </type>
+              <configd:help text="Specifies the oid"/>
+            </leaf>
+            <leaf name="exclude">
+              <type name="empty"/>
+              <configd:help text="Exclude is optional argument."/>
+            </leaf>
+            <leaf name="mask">
+              <type name="string">
+                <pattern value="[0-9a-f]{2}([\.:][0-9a-f]{2})*">
+                  <error-message>
+                    <value>MASK is a list of hex octets, separated by '.' or ':'</value>
+                  </error-message>
+                </pattern>
+              </type>
+              <configd:help text="Defines a bit-mask that is indicating which subidentifiers of the associated subtree OID should be regarded as significant."/>
+            </leaf>
+          </list>
+        </list>
+        <list name="user">
+          <configd:help text="Specifies the user with name username"/>
+          <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/configd_allowed.sh"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/configd_validate2.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="string">
+              <pattern value="[^\(\)\|&amp;-]+">
+                <error-message>
+                  <value>illegal characters in name</value>
+                </error-message>
+              </pattern>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Specifies the user with name username"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/configd_allowed.sh"/>
+          </leaf>
+          <container name="auth">
+            <presence value="true"/>
+            <configd:help text="Specifies the auth"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/auth/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/validate_key.cli"/>
+            <leaf name="encrypted-key">
+              <type name="string"/>
+              <configd:secret bool="true"/>
+              <configd:help text="Defines the encrypted key for authentication protocol"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/auth/encrypted-key/configd_allowed.sh"/>
+            </leaf>
+            <leaf name="plaintext-key">
+              <type name="string">
+                <pattern value=".{8,}">
+                  <error-message>
+                    <value>key must contain 8 or more characters</value>
+                  </error-message>
+                </pattern>
+              </type>
+              <configd:secret bool="true"/>
+              <configd:help text="Defines the key in the clear text for authentication protocol"/>
+            </leaf>
+            <leaf name="type">
+              <type name="enumeration">
+                <enum name="md5">
+                  <configd:help text="Message Digest 5"/>
+                </enum>
+                <enum name="sha">
+                  <configd:help text="Secure Hash Algorithm"/>
+                </enum>
+              </type>
+              <default value="md5"/>
+              <configd:help text="Defines the protocol using for authentication"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/auth/type/configd_allowed.sh"/>
+            </leaf>
+          </container>
+          <leaf name="tsm-key">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/tsm-key/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Specifies finger print or file name of TSM certificate."/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/tsm-key/configd_allowed.sh"/>
+          </leaf>
+          <leaf name="group">
+            <type name="string"/>
+            <configd:help text="Specifies group for user name"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/group/configd_allowed.sh"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/group/configd_validate1.cli"/>
+          </leaf>
+          <container name="privacy">
+            <presence value="true"/>
+            <configd:help text="Specifies the privacy"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/privacy/configd_validate1.cli"/>
+            <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/validate_key.cli"/>
+            <leaf name="encrypted-key">
+              <type name="string"/>
+              <configd:secret bool="true"/>
+              <configd:help text="Defines the encrypted key for privacy protocol"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/privacy/encrypted-key/configd_allowed.sh"/>
+            </leaf>
+            <leaf name="plaintext-key">
+              <type name="string">
+                <pattern value=".{8,}">
+                  <error-message>
+                    <value>key must contain 8 or more characters</value>
+                  </error-message>
+                </pattern>
+              </type>
+              <configd:secret bool="true"/>
+              <configd:help text="Defines the key in the clear text for protocol for privacy"/>
+            </leaf>
+            <leaf name="type">
+              <type name="enumeration">
+                <enum name="des">
+                  <configd:help text="Data Encryption Standard"/>
+                </enum>
+                <enum name="aes">
+                  <configd:help text="Advanced Encryption Standard"/>
+                </enum>
+              </type>
+              <default value="des"/>
+              <configd:help text="Defines the protocol for privacy"/>
+              <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/privacy/type/configd_allowed.sh"/>
+            </leaf>
+          </container>
+          <leaf name="engineid">
+            <type name="string">
+              <pattern value="(0x){0,1}([0-9a-f][0-9a-f]){1,18}">
+                <error-message>
+                  <value>id must contain from 2 to 36 hex digits</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:help text="Specifies the EngineID"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/engineid/configd_allowed.sh"/>
+          </leaf>
+          <leaf name="mode">
+            <type name="enumeration">
+              <enum name="ro"/>
+              <enum name="rw"/>
+            </type>
+            <default value="ro"/>
+            <configd:help text="Specifies the mode for access rights of user, read only or write"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/user/mode/configd_allowed.sh"/>
+          </leaf>
+        </list>
+        <container name="tsm">
+          <presence value="true"/>
+          <configd:help text="Specifies that the snmpd uses encryption."/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/tsm/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/tsm/configd_validate2.cli"/>
+          <leaf name="local-key">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/tsm/local-key/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Defines the server certificate fingerprint or key-file name."/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/service/snmp/v3/tsm/local-key/configd_allowed.sh"/>
+          </leaf>
+          <leaf name="port">
+            <type name="uint32">
+              <range value="1..65535">
+                <error-message>
+                  <value>Port number must be in range 1 to 65535</value>
+                </error-message>
+              </range>
+            </type>
+            <default value="10161"/>
+            <configd:help text="Defines the port for tsm."/>
+          </leaf>
+        </container>
+        <leaf name="engineid">
+          <type name="string">
+            <pattern value="(0x){0,1}([0-9a-f][0-9a-f]){1,18}">
+              <error-message>
+                <value>id must contain from 2 to 36 hex digits</value>
+              </error-message>
+            </pattern>
+          </type>
+          <configd:help text="Specifies the EngineID as a hex value (e.g., 0xff42)"/>
+        </leaf>
+      </container>
+      <list name="listen-address">
+        <configd:help text="IP address to listen for incoming SNMP requests"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="union">
+            <type name="types:ipv4-address"/>
+            <type name="types:ipv6-address"/>
+          </type>
+          <configd:help text="IP address to listen for incoming SNMP requests"/>
+        </leaf>
+        <leaf name="port">
+          <type name="uint32">
+            <range value="1..65535">
+              <error-message>
+                <value>Port number must be in range 1 to 65535</value>
+              </error-message>
+            </range>
+          </type>
+          <default value="161"/>
+          <configd:help text="Port for SNMP service"/>
+        </leaf>
+      </list>
+    </container>
+  </augment>
+</module>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="bvc-path-1.2.0" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
+    <feature name='bvc-path' description="Brocade Vyatta Controller :: Path Explorer" version='1.2.0'>
+        <bundle>mvn:com.brocade.bvc.app/bvc-app-pathexplorer-model/1.2.0</bundle>
+        <bundle>mvn:com.brocade.bvc.app/bvc-app-pathexplorer-provider/1.2.0</bundle>
+        <configfile finalname="etc/opendaylight/karaf/200-path-provider.xml">mvn:com.brocade.bvc.app/bvc-app-pathexplorer-provider/1.2.0/xml/config</configfile>
+    </feature>
+
+</features>

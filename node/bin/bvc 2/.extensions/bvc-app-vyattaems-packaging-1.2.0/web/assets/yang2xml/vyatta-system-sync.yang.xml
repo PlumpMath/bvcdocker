@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-system-sync"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:system-sync="urn:vyatta.com:mgmt:vyatta-system-sync"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:system="urn:vyatta.com:mgmt:vyatta-system"
+        xmlns:configd="urn:vyatta.com:mgmt:configd">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-system-sync"/>
+  <prefix value="system-sync"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="vyatta-system">
+    <prefix value="system"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-08-27">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/system:system">
+    <container name="config-sync">
+      <presence value="true"/>
+      <configd:priority priority="900"/>
+      <configd:help text="Configuration synchronization"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/system/config-sync/configd_end.sh"/>
+      <list name="remote-router">
+        <configd:help text="Remote router to which configuration is to be synced"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/system/config-sync/remote-router/configd_delete.sh"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/config-sync/remote-router/configd_validate1.cli"/>
+        <configd:validate executable="/opt/vyatta/share/tmplscripts/system/config-sync/remote-router/configd_validate2.cli"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="types:ipv4-address"/>
+          <configd:help text="Remote router to which configuration is to be synced"/>
+        </leaf>
+        <leaf name="password">
+          <type name="string"/>
+          <configd:secret bool="true"/>
+          <configd:help text="Plaintext password associated with remote router"/>
+        </leaf>
+        <leaf name="username">
+          <type name="string"/>
+          <configd:help text="Username associated with remote router"/>
+        </leaf>
+        <leaf name="sync-map">
+          <type name="string"/>
+          <configd:help text="Synchronization map associated with remote router"/>
+        </leaf>
+      </list>
+      <list name="sync-map">
+        <configd:help text="Configuration synchronization map to use for a remote-router"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="string"/>
+          <configd:help text="Configuration synchronization map to use for a remote-router"/>
+        </leaf>
+        <list name="rule">
+          <configd:help text="Rule number to evaluate configuration matching"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/system/config-sync/sync-map/rule/configd_validate1.cli"/>
+          <configd:validate executable="/opt/vyatta/share/tmplscripts/system/config-sync/sync-map/rule/configd_validate2.cli"/>
+          <key value="tagnode"/>
+          <leaf name="tagnode">
+            <type name="uint32"/>
+            <configd:help text="Rule number to evaluate configuration matching"/>
+          </leaf>
+          <leaf name="action">
+            <type name="enumeration">
+              <enum name="include"/>
+              <enum name="exclude"/>
+            </type>
+            <configd:help text='Rule behavior ("include" or "exclude")'/>
+          </leaf>
+          <leaf name="location">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/system/config-sync/sync-map/rule/location/configd_syntax1.cli"/>
+            </type>
+            <configd:help text="Configuration tree location to match"/>
+          </leaf>
+        </list>
+      </list>
+    </container>
+  </augment>
+</module>

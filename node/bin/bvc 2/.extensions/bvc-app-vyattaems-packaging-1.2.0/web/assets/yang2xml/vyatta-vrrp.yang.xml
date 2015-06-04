@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="vyatta-vrrp"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:vrrp="urn:vyatta.com:mgmt:vyatta-vrrp"
+        xmlns:types="urn:vyatta.com:mgmt:vyatta-types"
+        xmlns:configd="urn:vyatta.com:mgmt:configd"
+        xmlns:if="urn:vyatta.com:mgmt:vyatta-interfaces"
+        xmlns:interfaces-dataplane="urn:vyatta.com:mgmt:vyatta-interfaces-dataplane">
+  <namespace uri="urn:vyatta.com:mgmt:vyatta-vrrp"/>
+  <prefix value="vrrp"/>
+  <import module="vyatta-types">
+    <prefix value="types"/>
+  </import>
+  <import module="configd">
+    <prefix value="configd"/>
+  </import>
+  <import module="vyatta-interfaces">
+    <prefix value="if"/>
+  </import>
+  <import module="vyatta-interfaces-dataplane">
+    <prefix value="interfaces-dataplane"/>
+  </import>
+  <organization>
+    <text>Brocade Communications Systems, Inc.</text>
+  </organization>
+  <contact>
+    <text>Brocade Communications Systems, Inc.
+Postal: 130 Holger Way
+        San Jose, CA 95134
+E-mail: support@Brocade.com
+Web: www.brocade.com</text>
+  </contact>
+  <revision date="2014-10-28">
+    <description>
+      <text>Update for 3.2.1R1</text>
+    </description>
+  </revision>
+  <revision date="2014-09-08">
+    <description>
+      <text>Initial revision.</text>
+    </description>
+    <configd:migration level="1"/>
+  </revision>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane">
+    <container name="vrrp">
+      <configd:help text="Virtual Router Redundancy Protocol (VRRP)"/>
+      <configd:priority priority="800"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/configd_end.sh"/>
+      <list name="vrrp-group">
+        <configd:help text="VRRP group number"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/configd_delete.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>VRRP group must be between 1-255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="VRRP group number"/>
+        </leaf>
+        <leaf name="priority">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>priority must be between 1-255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Priority"/>
+        </leaf>
+        <container name="authentication">
+          <presence value="true"/>
+          <configd:help text="Authentication"/>
+          <leaf name="password">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,8}">
+                <error-message>
+                  <value>Password must be 8 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:secret bool="true"/>
+            <configd:help text="Password"/>
+          </leaf>
+          <leaf name="type">
+            <type name="enumeration">
+              <enum name="plaintext-password">
+                <configd:help text="Plain text password mode"/>
+              </enum>
+              <enum name="ah">
+                <configd:help text="IP Authentication Header mode"/>
+              </enum>
+            </type>
+            <configd:help text="Authentication type"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/authentication/type/configd_allowed.sh"/>
+          </leaf>
+        </container>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/description/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/description/configd_delete.sh"/>
+        </leaf>
+        <leaf name="hello-source-address">
+          <type name="union">
+            <type name="types:ipv4-address"/>
+            <type name="types:ipv6-address"/>
+          </type>
+          <configd:help text="Hello source address"/>
+        </leaf>
+        <leaf name="preempt">
+          <type name="boolean"/>
+          <configd:help text="Preempt mode"/>
+          <default value="true"/>
+        </leaf>
+        <leaf name="rfc3768-compatibility">
+          <type name="empty"/>
+          <configd:help text="Enable RFC 3768 compatibility"/>
+        </leaf>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="VRRP group disabled"/>
+        </leaf>
+        <container name="run-transition-scripts">
+          <presence value="true"/>
+          <configd:help text="Scripts for VRRP state-transitions"/>
+          <leaf name="master">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/run-transition-scripts/master/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/run-transition-scripts/master/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Script to run on VRRP state-transition to master"/>
+          </leaf>
+          <leaf name="backup">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/run-transition-scripts/backup/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/run-transition-scripts/backup/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Script to run on VRRP state-transition to backup"/>
+          </leaf>
+          <leaf name="fault">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/run-transition-scripts/fault/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/run-transition-scripts/fault/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Script to run on VRRP state-transition to fault"/>
+          </leaf>
+        </container>
+        <leaf name="preempt-delay">
+          <type name="uint32">
+            <range value="0..1000">
+              <error-message>
+                <value>preempt-delay must be between 0-1000</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Preempt delay"/>
+        </leaf>
+        <leaf name="advertise-interval">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>Advertise interval must be between 1-255</value>
+              </error-message>
+            </range>
+          </type>
+          <default value="1"/>
+          <configd:help text="Advertise interval"/>
+        </leaf>
+        <container name="notify">
+          <presence value="true"/>
+          <configd:help text="Protocol to notify on VRRP state transtition"/>
+          <leaf name="bgp">
+            <type name="empty"/>
+            <configd:help text="Notify bgp daemon on VRRP state transition"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/notify/bgp/configd_delete.sh"/>
+          </leaf>
+          <leaf name="ipsec">
+            <type name="empty"/>
+            <configd:help text="Enable ipsec restart/stop on VRRP state transition"/>
+          </leaf>
+        </container>
+        <leaf name="sync-group">
+          <type name="string"/>
+          <configd:help text="Add this vrrp group to a sync group"/>
+        </leaf>
+        <leaf-list name="virtual-address">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vrrp/vrrp-group/virtual-address/configd_syntax1.cli"/>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="Virtual address [REQUIRED]"/>
+        </leaf-list>
+      </list>
+    </container>
+  </augment>
+  <augment target-node="/if:interfaces/interfaces-dataplane:dataplane/interfaces-dataplane:vif">
+    <container name="vrrp">
+      <configd:help text="Virtual Router Redundancy Protocol (VRRP)"/>
+      <configd:priority priority="800"/>
+      <configd:end executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/configd_end.sh"/>
+      <list name="vrrp-group">
+        <configd:help text="VRRP group number"/>
+        <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/configd_delete.sh"/>
+        <key value="tagnode"/>
+        <leaf name="tagnode">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>VRRP group must be between 1-255</value>
+              </error-message>
+            </range>
+            <configd:syntax executable="check_vif_vmac_intf_size $VAR(../../../@).$VAR(../../@)v$VAR(@)"/>
+          </type>
+          <configd:help text="VRRP group number"/>
+        </leaf>
+        <leaf name="priority">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>priority must be between 1-255</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Priority"/>
+        </leaf>
+        <container name="authentication">
+          <presence value="true"/>
+          <configd:help text="Authentication"/>
+          <leaf name="password">
+            <type name="string">
+              <pattern value="[^&#9;&#10;\r ]{1,8}">
+                <error-message>
+                  <value>Password must be 8 characters or less</value>
+                </error-message>
+              </pattern>
+            </type>
+            <configd:secret bool="true"/>
+            <configd:help text="Password"/>
+          </leaf>
+          <leaf name="type">
+            <type name="enumeration">
+              <enum name="plaintext-password">
+                <configd:help text="Plain text password mode"/>
+              </enum>
+              <enum name="ah">
+                <configd:help text="IP Authentication Header mode"/>
+              </enum>
+            </type>
+            <configd:help text="Authentication type"/>
+            <configd:allowed executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/authentication/type/configd_allowed.sh"/>
+          </leaf>
+        </container>
+        <leaf name="description">
+          <type name="string"/>
+          <configd:help text="Description"/>
+          <configd:update executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/description/configd_update.sh"/>
+          <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/description/configd_delete.sh"/>
+        </leaf>
+        <leaf name="hello-source-address">
+          <type name="union">
+            <type name="types:ipv4-address"/>
+            <type name="types:ipv6-address"/>
+          </type>
+          <configd:help text="Hello source address"/>
+        </leaf>
+        <leaf name="preempt">
+          <type name="boolean"/>
+          <configd:help text="Preempt mode"/>
+          <default value="true"/>
+        </leaf>
+        <leaf name="rfc3768-compatibility">
+          <type name="empty"/>
+          <configd:help text="Enable RFC 3768 compatibility"/>
+        </leaf>
+        <leaf name="disable">
+          <type name="empty"/>
+          <configd:help text="VRRP group disabled"/>
+        </leaf>
+        <container name="run-transition-scripts">
+          <presence value="true"/>
+          <configd:help text="Scripts for VRRP state-transitions"/>
+          <leaf name="master">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/run-transition-scripts/master/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/run-transition-scripts/master/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Script to run on VRRP state-transition to master"/>
+          </leaf>
+          <leaf name="backup">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/run-transition-scripts/backup/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/run-transition-scripts/backup/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Script to run on VRRP state-transition to backup"/>
+          </leaf>
+          <leaf name="fault">
+            <type name="string">
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/run-transition-scripts/fault/configd_syntax1.cli"/>
+              <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/run-transition-scripts/fault/configd_syntax2.cli"/>
+            </type>
+            <configd:help text="Script to run on VRRP state-transition to fault"/>
+          </leaf>
+        </container>
+        <leaf name="preempt-delay">
+          <type name="uint32">
+            <range value="0..1000">
+              <error-message>
+                <value>preempt-delay must be between 0-1000</value>
+              </error-message>
+            </range>
+          </type>
+          <configd:help text="Preempt delay"/>
+        </leaf>
+        <leaf name="advertise-interval">
+          <type name="uint32">
+            <range value="1..255">
+              <error-message>
+                <value>Advertise interval must be between 1-255</value>
+              </error-message>
+            </range>
+          </type>
+          <default value="1"/>
+          <configd:help text="Advertise interval"/>
+        </leaf>
+        <container name="notify">
+          <presence value="true"/>
+          <configd:help text="Protocol to notify on VRRP state transtition"/>
+          <leaf name="bgp">
+            <type name="empty"/>
+            <configd:help text="Notify bgp daemon on VRRP state transition"/>
+            <configd:delete executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/notify/bgp/configd_delete.sh"/>
+          </leaf>
+          <leaf name="ipsec">
+            <type name="empty"/>
+            <configd:help text="Enable ipsec restart/stop on VRRP state transition"/>
+          </leaf>
+        </container>
+        <leaf name="sync-group">
+          <type name="string"/>
+          <configd:help text="Add this vrrp group to a sync group"/>
+        </leaf>
+        <leaf-list name="virtual-address">
+          <type name="string">
+            <configd:syntax executable="/opt/vyatta/share/tmplscripts/interfaces/dataplane/vif/vrrp/vrrp-group/virtual-address/configd_syntax1.cli"/>
+          </type>
+          <ordered-by value="user"/>
+          <configd:help text="Virtual address [REQUIRED]"/>
+        </leaf-list>
+      </list>
+    </container>
+  </augment>
+</module>
